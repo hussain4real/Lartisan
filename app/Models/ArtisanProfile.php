@@ -14,13 +14,23 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\File;
 
 /**
  * @property int $id
  * @property int $team_id
  * @property int $user_id
  * @property string $business_name
+ * @property string|null $public_summary
+ * @property int|null $years_experience
+ * @property int|null $service_radius_km
+ * @property string|null $public_phone
+ * @property string|null $public_email
  * @property ArtisanVerificationStatus $verification_status
  * @property ArtisanSubscriptionStatus $subscription_status
  * @property ArtisanAvailabilityStatus $availability_status
@@ -37,6 +47,11 @@ use Illuminate\Support\Carbon;
     'team_id',
     'user_id',
     'business_name',
+    'public_summary',
+    'years_experience',
+    'service_radius_km',
+    'public_phone',
+    'public_email',
     'verification_status',
     'subscription_status',
     'availability_status',
@@ -50,10 +65,23 @@ use Illuminate\Support\Carbon;
     'is_public',
     'internal_notes',
 ])]
-class ArtisanProfile extends Model
+class ArtisanProfile extends Model implements HasMedia
 {
     /** @use HasFactory<ArtisanProfileFactory> */
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
+
+    public const PORTFOLIO_COLLECTION = 'portfolio';
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(self::PORTFOLIO_COLLECTION)
+            ->useDisk('public')
+            ->acceptsFile(fn (File $file): bool => in_array($file->mimeType, [
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+            ], true));
+    }
 
     /**
      * @return BelongsTo<Team, $this>
@@ -117,6 +145,38 @@ class ArtisanProfile extends Model
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * @return HasMany<ArtisanService, $this>
+     */
+    public function services(): HasMany
+    {
+        return $this->hasMany(ArtisanService::class);
+    }
+
+    /**
+     * @return HasMany<KycSubmission, $this>
+     */
+    public function kycSubmissions(): HasMany
+    {
+        return $this->hasMany(KycSubmission::class);
+    }
+
+    /**
+     * @return HasMany<FieldVisit, $this>
+     */
+    public function fieldVisits(): HasMany
+    {
+        return $this->hasMany(FieldVisit::class);
+    }
+
+    /**
+     * @return MorphMany<StatusHistory, $this>
+     */
+    public function statusHistories(): MorphMany
+    {
+        return $this->morphMany(StatusHistory::class, 'statusable');
     }
 
     /**
@@ -231,8 +291,10 @@ class ArtisanProfile extends Model
             'approved_at' => 'datetime',
             'availability_status' => ArtisanAvailabilityStatus::class,
             'is_public' => 'boolean',
+            'service_radius_km' => 'integer',
             'subscription_status' => ArtisanSubscriptionStatus::class,
             'verification_status' => ArtisanVerificationStatus::class,
+            'years_experience' => 'integer',
         ];
     }
 }

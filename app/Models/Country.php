@@ -39,6 +39,14 @@ class Country extends Model
     }
 
     /**
+     * @return HasMany<Address, $this>
+     */
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

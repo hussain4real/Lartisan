@@ -1,12 +1,18 @@
 <?php
 
 use App\Enums\AdminProfileStatus;
+use App\Enums\ArtisanServiceStatus;
+use App\Enums\ArtisanVerificationStatus;
 use App\Enums\PlatformRole;
+use App\Models\Address;
 use App\Models\AdminProfile;
 use App\Models\AreaAgentAssignment;
 use App\Models\ArtisanProfile;
+use App\Models\ArtisanService;
 use App\Models\CustomerProfile;
+use App\Models\KycSubmission;
 use App\Models\LocalGovernment;
+use App\Models\ServiceCategory;
 use App\Models\State;
 use App\Models\Team;
 use App\Models\User;
@@ -33,7 +39,11 @@ test('pilot user seeder creates idempotent role scoped demo accounts', function 
     expect(AdminProfile::query()->count())->toBe(4);
     expect(AreaAgentAssignment::query()->count())->toBe(2);
     expect(ArtisanProfile::query()->count())->toBe(1);
+    expect(ServiceCategory::query()->count())->toBe(3);
+    expect(ArtisanService::query()->count())->toBe(1);
+    expect(KycSubmission::query()->count())->toBe(1);
     expect(CustomerProfile::query()->count())->toBe(1);
+    expect(Address::query()->count())->toBe(1);
 
     expect($superAdmin->hasRole(PlatformRole::SuperAdmin->value))->toBeTrue();
     expect($stateCoordinator->hasRole(PlatformRole::StateCoordinator->value))->toBeTrue();
@@ -73,11 +83,14 @@ test('pilot user seeder creates idempotent role scoped demo accounts', function 
     expect($artisanProfile->state()->firstOrFail()->is($fct))->toBeTrue();
     expect($artisanProfile->localGovernment()->firstOrFail()->is($amac))->toBeTrue();
     expect($artisanProfile->territory()->firstOrFail()->slug)->toBe('wuse-market');
+    expect($artisanProfile->services()->firstOrFail()->status)->toBe(ArtisanServiceStatus::Active);
+    expect($artisanProfile->kycSubmissions()->firstOrFail()->status)->toBe(ArtisanVerificationStatus::Submitted);
     expect($customer->artisanProfiles()->exists())->toBeFalse();
     expect($customer->customerProfile()->firstOrFail()->preferences)->toBe([
         'preferred_channel' => 'whatsapp',
         'service_area' => 'Wuse',
     ]);
+    expect($customer->customerProfile()->firstOrFail()->defaultAddress()->firstOrFail()->label)->toBe('Home');
 });
 
 test('database seeder loads pilot users instead of the generic test account', function () {

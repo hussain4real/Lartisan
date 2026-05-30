@@ -3,10 +3,15 @@ import { Link, usePage } from '@inertiajs/vue3';
 import {
     BookOpen,
     BriefcaseBusiness,
+    ClipboardCheck,
     FolderGit2,
+    IdCard,
     LayoutGrid,
+    Smartphone,
+    Wrench,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { edit as phoneVerification } from '@/actions/App/Http/Controllers/Identity/PhoneVerificationController';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -22,7 +27,11 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { dashboard as artisanDashboard } from '@/routes/artisan';
+import { show as artisanKyc } from '@/routes/artisan/kyc';
 import { create as artisanOnboarding } from '@/routes/artisan/onboarding';
+import { edit as artisanProfile } from '@/routes/artisan/profile';
+import { index as artisanServices } from '@/routes/artisan/services';
 import type { NavItem } from '@/types';
 
 const page = usePage();
@@ -38,11 +47,44 @@ const mainNavItems = computed<NavItem[]>(() => [
         icon: LayoutGrid,
     },
     {
-        title: 'Artisan onboarding',
+        title: 'Artisan',
+        href: page.props.currentTeam
+            ? artisanDashboard(page.props.currentTeam.slug).url
+            : '/',
+        icon: BriefcaseBusiness,
+    },
+    {
+        title: 'Artisan profile',
+        href: page.props.currentTeam
+            ? artisanProfile(page.props.currentTeam.slug).url
+            : '/',
+        icon: IdCard,
+    },
+    {
+        title: 'Services',
+        href: page.props.currentTeam
+            ? artisanServices(page.props.currentTeam.slug).url
+            : '/',
+        icon: Wrench,
+    },
+    {
+        title: 'KYC',
+        href: page.props.currentTeam
+            ? artisanKyc(page.props.currentTeam.slug).url
+            : '/',
+        icon: ClipboardCheck,
+    },
+    {
+        title: 'Onboarding',
         href: page.props.currentTeam
             ? artisanOnboarding(page.props.currentTeam.slug).url
             : '/',
         icon: BriefcaseBusiness,
+    },
+    {
+        title: 'Phone verification',
+        href: phoneVerification().url,
+        icon: Smartphone,
     },
 ]);
 

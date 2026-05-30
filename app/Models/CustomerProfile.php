@@ -31,6 +31,14 @@ class CustomerProfile extends Model
     }
 
     /**
+     * @return BelongsTo<Address, $this>
+     */
+    public function defaultAddress(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'default_address_id');
+    }
+
+    /**
      * @param  Builder<CustomerProfile>  $query
      */
     public function scopeOwnedBy(Builder $query, User $user): void

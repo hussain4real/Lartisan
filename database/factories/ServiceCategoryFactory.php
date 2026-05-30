@@ -1,0 +1,39 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\ServiceCategory;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
+
+/**
+ * @extends Factory<ServiceCategory>
+ */
+class ServiceCategoryFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        $name = fake()->unique()->word().' '.fake()->unique()->word();
+
+        return [
+            'parent_id' => null,
+            'name' => Str::title($name),
+            'slug' => Str::slug($name),
+            'description' => fake()->sentence(),
+            'active' => true,
+            'sort_order' => fake()->numberBetween(1, 50),
+        ];
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'active' => false,
+        ]);
+    }
+}

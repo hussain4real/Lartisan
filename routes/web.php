@@ -1,6 +1,13 @@
 <?php
 
+use App\Http\Controllers\Artisan\DashboardController as ArtisanDashboardController;
+use App\Http\Controllers\Artisan\FieldVisitController;
+use App\Http\Controllers\Artisan\KycController;
 use App\Http\Controllers\Artisan\OnboardingController;
+use App\Http\Controllers\Artisan\ProfileController as ArtisanProfileController;
+use App\Http\Controllers\Artisan\ServiceController as ArtisanServiceController;
+use App\Http\Controllers\Identity\AccountClaimController;
+use App\Http\Controllers\Identity\PhoneVerificationController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
@@ -12,12 +19,33 @@ Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])
     ->group(function () {
         Route::get('dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
-        Route::get('artisan/onboarding', [OnboardingController::class, 'create'])->name('artisan.onboarding.create');
-        Route::post('artisan/onboarding', [OnboardingController::class, 'store'])->name('artisan.onboarding.store');
+
+        Route::prefix('artisan')->name('artisan.')->group(function () {
+            Route::get('/', ArtisanDashboardController::class)->name('dashboard');
+            Route::get('onboarding', [OnboardingController::class, 'create'])->name('onboarding.create');
+            Route::post('onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
+            Route::get('profile', [ArtisanProfileController::class, 'edit'])->name('profile.edit');
+            Route::patch('profile', [ArtisanProfileController::class, 'update'])->name('profile.update');
+            Route::post('profile/portfolio', [ArtisanProfileController::class, 'portfolio'])->name('profile.portfolio.store');
+            Route::get('services', [ArtisanServiceController::class, 'index'])->name('services.index');
+            Route::post('services', [ArtisanServiceController::class, 'store'])->name('services.store');
+            Route::get('kyc', [KycController::class, 'show'])->name('kyc.show');
+            Route::post('kyc', [KycController::class, 'store'])->name('kyc.store');
+            Route::post('field-visits', [FieldVisitController::class, 'store'])->name('field-visits.store');
+        });
     });
 
 Route::middleware(['auth'])->group(function () {
     Route::get('invitations/{invitation}/accept', [TeamInvitationController::class, 'accept'])->name('invitations.accept');
+
+    Route::prefix('identity')->name('identity.')->group(function () {
+        Route::get('phone', [PhoneVerificationController::class, 'edit'])->name('phone.edit');
+        Route::post('otp', [PhoneVerificationController::class, 'issue'])->name('otp.issue');
+        Route::post('otp/verify', [PhoneVerificationController::class, 'verify'])->name('otp.verify');
+    });
 });
+
+Route::get('claim-account', [AccountClaimController::class, 'show'])->name('account-claim.show');
+Route::post('claim-account', [AccountClaimController::class, 'store'])->name('account-claim.store');
 
 require __DIR__.'/settings.php';
