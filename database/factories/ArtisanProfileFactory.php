@@ -23,7 +23,7 @@ class ArtisanProfileFactory extends Factory
     public function definition(): array
     {
         return [
-            'team_id' => Team::factory(),
+            'team_id' => Team::factory()->artisanBusiness(),
             'user_id' => User::factory(),
             'business_name' => fake()->company(),
             'verification_status' => ArtisanVerificationStatus::Draft,

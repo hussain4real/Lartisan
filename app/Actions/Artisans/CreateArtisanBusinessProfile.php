@@ -6,6 +6,7 @@ use App\Enums\ArtisanAvailabilityStatus;
 use App\Enums\ArtisanSubscriptionStatus;
 use App\Enums\ArtisanVerificationStatus;
 use App\Enums\PlatformRole;
+use App\Enums\TeamKind;
 use App\Enums\TeamRole;
 use App\Models\ArtisanProfile;
 use App\Models\Team;
@@ -33,6 +34,7 @@ class CreateArtisanBusinessProfile
         return DB::transaction(function () use ($owner, $businessName, $onboardedByAgent, $internalNotes): ArtisanProfile {
             $team = Team::query()->create([
                 'name' => $businessName,
+                'kind' => TeamKind::ArtisanBusiness,
                 'is_personal' => false,
             ]);
 

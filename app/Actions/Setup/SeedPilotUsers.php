@@ -4,13 +4,16 @@ namespace App\Actions\Setup;
 
 use App\Actions\Artisans\CreateArtisanBusinessProfile;
 use App\Actions\Artisans\UpdateArtisanBusinessLocation;
+use App\Actions\Customers\CreateCustomerProfile;
 use App\Enums\AdminProfileStatus;
 use App\Enums\PlatformRole;
+use App\Enums\TeamKind;
 use App\Enums\TeamRole;
 use App\Models\AdminProfile;
 use App\Models\AreaAgentAssignment;
 use App\Models\ArtisanProfile;
 use App\Models\Country;
+use App\Models\CustomerProfile;
 use App\Models\LocalGovernment;
 use App\Models\State;
 use App\Models\Team;
@@ -31,6 +34,7 @@ class SeedPilotUsers
         private readonly SeedPlatformAccess $seedPlatformAccess,
         private readonly CreateArtisanBusinessProfile $createArtisanBusinessProfile,
         private readonly UpdateArtisanBusinessLocation $updateArtisanBusinessLocation,
+        private readonly CreateCustomerProfile $createCustomerProfile,
     ) {}
 
     /**
@@ -43,6 +47,7 @@ class SeedPilotUsers
      *     area_agent: User,
      *     artisan: User,
      *     customer: User,
+     *     customer_profile: CustomerProfile,
      *     artisan_profile: ArtisanProfile
      * }
      */
@@ -71,6 +76,10 @@ class SeedPilotUsers
             $this->assignPlatformRole($areaAgent, PlatformRole::AreaAgent);
             $this->assignPlatformRole($artisan, PlatformRole::Artisan);
             $this->assignPlatformRole($customer, PlatformRole::Customer);
+            $customerProfile = $this->createCustomerProfile->handle($customer, preferences: [
+                'preferred_channel' => 'whatsapp',
+                'service_area' => 'Wuse',
+            ]);
 
             $this->upsertAdminProfile($superAdmin, PlatformRole::SuperAdmin);
             $this->upsertAdminProfile($stateCoordinator, PlatformRole::StateCoordinator, $state, $superAdmin);
@@ -96,6 +105,7 @@ class SeedPilotUsers
                 'area_agent' => $areaAgent->refresh(),
                 'artisan' => $artisan->refresh(),
                 'customer' => $customer->refresh(),
+                'customer_profile' => $customerProfile->refresh(),
                 'artisan_profile' => $artisanProfile->refresh(),
             ];
         });
@@ -135,6 +145,7 @@ class SeedPilotUsers
 
         $team = Team::query()->create([
             'name' => $user->name."'s Team",
+            'kind' => TeamKind::Personal,
             'is_personal' => true,
         ]);
 

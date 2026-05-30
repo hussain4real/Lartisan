@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\GeneratesUniqueTeamSlugs;
+use App\Enums\TeamKind;
 use App\Enums\TeamRole;
 use Database\Factories\TeamFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -17,9 +18,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property string $name
  * @property string $slug
+ * @property TeamKind|null $kind
  * @property bool $is_personal
  */
-#[Fillable(['name', 'slug', 'is_personal'])]
+#[Fillable(['name', 'slug', 'kind', 'is_personal'])]
 class Team extends Model
 {
     /** @use HasFactory<TeamFactory> */
@@ -33,6 +35,14 @@ class Team extends Model
         parent::boot();
 
         static::creating(function (Team $team) {
+            if (empty($team->kind)) {
+                $team->kind = $team->is_personal ? TeamKind::Personal : TeamKind::Workspace;
+            }
+
+            if ($team->kind === TeamKind::Personal) {
+                $team->is_personal = true;
+            }
+
             if (empty($team->slug)) {
                 $team->slug = static::generateUniqueTeamSlug($team->name);
             }
@@ -107,6 +117,7 @@ class Team extends Model
     {
         return [
             'is_personal' => 'boolean',
+            'kind' => TeamKind::class,
         ];
     }
 

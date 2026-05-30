@@ -2,6 +2,7 @@
 
 namespace App\Actions\Teams;
 
+use App\Enums\TeamKind;
 use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Models\User;
@@ -17,6 +18,7 @@ class CreateTeam
         return DB::transaction(function () use ($user, $name, $isPersonal) {
             $team = Team::create([
                 'name' => $name,
+                'kind' => $isPersonal ? TeamKind::Personal : TeamKind::Workspace,
                 'is_personal' => $isPersonal,
             ]);
 

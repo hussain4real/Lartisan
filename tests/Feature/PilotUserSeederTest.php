@@ -5,6 +5,7 @@ use App\Enums\PlatformRole;
 use App\Models\AdminProfile;
 use App\Models\AreaAgentAssignment;
 use App\Models\ArtisanProfile;
+use App\Models\CustomerProfile;
 use App\Models\LocalGovernment;
 use App\Models\State;
 use App\Models\Team;
@@ -32,6 +33,7 @@ test('pilot user seeder creates idempotent role scoped demo accounts', function 
     expect(AdminProfile::query()->count())->toBe(4);
     expect(AreaAgentAssignment::query()->count())->toBe(2);
     expect(ArtisanProfile::query()->count())->toBe(1);
+    expect(CustomerProfile::query()->count())->toBe(1);
 
     expect($superAdmin->hasRole(PlatformRole::SuperAdmin->value))->toBeTrue();
     expect($stateCoordinator->hasRole(PlatformRole::StateCoordinator->value))->toBeTrue();
@@ -72,6 +74,10 @@ test('pilot user seeder creates idempotent role scoped demo accounts', function 
     expect($artisanProfile->localGovernment()->firstOrFail()->is($amac))->toBeTrue();
     expect($artisanProfile->territory()->firstOrFail()->slug)->toBe('wuse-market');
     expect($customer->artisanProfiles()->exists())->toBeFalse();
+    expect($customer->customerProfile()->firstOrFail()->preferences)->toBe([
+        'preferred_channel' => 'whatsapp',
+        'service_area' => 'Wuse',
+    ]);
 });
 
 test('database seeder loads pilot users instead of the generic test account', function () {
