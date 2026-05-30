@@ -13,7 +13,15 @@ return new class extends Migration
     {
         Schema::create('reason_codes', function (Blueprint $table) {
             $table->id();
+            $table->string('category');
+            $table->string('code');
+            $table->string('label');
+            $table->text('description')->nullable();
+            $table->boolean('active')->default(true);
             $table->timestamps();
+
+            $table->unique(['category', 'code']);
+            $table->index(['category', 'active']);
         });
     }
 

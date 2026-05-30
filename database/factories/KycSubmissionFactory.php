@@ -29,6 +29,7 @@ class KycSubmissionFactory extends Factory
             'reviewed_by' => null,
             'reviewed_at' => null,
             'decision_reason' => null,
+            'reason_code_id' => null,
             'notes' => fake()->sentence(),
         ];
     }

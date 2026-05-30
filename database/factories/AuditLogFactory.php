@@ -26,6 +26,7 @@ class AuditLogFactory extends Factory
             'before' => null,
             'after' => ['status' => 'updated'],
             'reason' => fake()->sentence(),
+            'reason_code_id' => null,
             'ip_address' => fake()->ipv4(),
             'user_agent' => fake()->userAgent(),
         ];

@@ -49,7 +49,7 @@ defineOptions({
 
     <h1 class="sr-only">{{ profile.businessName }}</h1>
 
-    <div class="flex flex-col gap-8">
+    <div class="flex flex-col gap-8 p-4 sm:p-6">
         <div
             class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
         >

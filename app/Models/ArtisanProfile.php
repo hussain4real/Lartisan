@@ -42,6 +42,9 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property int|null $approved_by
  * @property Carbon|null $approved_at
  * @property bool $is_public
+ * @property int|null $suspension_reason_code_id
+ * @property int|null $suspended_by
+ * @property Carbon|null $suspended_at
  */
 #[Fillable([
     'team_id',
@@ -64,6 +67,9 @@ use Spatie\MediaLibrary\MediaCollections\File;
     'approved_at',
     'is_public',
     'internal_notes',
+    'suspension_reason_code_id',
+    'suspended_by',
+    'suspended_at',
 ])]
 class ArtisanProfile extends Model implements HasMedia
 {
@@ -145,6 +151,22 @@ class ArtisanProfile extends Model implements HasMedia
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function suspendedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'suspended_by');
+    }
+
+    /**
+     * @return BelongsTo<ReasonCode, $this>
+     */
+    public function suspensionReasonCode(): BelongsTo
+    {
+        return $this->belongsTo(ReasonCode::class, 'suspension_reason_code_id');
     }
 
     /**
@@ -293,6 +315,7 @@ class ArtisanProfile extends Model implements HasMedia
             'is_public' => 'boolean',
             'service_radius_km' => 'integer',
             'subscription_status' => ArtisanSubscriptionStatus::class,
+            'suspended_at' => 'datetime',
             'verification_status' => ArtisanVerificationStatus::class,
             'years_experience' => 'integer',
         ];

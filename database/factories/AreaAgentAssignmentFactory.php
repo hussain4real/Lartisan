@@ -26,6 +26,7 @@ class AreaAgentAssignmentFactory extends Factory
             'ends_at' => null,
             'assigned_by' => null,
             'reason' => fake()->sentence(),
+            'reason_code_id' => null,
         ];
     }
 }

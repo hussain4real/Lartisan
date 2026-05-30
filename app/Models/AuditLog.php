@@ -21,10 +21,11 @@ use LogicException;
  * @property array<string, mixed>|null $before
  * @property array<string, mixed>|null $after
  * @property string|null $reason
+ * @property int|null $reason_code_id
  * @property string|null $ip_address
  * @property string|null $user_agent
  */
-#[Fillable(['actor_id', 'action', 'subject_type', 'subject_id', 'before', 'after', 'reason', 'ip_address', 'user_agent'])]
+#[Fillable(['actor_id', 'action', 'subject_type', 'subject_id', 'before', 'after', 'reason', 'reason_code_id', 'ip_address', 'user_agent'])]
 class AuditLog extends Model
 {
     public const UPDATED_AT = null;
@@ -46,6 +47,14 @@ class AuditLog extends Model
     public function subject(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * @return BelongsTo<ReasonCode, $this>
+     */
+    public function reasonCode(): BelongsTo
+    {
+        return $this->belongsTo(ReasonCode::class);
     }
 
     /**

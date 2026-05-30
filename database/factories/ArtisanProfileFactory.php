@@ -43,6 +43,9 @@ class ArtisanProfileFactory extends Factory
             'approved_at' => null,
             'is_public' => false,
             'internal_notes' => null,
+            'suspension_reason_code_id' => null,
+            'suspended_by' => null,
+            'suspended_at' => null,
         ];
     }
 }

@@ -25,6 +25,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property int|null $reviewed_by
  * @property CarbonInterface|null $reviewed_at
  * @property string|null $decision_reason
+ * @property int|null $reason_code_id
  * @property string|null $notes
  */
 #[Fillable([
@@ -35,6 +36,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
     'reviewed_by',
     'reviewed_at',
     'decision_reason',
+    'reason_code_id',
     'notes',
 ])]
 class KycSubmission extends Model implements HasMedia
@@ -92,6 +94,14 @@ class KycSubmission extends Model implements HasMedia
     public function reviewedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    /**
+     * @return BelongsTo<ReasonCode, $this>
+     */
+    public function reasonCode(): BelongsTo
+    {
+        return $this->belongsTo(ReasonCode::class);
     }
 
     /**

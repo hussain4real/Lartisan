@@ -3,6 +3,7 @@
 namespace App\Actions\Audit;
 
 use App\Models\AuditLog;
+use App\Models\ReasonCode;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,6 +22,7 @@ class RecordAuditLog
         ?array $before = null,
         ?array $after = null,
         ?string $reason = null,
+        ?ReasonCode $reasonCode = null,
         ?string $ipAddress = null,
         ?string $userAgent = null,
     ): AuditLog {
@@ -32,6 +34,7 @@ class RecordAuditLog
             'before' => $before,
             'after' => $after,
             'reason' => $reason,
+            'reason_code_id' => $reasonCode?->id,
             'ip_address' => $ipAddress,
             'user_agent' => $userAgent,
         ]);

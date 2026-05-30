@@ -4,9 +4,12 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Concerns\HasTeams;
+use App\Enums\PlatformPermission;
 use App\Enums\PreferredChannel;
 use App\Enums\UserStatus;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Collection;
@@ -49,7 +52,7 @@ use Spatie\Permission\Traits\HasRoles;
     'current_team_id',
 ])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable implements PasskeyUser
+class User extends Authenticatable implements FilamentUser, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, HasTeams, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable {
@@ -163,6 +166,14 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     /**
+     * @return HasMany<ArtisanProfile, $this>
+     */
+    public function suspendedArtisanProfiles(): HasMany
+    {
+        return $this->hasMany(ArtisanProfile::class, 'suspended_by');
+    }
+
+    /**
      * @return HasMany<KycSubmission, $this>
      */
     public function reviewedKycSubmissions(): HasMany
@@ -184,5 +195,16 @@ class User extends Authenticatable implements PasskeyUser
     public function statusHistories(): HasMany
     {
         return $this->hasMany(StatusHistory::class, 'actor_id');
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return match ($panel->getId()) {
+            'admin' => $this->can(PlatformPermission::ViewGlobalReports->value),
+            'state' => $this->can(PlatformPermission::ViewStateReports->value),
+            'lga' => $this->can(PlatformPermission::ViewLocalGovernmentReports->value),
+            'agent' => $this->can(PlatformPermission::ViewAreaReports->value),
+            default => false,
+        };
     }
 }

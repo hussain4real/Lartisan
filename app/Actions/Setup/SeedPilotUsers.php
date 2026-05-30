@@ -12,6 +12,7 @@ use App\Enums\ArtisanServiceStatus;
 use App\Enums\ArtisanVerificationStatus;
 use App\Enums\PlatformRole;
 use App\Enums\PreferredChannel;
+use App\Enums\ReasonCodeCategory;
 use App\Enums\TeamKind;
 use App\Enums\TeamRole;
 use App\Enums\UserStatus;
@@ -24,6 +25,7 @@ use App\Models\Country;
 use App\Models\CustomerProfile;
 use App\Models\KycSubmission;
 use App\Models\LocalGovernment;
+use App\Models\ReasonCode;
 use App\Models\ServiceCategory;
 use App\Models\State;
 use App\Models\Team;
@@ -42,6 +44,7 @@ class SeedPilotUsers
     public function __construct(
         private readonly SeedGeography $seedGeography,
         private readonly SeedPlatformAccess $seedPlatformAccess,
+        private readonly SeedReasonCodes $seedReasonCodes,
         private readonly CreateArtisanBusinessProfile $createArtisanBusinessProfile,
         private readonly UpdateArtisanBusinessLocation $updateArtisanBusinessLocation,
         private readonly CreateCustomerProfile $createCustomerProfile,
@@ -70,6 +73,7 @@ class SeedPilotUsers
     {
         $this->seedGeography->handle();
         $this->seedPlatformAccess->handle();
+        $this->seedReasonCodes->handle();
 
         return DB::transaction(function (): array {
             $country = Country::query()->where('iso_code', 'NG')->firstOrFail();
@@ -219,6 +223,11 @@ class SeedPilotUsers
 
     private function upsertAreaAssignment(User $agent, Territory $territory, User $assignedBy): AreaAgentAssignment
     {
+        $reasonCode = ReasonCode::query()
+            ->forCategory(ReasonCodeCategory::TerritoryAssignment)
+            ->where('code', 'coverage-balancing')
+            ->first();
+
         return AreaAgentAssignment::query()->updateOrCreate(
             [
                 'user_id' => $agent->id,
@@ -229,6 +238,7 @@ class SeedPilotUsers
                 'ends_at' => null,
                 'assigned_by' => $assignedBy->id,
                 'reason' => 'Pilot market coverage',
+                'reason_code_id' => $reasonCode?->id,
             ],
         );
     }
