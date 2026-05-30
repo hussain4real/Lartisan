@@ -20,7 +20,7 @@ test('team member roles can be updated by owners', function () {
 
     $response->assertRedirect(route('teams.edit', $team));
 
-    expect($team->members()->where('user_id', $member->id)->first()->pivot->role->value)->toEqual(TeamRole::Admin->value);
+    expect($team->memberships()->where('user_id', $member->id)->firstOrFail()->role)->toBe(TeamRole::Admin);
 });
 
 test('team member roles cannot be updated by non owners', function () {
@@ -56,7 +56,7 @@ test('team members can be removed by owners', function () {
 
     $response->assertRedirect(route('teams.edit', $team));
 
-    expect($member->fresh()->belongsToTeam($team))->toBeFalse();
+    expect(User::query()->findOrFail($member->id)->belongsToTeam($team))->toBeFalse();
 });
 
 test('team members cannot be removed by non owners', function () {
@@ -88,7 +88,7 @@ test('team owner cannot be removed', function () {
 
     $response->assertForbidden();
 
-    expect($owner->fresh()->belongsToTeam($team))->toBeTrue();
+    expect(User::query()->findOrFail($owner->id)->belongsToTeam($team))->toBeTrue();
 });
 
 test('team member role cannot be set to owner', function () {
@@ -107,13 +107,13 @@ test('team member role cannot be set to owner', function () {
 
     $response->assertSessionHasErrors('role');
 
-    expect($team->members()->where('user_id', $member->id)->first()->pivot->role->value)->toEqual(TeamRole::Member->value);
+    expect($team->memberships()->where('user_id', $member->id)->firstOrFail()->role)->toBe(TeamRole::Member);
 });
 
 test('removed member current team is set to personal team', function () {
     $owner = User::factory()->create();
     $member = User::factory()->create();
-    $personalTeam = $member->personalTeam();
+    $personalTeam = $member->teams()->where('is_personal', true)->firstOrFail();
     $team = Team::factory()->create();
 
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
@@ -125,5 +125,5 @@ test('removed member current team is set to personal team', function () {
         ->actingAs($owner)
         ->delete(route('teams.members.destroy', [$team, $member]));
 
-    expect($member->fresh()->current_team_id)->toEqual($personalTeam->id);
+    expect(User::query()->findOrFail($member->id)->current_team_id)->toEqual($personalTeam->id);
 });

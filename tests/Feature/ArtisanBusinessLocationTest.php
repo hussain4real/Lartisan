@@ -25,10 +25,10 @@ test('artisan business location action stores a valid geography hierarchy', func
         $territory,
     );
 
-    expect($updated->country->is($country))->toBeTrue();
-    expect($updated->state->is($state))->toBeTrue();
-    expect($updated->localGovernment->is($localGovernment))->toBeTrue();
-    expect($updated->territory->is($territory))->toBeTrue();
+    expect($updated->country()->firstOrFail()->is($country))->toBeTrue();
+    expect($updated->state()->firstOrFail()->is($state))->toBeTrue();
+    expect($updated->localGovernment()->firstOrFail()->is($localGovernment))->toBeTrue();
+    expect($updated->territory()->firstOrFail()->is($territory))->toBeTrue();
     expect($country->artisanProfiles()->firstOrFail()->is($updated))->toBeTrue();
     expect($state->artisanProfiles()->firstOrFail()->is($updated))->toBeTrue();
     expect($localGovernment->artisanProfiles()->firstOrFail()->is($updated))->toBeTrue();

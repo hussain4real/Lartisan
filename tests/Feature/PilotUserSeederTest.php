@@ -46,12 +46,12 @@ test('pilot user seeder creates idempotent role scoped demo accounts', function 
 
     expect($stateCoordinatorProfile->role)->toBe(PlatformRole::StateCoordinator);
     expect($stateCoordinatorProfile->status)->toBe(AdminProfileStatus::Active);
-    expect($stateCoordinatorProfile->scope->is($fct))->toBeTrue();
-    expect($stateCoordinatorProfile->appointedBy->is($superAdmin))->toBeTrue();
-    expect($localGovernmentAdminProfile->scope->is($amac))->toBeTrue();
-    expect($localGovernmentAdminProfile->appointedBy->is($stateCoordinator))->toBeTrue();
-    expect($areaAgentProfile->scope->is($amac))->toBeTrue();
-    expect($areaAgentProfile->appointedBy->is($localGovernmentAdmin))->toBeTrue();
+    expect($stateCoordinatorProfile->scope()->firstOrFail()->is($fct))->toBeTrue();
+    expect($stateCoordinatorProfile->appointedBy()->firstOrFail()->is($superAdmin))->toBeTrue();
+    expect($localGovernmentAdminProfile->scope()->firstOrFail()->is($amac))->toBeTrue();
+    expect($localGovernmentAdminProfile->appointedBy()->firstOrFail()->is($stateCoordinator))->toBeTrue();
+    expect($areaAgentProfile->scope()->firstOrFail()->is($amac))->toBeTrue();
+    expect($areaAgentProfile->appointedBy()->firstOrFail()->is($localGovernmentAdmin))->toBeTrue();
 
     $assignedTerritories = AreaAgentAssignment::query()
         ->where('user_id', $areaAgent->id)
@@ -64,13 +64,13 @@ test('pilot user seeder creates idempotent role scoped demo accounts', function 
 
     expect($assignedTerritories)->toBe(['garki-market', 'wuse-market']);
     expect($artisanProfile->business_name)->toBe('Wuse Sparks Electrical');
-    expect($artisanProfile->team->is_personal)->toBeFalse();
-    expect($artisanProfile->user->is($artisan))->toBeTrue();
-    expect($artisanProfile->onboardedByAgent->is($areaAgent))->toBeTrue();
-    expect($artisanProfile->country->iso_code)->toBe('NG');
-    expect($artisanProfile->state->is($fct))->toBeTrue();
-    expect($artisanProfile->localGovernment->is($amac))->toBeTrue();
-    expect($artisanProfile->territory->slug)->toBe('wuse-market');
+    expect($artisanProfile->team()->firstOrFail()->is_personal)->toBeFalse();
+    expect($artisanProfile->user()->firstOrFail()->is($artisan))->toBeTrue();
+    expect($artisanProfile->onboardedByAgent()->firstOrFail()->is($areaAgent))->toBeTrue();
+    expect($artisanProfile->country()->firstOrFail()->iso_code)->toBe('NG');
+    expect($artisanProfile->state()->firstOrFail()->is($fct))->toBeTrue();
+    expect($artisanProfile->localGovernment()->firstOrFail()->is($amac))->toBeTrue();
+    expect($artisanProfile->territory()->firstOrFail()->slug)->toBe('wuse-market');
     expect($customer->artisanProfiles()->exists())->toBeFalse();
 });
 

@@ -24,20 +24,23 @@ test('artisan business profile action creates a non personal team workspace', fu
         internalNotes: 'Agent assisted onboarding',
     );
 
-    $team = $profile->team;
+    $team = $profile->team()->firstOrFail();
+    $onboardedByAgent = $profile->onboardedByAgent()->firstOrFail();
+    $profileFromTeam = $team->artisanProfile()->firstOrFail();
+    $ownerFresh = User::query()->findOrFail($owner->id);
 
     expect($profile->business_name)->toBe('Bright Sparks Electrical');
     expect($profile->verification_status)->toBe(ArtisanVerificationStatus::Draft);
     expect($profile->subscription_status)->toBe(ArtisanSubscriptionStatus::Trial);
     expect($profile->availability_status)->toBe(ArtisanAvailabilityStatus::Offline);
     expect($profile->internal_notes)->toBe('Agent assisted onboarding');
-    expect($profile->onboardedByAgent->is($agent))->toBeTrue();
+    expect($onboardedByAgent->is($agent))->toBeTrue();
     expect($team->name)->toBe('Bright Sparks Electrical');
     expect($team->is_personal)->toBeFalse();
     expect($team->owner()?->is($owner))->toBeTrue();
-    expect($team->artisanProfile->is($profile))->toBeTrue();
-    expect($owner->fresh()->current_team_id)->toBe($team->id);
-    expect($owner->fresh()->hasRole(PlatformRole::Artisan->value))->toBeTrue();
+    expect($profileFromTeam->is($profile))->toBeTrue();
+    expect($ownerFresh->current_team_id)->toBe($team->id);
+    expect($ownerFresh->hasRole(PlatformRole::Artisan->value))->toBeTrue();
     expect($owner->artisanProfiles()->firstOrFail()->is($profile))->toBeTrue();
     expect($agent->onboardedArtisanProfiles()->firstOrFail()->is($profile))->toBeTrue();
 });
@@ -50,10 +53,12 @@ test('a user may own multiple artisan business profiles while personal teams sta
 
     $first = app(CreateArtisanBusinessProfile::class)->handle($owner, 'Northside Tailors');
     $second = app(CreateArtisanBusinessProfile::class)->handle($owner, 'Northside Repairs');
+    $firstTeam = $first->team()->firstOrFail();
+    $secondTeam = $second->team()->firstOrFail();
 
     expect($owner->artisanProfiles()->count())->toBe(2);
-    expect($first->team->is_personal)->toBeFalse();
-    expect($second->team->is_personal)->toBeFalse();
+    expect($firstTeam->is_personal)->toBeFalse();
+    expect($secondTeam->is_personal)->toBeFalse();
     expect($personalTeam?->artisanProfile)->toBeNull();
 });
 
@@ -70,14 +75,17 @@ test('artisan profile casts status and approval fields', function () {
         'approved_at' => now(),
         'is_public' => true,
     ]);
+    $approvedAt = $profile->approved_at;
+    $profileOwner = $profile->user()->firstOrFail();
+    $profileApprover = $profile->approvedBy()->firstOrFail();
 
     expect($profile->verification_status)->toBe(ArtisanVerificationStatus::Approved);
     expect($profile->subscription_status)->toBe(ArtisanSubscriptionStatus::Active);
     expect($profile->availability_status)->toBe(ArtisanAvailabilityStatus::Online);
     expect($profile->is_public)->toBeTrue();
-    expect($profile->approved_at->isToday())->toBeTrue();
-    expect($profile->user->is($owner))->toBeTrue();
-    expect($profile->approvedBy->is($approver))->toBeTrue();
+    expect($approvedAt?->isToday())->toBeTrue();
+    expect($profileOwner->is($owner))->toBeTrue();
+    expect($profileApprover->is($approver))->toBeTrue();
     expect($approver->approvedArtisanProfiles()->firstOrFail()->is($profile))->toBeTrue();
 });
 

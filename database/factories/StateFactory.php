@@ -19,7 +19,7 @@ class StateFactory extends Factory
      */
     public function definition(): array
     {
-        $name = fake()->unique()->state();
+        $name = fake()->unique()->city().' State';
 
         return [
             'country_id' => Country::factory(),

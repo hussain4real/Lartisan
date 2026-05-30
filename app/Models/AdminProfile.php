@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property PlatformRole $role
  * @property AdminProfileStatus $status
  * @property int|null $appointed_by
+ * @property Carbon|null $appointed_at
  */
 #[Fillable(['user_id', 'role', 'scope_type', 'scope_id', 'status', 'appointed_by', 'appointed_at'])]
 class AdminProfile extends Model

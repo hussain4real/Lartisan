@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Contracts\Session\Session;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Fortify\Features;
@@ -30,12 +32,23 @@ test('passkey login response redirects to the current team dashboard', function 
     $request = Request::create(route('login', absolute: false), 'GET', server: [
         'HTTP_ACCEPT' => 'application/json',
     ]);
-    $request->setLaravelSession($this->app['session.store']);
+
+    /** @var Session $session */
+    $session = app('session.store');
+
+    $request->setLaravelSession($session);
     $request->setUserResolver(fn () => $user);
 
     $jsonResponse = app(PasskeyLoginResponse::class)->toResponse($request);
+    $personalTeam = $user->teams()->where('is_personal', true)->firstOrFail();
 
-    expect($jsonResponse->getData()->redirect)->toBe(route('dashboard', ['current_team' => $user->personalTeam()->slug]));
+    assert($jsonResponse instanceof JsonResponse);
+
+    $responseData = $jsonResponse->getData(true);
+
+    assert(is_array($responseData));
+
+    expect($responseData['redirect'] ?? null)->toBe(route('dashboard', ['current_team' => $personalTeam->slug]));
 });
 
 test('users with two factor enabled are redirected to two factor challenge', function () {

@@ -23,12 +23,12 @@ test('geography seeder creates idempotent nigeria pilot data', function () {
 
     expect(Country::query()->count())->toBe(1);
     expect($country->states()->count())->toBe(37);
-    expect($fct->country->is($country))->toBeTrue();
+    expect($fct->country()->firstOrFail()->is($country))->toBeTrue();
     expect($fct->localGovernments()->count())->toBe(6);
-    expect($amac->state->is($fct))->toBeTrue();
+    expect($amac->state()->firstOrFail()->is($fct))->toBeTrue();
     expect($amac->territories()->count())->toBe(4);
     expect(Territory::query()->count())->toBe(15);
-    expect($wuseMarket->localGovernment->is($amac))->toBeTrue();
+    expect($wuseMarket->localGovernment()->firstOrFail()->is($amac))->toBeTrue();
     expect($wuseMarket->type)->toBe(TerritoryType::Market);
     expect($wuseMarket->active)->toBeTrue();
 });
@@ -59,16 +59,16 @@ test('admin profile and area assignment relationships resolve operational scopes
         'reason' => 'Pilot market coverage',
     ]);
 
-    expect($profile->user->is($stateCoordinator))->toBeTrue();
-    expect($profile->appointedBy->is($superAdmin))->toBeTrue();
-    expect($profile->scope->is($fct))->toBeTrue();
+    expect($profile->user()->firstOrFail()->is($stateCoordinator))->toBeTrue();
+    expect($profile->appointedBy()->firstOrFail()->is($superAdmin))->toBeTrue();
+    expect($profile->scope()->firstOrFail()->is($fct))->toBeTrue();
     expect($profile->role)->toBe(PlatformRole::StateCoordinator);
     expect($profile->status)->toBe(AdminProfileStatus::Active);
-    expect($profile->appointed_at->isToday())->toBeTrue();
+    expect($profile->appointed_at?->isToday())->toBeTrue();
 
-    expect($assignment->user->is($agent))->toBeTrue();
-    expect($assignment->territory->is($territory))->toBeTrue();
-    expect($assignment->assignedBy->is($stateCoordinator))->toBeTrue();
-    expect($assignment->starts_at->lessThanOrEqualTo(now()))->toBeTrue();
-    expect($territory->areaAgentAssignments()->first()->is($assignment))->toBeTrue();
+    expect($assignment->user()->firstOrFail()->is($agent))->toBeTrue();
+    expect($assignment->territory()->firstOrFail()->is($territory))->toBeTrue();
+    expect($assignment->assignedBy()->firstOrFail()->is($stateCoordinator))->toBeTrue();
+    expect($assignment->starts_at?->lessThanOrEqualTo(now()))->toBeTrue();
+    expect($territory->areaAgentAssignments()->firstOrFail()->is($assignment))->toBeTrue();
 });

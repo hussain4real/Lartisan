@@ -1,5 +1,7 @@
 includes:
     - vendor/larastan/larastan/extension.neon
+    - vendor/pestphp/pest/extension.neon
+    - vendor/pestphp/pest/phpstan-pest-extension.neon
 
 parameters:
     level: max
@@ -10,5 +12,18 @@ parameters:
     paths:
         - app
         - bootstrap/providers.php
+        - database
+        - routes
+        - tests
 
     tmpDir: storage/framework/cache/phpstan
+
+    ignoreErrors:
+        -
+            identifier: method.notFound
+            message: '#^Call to an undefined method Pest\\PendingCalls\\TestCall::(actingAs|assertAuthenticated|assertDatabaseHas|assertDatabaseMissing|assertGuest|assertSoftDeleted|delete|get|markTestSkipped|patch|post|seed|skipUnlessFortifyHas|withoutVite)\(\)\.$#'
+            path: tests/*
+        -
+            identifier: method.nonObject
+            message: '#^Cannot call method (assertForbidden|assertInertia|assertOk|assertRedirect|assertSessionHas|assertSessionHasErrors|assertSessionHasNoErrors|assertTooManyRequests|delete|from|get|patch|post|put|withSession)\(\) on mixed\.$#'
+            path: tests/*

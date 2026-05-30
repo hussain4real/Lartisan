@@ -1,15 +1,19 @@
 <?php
 
+use App\Http\Controllers\Artisan\OnboardingController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-Route::inertia('/', 'Welcome')->name('home');
+Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
 
 Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])
     ->group(function () {
-        Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+        Route::get('dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
+        Route::get('artisan/onboarding', [OnboardingController::class, 'create'])->name('artisan.onboarding.create');
+        Route::post('artisan/onboarding', [OnboardingController::class, 'store'])->name('artisan.onboarding.store');
     });
 
 Route::middleware(['auth'])->group(function () {

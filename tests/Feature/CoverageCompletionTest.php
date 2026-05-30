@@ -28,12 +28,17 @@ use App\Providers\AppServiceProvider;
 use App\Rules\TeamName;
 use App\Rules\UniqueTeamInvitation;
 use App\Rules\ValidTeamInvitation;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Session\Session;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Translation\PotentiallyTranslatedString;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
@@ -48,17 +53,25 @@ function jsonFortifyRequest(): Request
         'HTTP_ACCEPT' => 'application/json',
     ]);
 
-    $request->setLaravelSession(app('session.store'));
+    /** @var Session $session */
+    $session = app('session.store');
+
+    $request->setLaravelSession($session);
 
     return $request;
 }
 
-function validationFailuresFor(object $rule, mixed $value): array
+/**
+ * @return array<int, string>
+ */
+function validationFailuresFor(ValidationRule $rule, mixed $value): array
 {
     $messages = [];
 
-    $rule->validate('value', $value, function (string $message) use (&$messages): void {
+    $rule->validate('value', $value, function (string $message) use (&$messages): PotentiallyTranslatedString {
         $messages[] = $message;
+
+        return new PotentiallyTranslatedString($message, app('translator'));
     });
 
     return $messages;
@@ -77,7 +90,11 @@ function coverageFormRequest(string $formRequest, string $uri = '/', string $met
     $request = $formRequest::create($uri, $method, $parameters);
     $request->setContainer(app());
     $request->setRedirector(app('redirect'));
-    $request->setLaravelSession(app('session.store'));
+
+    /** @var Session $session */
+    $session = app('session.store');
+
+    $request->setLaravelSession($session);
 
     return $request;
 }
@@ -92,16 +109,16 @@ test('team slugs ignore non numeric suffixes when finding the next suffix', func
 
 test('team ownership helpers expose owned teams and permission checks', function () {
     $user = User::factory()->create();
-    $personalTeam = $user->personalTeam();
+    $personalTeam = $user->teams()->where('is_personal', true)->firstOrFail();
     $ownedTeam = Team::factory()->create();
     $memberTeam = Team::factory()->create();
 
     $ownedTeam->members()->attach($user, ['role' => TeamRole::Owner->value]);
     $memberTeam->members()->attach($user, ['role' => TeamRole::Member->value]);
+    $ownedTeamIds = $user->ownedTeams()->pluck('teams.id')->all();
 
-    expect($user->ownedTeams()->pluck('teams.id')->all())
-        ->toContain($personalTeam->id, $ownedTeam->id)
-        ->not->toContain($memberTeam->id);
+    expect($ownedTeamIds)->toContain($personalTeam->id, $ownedTeam->id);
+    expect(in_array($memberTeam->id, $ownedTeamIds, true))->toBeFalse();
     expect($user->ownsTeam($ownedTeam))->toBeTrue();
     expect($user->ownsTeam($memberTeam))->toBeFalse();
     expect($user->hasTeamPermission($ownedTeam, TeamPermission::DeleteTeam))->toBeTrue();
@@ -114,7 +131,7 @@ test('switching teams fails without membership and leaves the current team uncha
     $otherTeam = Team::factory()->create();
 
     expect($user->switchTeam($otherTeam))->toBeFalse();
-    expect($user->fresh()->current_team_id)->toBe($currentTeamId);
+    expect(User::query()->findOrFail($user->id)->current_team_id)->toBe($currentTeamId);
 });
 
 test('team roles expose hierarchy and assignable role metadata', function () {
@@ -141,8 +158,8 @@ test('membership model exposes related team user and role cast', function () {
         ->firstOrFail();
 
     expect($membership->role)->toBe(TeamRole::Admin);
-    expect($membership->team->is($team))->toBeTrue();
-    expect($membership->user->is($user))->toBeTrue();
+    expect($membership->team()->firstOrFail()->is($team))->toBeTrue();
+    expect($membership->user()->firstOrFail()->is($user))->toBeTrue();
 });
 
 test('team invitation model reports generated codes inviter and pending state', function () {
@@ -157,7 +174,7 @@ test('team invitation model reports generated codes inviter and pending state', 
     ]);
 
     expect($invitation->code)->toBeString()->toHaveLength(64);
-    expect($invitation->inviter->is($inviter))->toBeTrue();
+    expect($invitation->inviter()->firstOrFail()->is($inviter))->toBeTrue();
     expect($invitation->isAccepted())->toBeFalse();
     expect($invitation->isPending())->toBeTrue();
     expect($invitation->isExpired())->toBeFalse();
@@ -217,7 +234,8 @@ test('team membership middleware enforces minimum role and switches current team
     $user = User::factory()->create();
     $team = Team::factory()->create();
     $team->members()->attach($user, ['role' => TeamRole::Admin->value]);
-    $user->update(['current_team_id' => $user->personalTeam()->id]);
+    $personalTeam = $user->teams()->where('is_personal', true)->firstOrFail();
+    $user->update(['current_team_id' => $personalTeam->id]);
 
     $path = '/coverage-membership-'.uniqid().'/{current_team}';
     Route::get($path, fn () => 'ok')
@@ -228,12 +246,12 @@ test('team membership middleware enforces minimum role and switches current team
         ->get(str_replace('{current_team}', $team->slug, $path))
         ->assertOk();
 
-    expect($user->fresh()->current_team_id)->toBe($team->id);
+    expect(User::query()->findOrFail($user->id)->current_team_id)->toBe($team->id);
 });
 
 test('team membership middleware rejects invalid minimum roles', function () {
     $user = User::factory()->create();
-    $team = $user->personalTeam();
+    $team = $user->teams()->where('is_personal', true)->firstOrFail();
 
     $path = '/coverage-invalid-membership-'.uniqid().'/{team}';
     Route::get($path, fn () => 'ok')
@@ -246,11 +264,17 @@ test('team membership middleware rejects invalid minimum roles', function () {
 });
 
 test('fortify response contracts return json payloads', function () {
-    expect(app(LoginResponseContract::class)->toResponse(jsonFortifyRequest())->getData(true))
+    $loginResponse = app(LoginResponseContract::class)->toResponse(jsonFortifyRequest());
+    $twoFactorResponse = app(TwoFactorLoginResponseContract::class)->toResponse(jsonFortifyRequest());
+
+    assert($loginResponse instanceof JsonResponse);
+    assert($twoFactorResponse instanceof JsonResponse);
+
+    expect($loginResponse->getData(true))
         ->toBe(['two_factor' => false]);
     expect(app(RegisterResponseContract::class)->toResponse(jsonFortifyRequest())->getStatusCode())
         ->toBe(201);
-    expect(app(TwoFactorLoginResponseContract::class)->toResponse(jsonFortifyRequest())->getData(true))
+    expect($twoFactorResponse->getData(true))
         ->toBe(['two_factor' => false]);
     expect(app(VerifyEmailResponseContract::class)->toResponse(jsonFortifyRequest())->getStatusCode())
         ->toBe(204);
@@ -271,20 +295,46 @@ test('current team redirects fail when a user has no available team', function (
 
 test('fortify rate limiters use session credential and fallback keys', function () {
     $twoFactorRequest = Request::create('/two-factor-challenge', 'POST');
-    $twoFactorRequest->setLaravelSession(app('session.store'));
+    /** @var Session $twoFactorSession */
+    $twoFactorSession = app('session.store');
+    $twoFactorRequest->setLaravelSession($twoFactorSession);
     $twoFactorRequest->session()->put('login.id', 123);
 
     $passkeyRequest = Request::create('/passkey', 'POST', [
         'credential' => ['id' => 'credential-123'],
     ]);
-    $passkeyRequest->setLaravelSession(app('session.store'));
+    /** @var Session $passkeySession */
+    $passkeySession = app('session.store');
+    $passkeyRequest->setLaravelSession($passkeySession);
 
     $fallbackPasskeyRequest = Request::create('/passkey', 'POST');
-    $fallbackPasskeyRequest->setLaravelSession(app('session.store'));
+    /** @var Session $fallbackPasskeySession */
+    $fallbackPasskeySession = app('session.store');
+    $fallbackPasskeyRequest->setLaravelSession($fallbackPasskeySession);
 
-    expect(RateLimiter::limiter('two-factor')($twoFactorRequest)->key)->toBe(123);
-    expect(RateLimiter::limiter('passkeys')($passkeyRequest)->key)->toContain('credential-123|');
-    expect(RateLimiter::limiter('passkeys')($fallbackPasskeyRequest)->key)
+    $twoFactorLimiter = RateLimiter::limiter('two-factor');
+    $passkeysLimiter = RateLimiter::limiter('passkeys');
+
+    assert($twoFactorLimiter instanceof Closure);
+    assert($passkeysLimiter instanceof Closure);
+
+    $twoFactorLimit = $twoFactorLimiter($twoFactorRequest);
+    $passkeyLimit = $passkeysLimiter($passkeyRequest);
+    $fallbackPasskeyLimit = $passkeysLimiter($fallbackPasskeyRequest);
+
+    assert($twoFactorLimit instanceof Limit);
+    assert($passkeyLimit instanceof Limit);
+    assert($fallbackPasskeyLimit instanceof Limit);
+
+    $passkeyLimitKey = $passkeyLimit->key;
+    $fallbackPasskeyLimitKey = $fallbackPasskeyLimit->key;
+
+    assert(is_scalar($passkeyLimitKey));
+    assert(is_scalar($fallbackPasskeyLimitKey));
+
+    expect($twoFactorLimit->key)->toBe(123);
+    expect((string) $passkeyLimitKey)->toContain('credential-123|');
+    expect((string) $fallbackPasskeyLimitKey)
         ->toContain($fallbackPasskeyRequest->session()->getId().'|');
 });
 
@@ -379,9 +429,11 @@ test('team validation rules reject non string values', function () {
 });
 
 test('app service provider configures production password defaults', function () {
-    $this->app->detectEnvironment(fn () => 'production');
+    $app = app();
 
-    $provider = new class($this->app) extends AppServiceProvider
+    $app->detectEnvironment(fn () => 'production');
+
+    $provider = new class($app) extends AppServiceProvider
     {
         public function configureForCoverage(): void
         {
@@ -394,7 +446,7 @@ test('app service provider configures production password defaults', function ()
     expect(Password::default())->toBeInstanceOf(Password::class);
 
     Password::defaults(fn (): ?Password => null);
-    $this->app->detectEnvironment(fn () => 'testing');
+    $app->detectEnvironment(fn () => 'testing');
 });
 
 test('team name rule rejects reserved names from configured routes', function () {
