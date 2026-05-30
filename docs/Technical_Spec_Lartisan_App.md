@@ -22,17 +22,17 @@ The BRS changed the operating hierarchy from State Coordinator -> Area Agent to 
 
 ### 1.2 Architectural Decisions
 
-| Decision | Direction |
-| --- | --- |
-| Application shape | Laravel 13 monolith with Inertia Vue for product UI and Filament for operational panels. |
-| Database | PostgreSQL in production; SQLite remains acceptable for local tests. |
-| Authorization | Spatie Permission recommended for database-backed roles and permission templates. |
-| Media | Spatie Media Library recommended for KYC, portfolio, proof-of-work, and dispute evidence. |
-| PDFs | Spatie Laravel PDF recommended for receipts, payout statements, verification reports, invoices, and dispute packs. |
-| Payments | Provider abstraction over Paystack and Flutterwave. |
-| Notifications | Laravel Notifications with SMS, WhatsApp, email, and optional push channels. |
-| Frontend routes | Wayfinder-generated route/action helpers for Inertia links and forms. |
-| Testing | Pest for feature, unit, policy, route, notification, validation, and coverage gates. |
+| Decision          | Direction                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Application shape | Laravel 13 monolith with Inertia Vue for product UI and Filament for operational panels.                           |
+| Database          | PostgreSQL in production; SQLite remains acceptable for local tests.                                               |
+| Authorization     | Spatie Permission recommended for database-backed roles and permission templates.                                  |
+| Media             | Spatie Media Library recommended for KYC, portfolio, proof-of-work, and dispute evidence.                          |
+| PDFs              | Spatie Laravel PDF recommended for receipts, payout statements, verification reports, invoices, and dispute packs. |
+| Payments          | Provider abstraction over Paystack and Flutterwave.                                                                |
+| Notifications     | Laravel Notifications with SMS, WhatsApp, email, and optional push channels.                                       |
+| Frontend routes   | Wayfinder-generated route/action helpers for Inertia links and forms.                                              |
+| Testing           | Pest for feature, unit, policy, route, notification, validation, and coverage gates.                               |
 
 ## 2. System Architecture
 
@@ -78,69 +78,69 @@ flowchart TD
 
 ### 2.1 Application Layers
 
-| Layer | Responsibility |
-| --- | --- |
-| Routes | Web, guest booking, authenticated product UI, admin panels, provider webhooks. |
-| Controllers | Thin Inertia endpoints and webhook entrypoints. Delegate business work to actions. |
-| Form Requests | Validation, authorization, and normalization for writes. |
-| Actions | Single-purpose workflow steps such as create booking, approve KYC, settle wallet, or request payout. |
-| Models | Eloquent relationships, casts, scopes, and domain status helpers. |
-| Policies | Per-model access rules with geographic scoping. |
-| Notifications | Transactional notifications and provider-specific delivery. |
-| Jobs | Payment verification, notification delivery, media processing, reports, PDF generation, payout retries. |
-| Filament Resources | CRUD, review queues, operations dashboards, scoped reports, and admin workflows. |
+| Layer              | Responsibility                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| Routes             | Web, guest booking, authenticated product UI, admin panels, provider webhooks.                          |
+| Controllers        | Thin Inertia endpoints and webhook entrypoints. Delegate business work to actions.                      |
+| Form Requests      | Validation, authorization, and normalization for writes.                                                |
+| Actions            | Single-purpose workflow steps such as create booking, approve KYC, settle wallet, or request payout.    |
+| Models             | Eloquent relationships, casts, scopes, and domain status helpers.                                       |
+| Policies           | Per-model access rules with geographic scoping.                                                         |
+| Notifications      | Transactional notifications and provider-specific delivery.                                             |
+| Jobs               | Payment verification, notification delivery, media processing, reports, PDF generation, payout retries. |
+| Filament Resources | CRUD, review queues, operations dashboards, scoped reports, and admin workflows.                        |
 
 ## 3. Package Strategy
 
 No third-party packages are installed by this spec. The following packages are recommended for implementation approval.
 
-| Package | Purpose | Notes |
-| --- | --- | --- |
-| `spatie/laravel-permission` | Roles and permissions | Use permissions for policy decisions. Roles map to Super Admin, State Coordinator, LGA Admin, Area Agent, Artisan, and Customer. |
-| `spatie/laravel-medialibrary` | KYC, portfolio, proof, and dispute media | Define named collections per model and store files on private disks where identity or dispute data is sensitive. |
-| `spatie/laravel-pdf` | Receipts, payout statements, KYC reports, invoices, dispute packs | Default to Browsershot for MVP. Wrap behind `DocumentRenderer` so Gotenberg or Cloudflare can replace it later. |
-| Filament | Admin dashboards and resources | Use separate panels or navigation groups by operational role. |
-| Paystack/Flutterwave SDK or first-party HTTP client | Payments and payouts | Prefer a local provider interface over leaking provider SDK objects into controllers. |
+| Package                                             | Purpose                                                           | Notes                                                                                                                            |
+| --------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `spatie/laravel-permission`                         | Roles and permissions                                             | Use permissions for policy decisions. Roles map to Super Admin, State Coordinator, LGA Admin, Area Agent, Artisan, and Customer. |
+| `spatie/laravel-medialibrary`                       | KYC, portfolio, proof, and dispute media                          | Define named collections per model and store files on private disks where identity or dispute data is sensitive.                 |
+| `spatie/laravel-pdf`                                | Receipts, payout statements, KYC reports, invoices, dispute packs | Default to Browsershot for MVP. Wrap behind `DocumentRenderer` so Gotenberg or Cloudflare can replace it later.                  |
+| Filament                                            | Admin dashboards and resources                                    | Use separate panels or navigation groups by operational role.                                                                    |
+| Paystack/Flutterwave SDK or first-party HTTP client | Payments and payouts                                              | Prefer a local provider interface over leaking provider SDK objects into controllers.                                            |
 
 ## 4. Role And Permission Model
 
 ### 4.1 Roles
 
-| Role | Scope | Primary UI | Core responsibilities |
-| --- | --- | --- | --- |
-| Super Admin | Platform-wide | Super admin panel | Global settings, finance oversight, provider configuration, role templates, state accounts, risk, reports. |
-| State Coordinator | One state | State panel | LGA Admin supervision, escalated KYC, state disputes, campaigns, state metrics. |
-| Local Government Admin | One LGA | LGA panel | Area Agent assignment, local KYC queues, field operations, local support, local disputes, LGA reports. |
-| Area Agent | One or more local territories inside an LGA | Agent panel or responsive field UI | Assisted onboarding, visits, evidence capture, first-line support, local flags. |
-| Artisan | Own business profile | Artisan workspace | KYC, service catalog, availability, bookings, subscriptions, wallet, payout details. |
-| Registered Customer | Own profile and bookings | Customer SPA | Saved addresses, booking history, chat, payments, reviews. |
-| Guest Customer | One booking context | Customer SPA and secure links | OTP booking, status tracking, payment, receipt, limited communication. |
+| Role                   | Scope                                       | Primary UI                         | Core responsibilities                                                                                      |
+| ---------------------- | ------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Super Admin            | Platform-wide                               | Super admin panel                  | Global settings, finance oversight, provider configuration, role templates, state accounts, risk, reports. |
+| State Coordinator      | One state                                   | State panel                        | LGA Admin supervision, escalated KYC, state disputes, campaigns, state metrics.                            |
+| Local Government Admin | One LGA                                     | LGA panel                          | Area Agent assignment, local KYC queues, field operations, local support, local disputes, LGA reports.     |
+| Area Agent             | One or more local territories inside an LGA | Agent panel or responsive field UI | Assisted onboarding, visits, evidence capture, first-line support, local flags.                            |
+| Artisan                | Own business profile                        | Artisan workspace                  | KYC, service catalog, availability, bookings, subscriptions, wallet, payout details.                       |
+| Registered Customer    | Own profile and bookings                    | Customer SPA                       | Saved addresses, booking history, chat, payments, reviews.                                                 |
+| Guest Customer         | One booking context                         | Customer SPA and secure links      | OTP booking, status tracking, payment, receipt, limited communication.                                     |
 
 ### 4.2 Permission Families
 
-| Family | Examples |
-| --- | --- |
-| Platform settings | Manage categories, plans, commission, role templates, risk settings. |
-| Admin management | Create state coordinators, manage LGA admins, manage area agents. |
-| Territory | Create states/LGAs/areas, assign territories, reassign with reason. |
-| KYC | Submit field check, review standard KYC, escalate KYC, suspend profile. |
-| Bookings | View scoped bookings, manage status exceptions, resolve failed flows. |
-| Finance | View payments, manage payout queue, approve adjustments, export statements. |
-| Support | View cases, add notes, escalate disputes, close local cases. |
-| Reporting | View dashboards and exports within global, state, LGA, area, or own scope. |
+| Family            | Examples                                                                    |
+| ----------------- | --------------------------------------------------------------------------- |
+| Platform settings | Manage categories, plans, commission, role templates, risk settings.        |
+| Admin management  | Create state coordinators, manage LGA admins, manage area agents.           |
+| Territory         | Create states/LGAs/areas, assign territories, reassign with reason.         |
+| KYC               | Submit field check, review standard KYC, escalate KYC, suspend profile.     |
+| Bookings          | View scoped bookings, manage status exceptions, resolve failed flows.       |
+| Finance           | View payments, manage payout queue, approve adjustments, export statements. |
+| Support           | View cases, add notes, escalate disputes, close local cases.                |
+| Reporting         | View dashboards and exports within global, state, LGA, area, or own scope.  |
 
 ### 4.3 Data Scoping
 
 Policies and query scopes must enforce geography and ownership.
 
-| Actor | Default data visibility |
-| --- | --- |
-| Super Admin | All states, LGAs, areas, artisans, bookings, payments, payouts, disputes. |
-| State Coordinator | Records assigned to the coordinator's state. |
-| LGA Admin | Records assigned to the admin's LGA. |
-| Area Agent | Artisans, visits, support tasks, and disputes assigned to the agent's territories. |
-| Artisan | Own profile, services, bookings, wallet, subscription, reviews, payouts. |
-| Customer | Own bookings, addresses, payment records, reviews, chat contexts. |
+| Actor             | Default data visibility                                                            |
+| ----------------- | ---------------------------------------------------------------------------------- |
+| Super Admin       | All states, LGAs, areas, artisans, bookings, payments, payouts, disputes.          |
+| State Coordinator | Records assigned to the coordinator's state.                                       |
+| LGA Admin         | Records assigned to the admin's LGA.                                               |
+| Area Agent        | Artisans, visits, support tasks, and disputes assigned to the agent's territories. |
+| Artisan           | Own profile, services, bookings, wallet, subscription, reviews, payouts.           |
+| Customer          | Own bookings, addresses, payment records, reviews, chat contexts.                  |
 
 ## 5. Territory Model
 
@@ -157,13 +157,13 @@ erDiagram
 
 ### 5.1 Geographic Entities
 
-| Entity | Purpose | Key fields |
-| --- | --- | --- |
-| Country | Launch country; initially Nigeria. | name, iso_code, currency_code, phone_country_code. |
-| State | State-level administration and reporting. | country_id, name, slug, active. |
-| Local Government | LGA-level operations and dashboards. | state_id, name, slug, active. |
-| Territory | Ward, community, market, estate, cluster, or service zone. | local_government_id, type, name, boundaries, active. |
-| Assignment | Connects Area Agents to territories. | user_id, territory_id, starts_at, ends_at, assigned_by, reason. |
+| Entity           | Purpose                                                    | Key fields                                                      |
+| ---------------- | ---------------------------------------------------------- | --------------------------------------------------------------- |
+| Country          | Launch country; initially Nigeria.                         | name, iso_code, currency_code, phone_country_code.              |
+| State            | State-level administration and reporting.                  | country_id, name, slug, active.                                 |
+| Local Government | LGA-level operations and dashboards.                       | state_id, name, slug, active.                                   |
+| Territory        | Ward, community, market, estate, cluster, or service zone. | local_government_id, type, name, boundaries, active.            |
+| Assignment       | Connects Area Agents to territories.                       | user_id, territory_id, starts_at, ends_at, assigned_by, reason. |
 
 ### 5.2 Territory Rules
 
@@ -179,60 +179,60 @@ This section defines the target model set. Exact migrations should be generated 
 
 ### 6.1 Identity And Organization
 
-| Model | Key fields | Relationships |
-| --- | --- | --- |
-| User | name, email, phone, password, status, current_team_id, preferred_channel | has roles, has one artisan profile, has many bookings, has many admin assignments. |
-| AdminProfile | user_id, role_scope_type, role_scope_id, status, appointed_by | belongs to user; scope is platform, state, LGA, or territory. |
-| ArtisanProfile | user_id, business_name, verification_status, subscription_status, availability_status, onboarded_by_agent_id | belongs to user, categories, services, KYC submissions, wallet. |
-| CustomerProfile | user_id, default_address_id, preferences | belongs to user, has addresses and bookings. |
+| Model           | Key fields                                                                                                   | Relationships                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| User            | name, email, phone, password, status, current_team_id, preferred_channel                                     | has roles, has one artisan profile, has many bookings, has many admin assignments. |
+| AdminProfile    | user_id, role_scope_type, role_scope_id, status, appointed_by                                                | belongs to user; scope is platform, state, LGA, or territory.                      |
+| ArtisanProfile  | user_id, business_name, verification_status, subscription_status, availability_status, onboarded_by_agent_id | belongs to user, categories, services, KYC submissions, wallet.                    |
+| CustomerProfile | user_id, default_address_id, preferences                                                                     | belongs to user, has addresses and bookings.                                       |
 
 ### 6.2 Marketplace
 
-| Model | Key fields | Relationships |
-| --- | --- | --- |
-| ServiceCategory | parent_id, name, slug, icon, active, sort_order | has many services. |
-| ArtisanService | artisan_id, category_id, title, description, starting_price, status | belongs to artisan and category; has media. |
-| Address | user_id, label, contact_name, phone, state_id, local_government_id, territory_id, line_1, coordinates | belongs to user and geography. |
-| Booking | customer_id, artisan_id, service_id, status, scheduled_at, quoted_amount, address snapshot, source | has payment, chat, review, dispute, status history. |
-| Review | booking_id, customer_id, artisan_id, rating, comment, status | may have proof media and moderation notes. |
+| Model           | Key fields                                                                                            | Relationships                                       |
+| --------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| ServiceCategory | parent_id, name, slug, icon, active, sort_order                                                       | has many services.                                  |
+| ArtisanService  | artisan_id, category_id, title, description, starting_price, status                                   | belongs to artisan and category; has media.         |
+| Address         | user_id, label, contact_name, phone, state_id, local_government_id, territory_id, line_1, coordinates | belongs to user and geography.                      |
+| Booking         | customer_id, artisan_id, service_id, status, scheduled_at, quoted_amount, address snapshot, source    | has payment, chat, review, dispute, status history. |
+| Review          | booking_id, customer_id, artisan_id, rating, comment, status                                          | may have proof media and moderation notes.          |
 
 ### 6.3 Verification And Field Operations
 
-| Model | Key fields | Relationships |
-| --- | --- | --- |
-| KycSubmission | artisan_id, status, risk_level, submitted_at, reviewed_by, reviewed_at, decision_reason | has media, visit checks, status history. |
-| FieldVisit | artisan_id, area_agent_id, territory_id, status, visited_at, coordinates, notes, checklist | belongs to KYC submission where applicable. |
-| SupportCase | subject, category, priority, status, owner_id, scope fields | may link booking, artisan, payment, payout, or dispute. |
-| Dispute | booking_id, opened_by, status, severity, owner_role, resolution | has evidence media and timeline. |
-| AuditLog | actor_id, action, subject_type, subject_id, before, after, reason, ip_address | append-only. |
+| Model         | Key fields                                                                                 | Relationships                                           |
+| ------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| KycSubmission | artisan_id, status, risk_level, submitted_at, reviewed_by, reviewed_at, decision_reason    | has media, visit checks, status history.                |
+| FieldVisit    | artisan_id, area_agent_id, territory_id, status, visited_at, coordinates, notes, checklist | belongs to KYC submission where applicable.             |
+| SupportCase   | subject, category, priority, status, owner_id, scope fields                                | may link booking, artisan, payment, payout, or dispute. |
+| Dispute       | booking_id, opened_by, status, severity, owner_role, resolution                            | has evidence media and timeline.                        |
+| AuditLog      | actor_id, action, subject_type, subject_id, before, after, reason, ip_address              | append-only.                                            |
 
 ### 6.4 Finance
 
-| Model | Key fields | Relationships |
-| --- | --- | --- |
-| Payment | booking_id, provider, provider_reference, amount, fees, status, paid_at | belongs to booking; has webhook events. |
-| Wallet | artisan_id, currency, available_balance, pending_balance | has ledger entries. |
-| WalletLedgerEntry | wallet_id, type, amount, direction, balance_after, source_type, source_id, immutable_reference | append-only. |
-| PayoutAccount | artisan_id, bank_code, account_number_hash, account_name, verification_status | stores sensitive fields securely. |
-| Payout | wallet_id, provider, amount, status, approved_by, processed_at, failure_reason | has retry attempts. |
-| SubscriptionPlan | name, price, duration_days, benefits, visibility_weight, active | configured by Super Admin. |
-| Subscription | artisan_id, plan_id, status, starts_at, ends_at, grace_ends_at, payment_id | controls listing visibility and lead access. |
+| Model             | Key fields                                                                                     | Relationships                                |
+| ----------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Payment           | booking_id, provider, provider_reference, amount, fees, status, paid_at                        | belongs to booking; has webhook events.      |
+| Wallet            | artisan_id, currency, available_balance, pending_balance                                       | has ledger entries.                          |
+| WalletLedgerEntry | wallet_id, type, amount, direction, balance_after, source_type, source_id, immutable_reference | append-only.                                 |
+| PayoutAccount     | artisan_id, bank_code, account_number_hash, account_name, verification_status                  | stores sensitive fields securely.            |
+| Payout            | wallet_id, provider, amount, status, approved_by, processed_at, failure_reason                 | has retry attempts.                          |
+| SubscriptionPlan  | name, price, duration_days, benefits, visibility_weight, active                                | configured by Super Admin.                   |
+| Subscription      | artisan_id, plan_id, status, starts_at, ends_at, grace_ends_at, payment_id                     | controls listing visibility and lead access. |
 
 ## 7. Status Values
 
-| Object | Statuses |
-| --- | --- |
-| User | Active, Inactive, Suspended, Guest, PendingClaim. |
+| Object               | Statuses                                                                                                                |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| User                 | Active, Inactive, Suspended, Guest, PendingClaim.                                                                       |
 | Artisan verification | Draft, Submitted, FieldCheckPending, FieldCheckComplete, LgaReview, Approved, Returned, Rejected, Escalated, Suspended. |
-| Field visit | Scheduled, InProgress, Completed, Failed, NeedsRevisit, Cancelled. |
-| Service | Draft, Active, Hidden, Suspended, Archived. |
-| Availability | Online, Busy, Offline, Vacation. |
-| Booking | Requested, Accepted, Rejected, Cancelled, InProgress, Finished, CustomerConfirmed, Paid, Disputed, Settled, Reviewed. |
-| Payment | Pending, Processing, Successful, Failed, Refunded, PartiallyRefunded, Reversed. |
-| Wallet ledger | BookingCredit, CommissionDebit, FeeDebit, PayoutDebit, RefundDebit, AdjustmentCredit, AdjustmentDebit. |
-| Payout | Pending, InReview, Approved, Processing, Paid, Failed, Retrying, Cancelled, Adjusted. |
-| Subscription | Trial, Active, GracePeriod, Expired, Cancelled, Suspended. |
-| Dispute | Open, AwaitingEvidence, UnderLgaReview, EscalatedToState, Resolved, Reopened, Closed. |
+| Field visit          | Scheduled, InProgress, Completed, Failed, NeedsRevisit, Cancelled.                                                      |
+| Service              | Draft, Active, Hidden, Suspended, Archived.                                                                             |
+| Availability         | Online, Busy, Offline, Vacation.                                                                                        |
+| Booking              | Requested, Accepted, Rejected, Cancelled, InProgress, Finished, CustomerConfirmed, Paid, Disputed, Settled, Reviewed.   |
+| Payment              | Pending, Processing, Successful, Failed, Refunded, PartiallyRefunded, Reversed.                                         |
+| Wallet ledger        | BookingCredit, CommissionDebit, FeeDebit, PayoutDebit, RefundDebit, AdjustmentCredit, AdjustmentDebit.                  |
+| Payout               | Pending, InReview, Approved, Processing, Paid, Failed, Retrying, Cancelled, Adjusted.                                   |
+| Subscription         | Trial, Active, GracePeriod, Expired, Cancelled, Suspended.                                                              |
+| Dispute              | Open, AwaitingEvidence, UnderLgaReview, EscalatedToState, Resolved, Reopened, Closed.                                   |
 
 Use PHP backed enums with TitleCase keys for statuses and role names.
 
@@ -296,46 +296,46 @@ Use PHP backed enums with TitleCase keys for statuses and role names.
 
 ### 9.1 Customer Inertia Routes
 
-| Method | Route | Purpose |
-| --- | --- | --- |
-| GET | `/` | Marketplace home, category discovery, location search. |
-| GET | `/services` | Search and filtered discovery. |
-| GET | `/artisans/{artisan}` | Public artisan profile. |
-| POST | `/bookings` | Create guest or registered booking request. |
-| GET | `/bookings/{booking}` | Secure booking tracker. |
-| POST | `/bookings/{booking}/pay` | Start checkout. |
-| POST | `/bookings/{booking}/confirm` | Confirm completion. |
-| POST | `/bookings/{booking}/reviews` | Submit verified review. |
+| Method | Route                         | Purpose                                                |
+| ------ | ----------------------------- | ------------------------------------------------------ |
+| GET    | `/`                           | Marketplace home, category discovery, location search. |
+| GET    | `/services`                   | Search and filtered discovery.                         |
+| GET    | `/artisans/{artisan}`         | Public artisan profile.                                |
+| POST   | `/bookings`                   | Create guest or registered booking request.            |
+| GET    | `/bookings/{booking}`         | Secure booking tracker.                                |
+| POST   | `/bookings/{booking}/pay`     | Start checkout.                                        |
+| POST   | `/bookings/{booking}/confirm` | Confirm completion.                                    |
+| POST   | `/bookings/{booking}/reviews` | Submit verified review.                                |
 
 ### 9.2 Artisan Routes
 
-| Method | Route | Purpose |
-| --- | --- | --- |
-| GET | `/artisan` | Artisan dashboard. |
-| GET/PATCH | `/artisan/profile` | Business profile. |
-| GET/POST | `/artisan/kyc` | KYC submission and corrections. |
-| CRUD | `/artisan/services` | Catalog management. |
-| PATCH | `/artisan/bookings/{booking}` | Accept, reject, update progress. |
-| GET | `/artisan/wallet` | Ledger and payout history. |
-| POST | `/artisan/payouts` | Request payout. |
-| GET/POST | `/artisan/subscription` | Plan selection and renewal. |
+| Method    | Route                         | Purpose                          |
+| --------- | ----------------------------- | -------------------------------- |
+| GET       | `/artisan`                    | Artisan dashboard.               |
+| GET/PATCH | `/artisan/profile`            | Business profile.                |
+| GET/POST  | `/artisan/kyc`                | KYC submission and corrections.  |
+| CRUD      | `/artisan/services`           | Catalog management.              |
+| PATCH     | `/artisan/bookings/{booking}` | Accept, reject, update progress. |
+| GET       | `/artisan/wallet`             | Ledger and payout history.       |
+| POST      | `/artisan/payouts`            | Request payout.                  |
+| GET/POST  | `/artisan/subscription`       | Plan selection and renewal.      |
 
 ### 9.3 Operational Panels
 
-| Panel | Route prefix | Main modules |
-| --- | --- | --- |
-| Super Admin | `/admin` | Settings, roles, states, LGAs, categories, plans, finance, risk, reports. |
-| State Coordinator | `/state` | State dashboard, LGA admins, escalated KYC, disputes, state reporting. |
-| LGA Admin | `/lga` | Area agents, local KYC queue, visits, disputes, support, LGA metrics. |
-| Area Agent | `/agent` | Assigned territories, assisted registrations, visits, support tasks, evidence capture. |
+| Panel             | Route prefix | Main modules                                                                           |
+| ----------------- | ------------ | -------------------------------------------------------------------------------------- |
+| Super Admin       | `/admin`     | Settings, roles, states, LGAs, categories, plans, finance, risk, reports.              |
+| State Coordinator | `/state`     | State dashboard, LGA admins, escalated KYC, disputes, state reporting.                 |
+| LGA Admin         | `/lga`       | Area agents, local KYC queue, visits, disputes, support, LGA metrics.                  |
+| Area Agent        | `/agent`     | Assigned territories, assisted registrations, visits, support tasks, evidence capture. |
 
 ### 9.4 Webhooks
 
-| Method | Route | Source | Rules |
-| --- | --- | --- | --- |
-| POST | `/webhooks/paystack` | Paystack | Verify signature, store raw event, idempotently process reference. |
-| POST | `/webhooks/flutterwave` | Flutterwave | Verify signature, store raw event, idempotently process reference. |
-| POST | `/webhooks/whatsapp` | WhatsApp provider | Verify signature, parse delivery and inbound messages. |
+| Method | Route                   | Source            | Rules                                                              |
+| ------ | ----------------------- | ----------------- | ------------------------------------------------------------------ |
+| POST   | `/webhooks/paystack`    | Paystack          | Verify signature, store raw event, idempotently process reference. |
+| POST   | `/webhooks/flutterwave` | Flutterwave       | Verify signature, store raw event, idempotently process reference. |
+| POST   | `/webhooks/whatsapp`    | WhatsApp provider | Verify signature, parse delivery and inbound messages.             |
 
 Webhook handlers must be idempotent. Store provider event IDs and ignore duplicates after confirming the event was already processed.
 
@@ -343,26 +343,26 @@ Webhook handlers must be idempotent. Store provider event IDs and ignore duplica
 
 Use private disks for sensitive identity, address, finance, and dispute media.
 
-| Model | Collection | Visibility |
-| --- | --- | --- |
-| ArtisanProfile | `portfolio` | Public after moderation. |
-| KycSubmission | `government_id`, `self_portrait`, `address_evidence`, `business_registration` | Private. |
-| FieldVisit | `visit_photos`, `shop_photos`, `checklist_evidence` | Private operations. |
-| Booking | `customer_job_photos`, `artisan_completion_photos` | Scoped to booking parties and operations. |
-| Dispute | `evidence` | Private operations and involved parties. |
-| Review | `proof_of_work` | Public only after moderation rules pass. |
+| Model          | Collection                                                                    | Visibility                                |
+| -------------- | ----------------------------------------------------------------------------- | ----------------------------------------- |
+| ArtisanProfile | `portfolio`                                                                   | Public after moderation.                  |
+| KycSubmission  | `government_id`, `self_portrait`, `address_evidence`, `business_registration` | Private.                                  |
+| FieldVisit     | `visit_photos`, `shop_photos`, `checklist_evidence`                           | Private operations.                       |
+| Booking        | `customer_job_photos`, `artisan_completion_photos`                            | Scoped to booking parties and operations. |
+| Dispute        | `evidence`                                                                    | Private operations and involved parties.  |
+| Review         | `proof_of_work`                                                               | Public only after moderation rules pass.  |
 
 ## 11. PDF Documents
 
 Create a `DocumentRenderer` service that wraps Spatie Laravel PDF.
 
-| Document | Trigger | Storage |
-| --- | --- | --- |
-| Customer receipt | Successful payment | Public signed URL or customer account. |
-| Artisan payout statement | Paid payout or monthly export | Private artisan account. |
-| Verification report | KYC approval, rejection, escalation | Private operations. |
-| Dispute pack | Escalation or legal/support export | Private operations. |
-| Invoice | Subscription payment | Artisan account and finance archive. |
+| Document                 | Trigger                             | Storage                                |
+| ------------------------ | ----------------------------------- | -------------------------------------- |
+| Customer receipt         | Successful payment                  | Public signed URL or customer account. |
+| Artisan payout statement | Paid payout or monthly export       | Private artisan account.               |
+| Verification report      | KYC approval, rejection, escalation | Private operations.                    |
+| Dispute pack             | Escalation or legal/support export  | Private operations.                    |
+| Invoice                  | Subscription payment                | Artisan account and finance archive.   |
 
 Default driver: Browsershot. Keep driver configuration centralized so Gotenberg or Cloudflare can replace it without changing controllers.
 
@@ -380,44 +380,44 @@ Default driver: Browsershot. Keep driver configuration centralized so Gotenberg 
 
 ## 13. Notifications
 
-| Event | Channels |
-| --- | --- |
-| OTP and account claim | SMS, WhatsApp. |
-| KYC submitted/returned/approved/rejected | In-app, SMS, WhatsApp, email when present. |
-| Booking requested/accepted/rejected/started/finished | In-app, SMS/WhatsApp, email where useful. |
-| Payment successful/failed/refunded | In-app, email, SMS/WhatsApp. |
-| Subscription renewal/grace/expiry | In-app, SMS/WhatsApp, email. |
-| Payout paid/failed/retrying | In-app, email, SMS/WhatsApp. |
-| Dispute opened/escalated/resolved | In-app, email, operations dashboard. |
+| Event                                                | Channels                                   |
+| ---------------------------------------------------- | ------------------------------------------ |
+| OTP and account claim                                | SMS, WhatsApp.                             |
+| KYC submitted/returned/approved/rejected             | In-app, SMS, WhatsApp, email when present. |
+| Booking requested/accepted/rejected/started/finished | In-app, SMS/WhatsApp, email where useful.  |
+| Payment successful/failed/refunded                   | In-app, email, SMS/WhatsApp.               |
+| Subscription renewal/grace/expiry                    | In-app, SMS/WhatsApp, email.               |
+| Payout paid/failed/retrying                          | In-app, email, SMS/WhatsApp.               |
+| Dispute opened/escalated/resolved                    | In-app, email, operations dashboard.       |
 
 Notifications should be queued. Provider failures should be logged and retried where the channel supports it.
 
 ## 14. Queues And Scheduled Jobs
 
-| Job/Command | Frequency/Trigger |
-| --- | --- |
-| VerifyPayment | Payment initialization and webhook fallback. |
-| ProcessProviderWebhook | Webhook receipt. |
-| ExpireSubscriptions | Daily. |
-| SendSubscriptionReminders | Daily, looking ahead by configured windows. |
-| ReleaseWalletBalances | Completion and escrow policy trigger. |
-| ProcessPayout | Manual approval or payout schedule. |
-| RetryFailedPayouts | Scheduled. |
-| GeneratePdfDocument | Queueable document request. |
-| SendTransactionalNotification | Event trigger. |
-| RecalculateArtisanTrustScore | Booking, review, dispute, and completion events. |
+| Job/Command                   | Frequency/Trigger                                |
+| ----------------------------- | ------------------------------------------------ |
+| VerifyPayment                 | Payment initialization and webhook fallback.     |
+| ProcessProviderWebhook        | Webhook receipt.                                 |
+| ExpireSubscriptions           | Daily.                                           |
+| SendSubscriptionReminders     | Daily, looking ahead by configured windows.      |
+| ReleaseWalletBalances         | Completion and escrow policy trigger.            |
+| ProcessPayout                 | Manual approval or payout schedule.              |
+| RetryFailedPayouts            | Scheduled.                                       |
+| GeneratePdfDocument           | Queueable document request.                      |
+| SendTransactionalNotification | Event trigger.                                   |
+| RecalculateArtisanTrustScore  | Booking, review, dispute, and completion events. |
 
 Use `withoutOverlapping()` and `onOneServer()` for scheduled commands in production.
 
 ## 15. Reporting And Dashboards
 
-| Role | Metrics |
-| --- | --- |
-| Super Admin | National revenue, commissions, subscriptions, payouts, disputes, KYC risk, user growth, provider health. |
-| State Coordinator | State growth, LGA performance, escalated KYC, disputes, campaigns, revenue, artisan/customer activity. |
-| LGA Admin | Agent activity, onboarding funnel, verification queues, field visits, local disputes, subscriptions, support tasks. |
-| Area Agent | Assigned artisans, pending visits, failed checks, support notes, assisted conversion, local campaign progress. |
-| Artisan | Bookings, earnings, subscription, reviews, payout history, service performance. |
+| Role              | Metrics                                                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Super Admin       | National revenue, commissions, subscriptions, payouts, disputes, KYC risk, user growth, provider health.            |
+| State Coordinator | State growth, LGA performance, escalated KYC, disputes, campaigns, revenue, artisan/customer activity.              |
+| LGA Admin         | Agent activity, onboarding funnel, verification queues, field visits, local disputes, subscriptions, support tasks. |
+| Area Agent        | Assigned artisans, pending visits, failed checks, support notes, assisted conversion, local campaign progress.      |
+| Artisan           | Bookings, earnings, subscription, reviews, payout history, service performance.                                     |
 
 Reports should use scoped queries and snapshot fields where historical geography matters.
 
@@ -425,31 +425,30 @@ Reports should use scoped queries and snapshot fields where historical geography
 
 The Lartisan UI uses Leadprenuer-inspired colors with an operational marketplace tone.
 
-| Token | Value | Usage |
-| --- | --- | --- |
-| Primary | `#001c72` | Navigation, primary buttons, trust-heavy surfaces. |
-| Accent | `#61ce70` | Verified, success, progress, positive status. |
-| Secondary | `#6c757d` | Secondary actions, neutral labels, operational metadata. |
-| Text | `#1d1d1d` | Primary text. |
-| Warning | `#f59e0b` | Pending verification, payout review, retry states. |
-| Risk | `#dc2626` | Failed, rejected, destructive, dispute-critical states. |
+| Token     | Value     | Usage                                                                              |
+| --------- | --------- | ---------------------------------------------------------------------------------- |
+| Primary   | `#001c72` | Navigation, primary buttons, trust-heavy surfaces.                                 |
+| Secondary | `#f59e0b` | Secondary actions, attention states, pending verification, payout review, retries. |
+| Tertiary  | `#6c757d` | Tertiary actions, neutral labels, operational metadata.                            |
+| Text      | `#1d1d1d` | Primary text.                                                                      |
+| Risk      | `#dc2626` | Failed, rejected, destructive, dispute-critical states.                            |
 
 Use dense operational layouts for dashboards. Customer discovery can be more editorial, but booking, verification, support, and finance screens must remain structured and scannable.
 
 ## 17. Testing Strategy
 
-| Area | Tests |
-| --- | --- |
-| Models | Relationships, casts, scopes, status helpers, factories. |
-| Policies | Role and geography scoped access. |
-| Form requests | Validation, authorization, conditional rules. |
-| Actions | Booking, KYC, wallet, payout, dispute, subscription workflows. |
-| Notifications | Channels and payloads. |
-| Webhooks | Signature validation, idempotency, event handling. |
-| Inertia | Page render, auth redirects, prop contracts. |
-| Filament | Resource visibility, table filters, actions, form validation. |
-| PDF | Fake renderer assertions for document requests. |
-| Coverage | Current app code must stay at 100 percent line coverage. |
+| Area          | Tests                                                          |
+| ------------- | -------------------------------------------------------------- |
+| Models        | Relationships, casts, scopes, status helpers, factories.       |
+| Policies      | Role and geography scoped access.                              |
+| Form requests | Validation, authorization, conditional rules.                  |
+| Actions       | Booking, KYC, wallet, payout, dispute, subscription workflows. |
+| Notifications | Channels and payloads.                                         |
+| Webhooks      | Signature validation, idempotency, event handling.             |
+| Inertia       | Page render, auth redirects, prop contracts.                   |
+| Filament      | Resource visibility, table filters, actions, form validation.  |
+| PDF           | Fake renderer assertions for document requests.                |
+| Coverage      | Current app code must stay at 100 percent line coverage.       |
 
 Current CI gate should run:
 
@@ -479,11 +478,11 @@ The MVP is ready when it demonstrates the complete trust loop:
 
 ## 19. Open Implementation Decisions
 
-| Decision | Recommended default |
-| --- | --- |
-| Payment timing | Collect payment before work starts for escrow-like trust, release after confirmation or policy timeout. |
-| Area definition | Start with configurable territory types: ward, community, market, estate, cluster. |
-| Agent compensation | Support fixed pay and commission metadata, but defer payout automation until finance policy is final. |
-| PDF driver | Start with Browsershot; keep a driver abstraction for Gotenberg or Cloudflare. |
-| Media storage | Use local private disk in development and S3-compatible private storage in production. |
-| Guest conversion | Create guest user records with phone OTP and upgrade the same record when a password is later added. |
+| Decision           | Recommended default                                                                                     |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| Payment timing     | Collect payment before work starts for escrow-like trust, release after confirmation or policy timeout. |
+| Area definition    | Start with configurable territory types: ward, community, market, estate, cluster.                      |
+| Agent compensation | Support fixed pay and commission metadata, but defer payout automation until finance policy is final.   |
+| PDF driver         | Start with Browsershot; keep a driver abstraction for Gotenberg or Cloudflare.                          |
+| Media storage      | Use local private disk in development and S3-compatible private storage in production.                  |
+| Guest conversion   | Create guest user records with phone OTP and upgrade the same record when a password is later added.    |

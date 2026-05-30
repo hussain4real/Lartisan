@@ -24,7 +24,9 @@ trait GeneratesUniqueTeamSlugs
             $query->where('id', '!=', $excludeId);
         }
 
-        $existingSlugs = $query->pluck('slug');
+        $existingSlugs = $query->pluck('slug')
+            ->filter(fn (mixed $slug): bool => is_string($slug))
+            ->values();
 
         $maxSuffix = $existingSlugs
             ->map(function (string $slug) use ($defaultSlug): ?int {

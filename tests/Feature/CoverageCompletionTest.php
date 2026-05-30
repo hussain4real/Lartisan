@@ -1,8 +1,22 @@
 <?php
 
+use App\Actions\Teams\CreateTeam;
 use App\Enums\TeamPermission;
 use App\Enums\TeamRole;
+use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Settings\SecurityController;
+use App\Http\Controllers\Teams\TeamController;
+use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Middleware\EnsureTeamMembership;
+use App\Http\Requests\Settings\PasswordUpdateRequest;
+use App\Http\Requests\Settings\ProfileDeleteRequest;
+use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Http\Requests\Settings\TwoFactorAuthenticationRequest;
+use App\Http\Requests\Teams\AcceptTeamInvitationRequest;
+use App\Http\Requests\Teams\CreateTeamInvitationRequest;
+use App\Http\Requests\Teams\DeleteTeamRequest;
+use App\Http\Requests\Teams\SaveTeamRequest;
+use App\Http\Responses\Concerns\RedirectsToCurrentTeam;
 use App\Http\Responses\LoginResponse;
 use App\Models\Membership;
 use App\Models\Team;
@@ -12,7 +26,10 @@ use App\Notifications\Teams\TeamInvitation as TeamInvitationNotification;
 use App\Policies\TeamPolicy;
 use App\Providers\AppServiceProvider;
 use App\Rules\TeamName;
+use App\Rules\UniqueTeamInvitation;
 use App\Rules\ValidTeamInvitation;
+use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
@@ -23,6 +40,7 @@ use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
 use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 function jsonFortifyRequest(): Request
 {
@@ -44,6 +62,24 @@ function validationFailuresFor(object $rule, mixed $value): array
     });
 
     return $messages;
+}
+
+/**
+ * @template TFormRequest of FormRequest
+ *
+ * @param  class-string<TFormRequest>  $formRequest
+ * @param  array<string, mixed>  $parameters
+ * @return TFormRequest
+ */
+function coverageFormRequest(string $formRequest, string $uri = '/', string $method = 'GET', array $parameters = []): FormRequest
+{
+    /** @var TFormRequest $request */
+    $request = $formRequest::create($uri, $method, $parameters);
+    $request->setContainer(app());
+    $request->setRedirector(app('redirect'));
+    $request->setLaravelSession(app('session.store'));
+
+    return $request;
 }
 
 test('team slugs ignore non numeric suffixes when finding the next suffix', function () {
@@ -250,6 +286,96 @@ test('fortify rate limiters use session credential and fallback keys', function 
     expect(RateLimiter::limiter('passkeys')($passkeyRequest)->key)->toContain('credential-123|');
     expect(RateLimiter::limiter('passkeys')($fallbackPasskeyRequest)->key)
         ->toContain($fallbackPasskeyRequest->session()->getId().'|');
+});
+
+test('defensive controller branches reject requests without resolved users', function () {
+    $team = Team::factory()->create();
+    $owner = User::factory()->create();
+    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+
+    $invitation = TeamInvitation::factory()->create([
+        'team_id' => $team->id,
+        'invited_by' => $owner->id,
+    ]);
+
+    $this->actingAs($owner);
+
+    $callbacks = [
+        fn () => app(ProfileController::class)->update(coverageFormRequest(ProfileUpdateRequest::class)),
+        fn () => app(ProfileController::class)->destroy(coverageFormRequest(ProfileDeleteRequest::class)),
+        fn () => app(SecurityController::class)->edit(coverageFormRequest(TwoFactorAuthenticationRequest::class)),
+        fn () => app(SecurityController::class)->update(coverageFormRequest(PasswordUpdateRequest::class)),
+        fn () => app(TeamController::class)->index(Request::create('/teams', 'GET')),
+        fn () => app(TeamController::class)->store(coverageFormRequest(SaveTeamRequest::class), app(CreateTeam::class)),
+        fn () => app(TeamController::class)->edit(Request::create("/{$team->slug}/teams/{$team->slug}", 'GET'), $team),
+        fn () => app(TeamController::class)->switch(Request::create("/teams/{$team->slug}/switch", 'POST'), $team),
+        fn () => app(TeamController::class)->destroy(coverageFormRequest(DeleteTeamRequest::class), $team),
+        fn () => app(TeamInvitationController::class)->store(coverageFormRequest(CreateTeamInvitationRequest::class), $team),
+        fn () => app(TeamInvitationController::class)->accept(coverageFormRequest(AcceptTeamInvitationRequest::class), $invitation),
+    ];
+
+    foreach ($callbacks as $callback) {
+        expect($callback)->toThrow(HttpException::class);
+    }
+});
+
+test('team member payload ignores unexpected pivot instances', function () {
+    $controller = new class extends TeamController
+    {
+        /**
+         * @return array{id: int, name: string, email: string, avatar: string|null, role: string, role_label: string}|null
+         */
+        public function payloadFor(User $member): ?array
+        {
+            return $this->memberPayload($member);
+        }
+    };
+
+    $member = User::factory()->make();
+    $member->setRelation('pivot', new Pivot);
+
+    expect($controller->payloadFor($member))->toBeNull();
+});
+
+test('team invitation request guards invalid route bindings and keeps parent data', function () {
+    $acceptRequest = coverageFormRequest(AcceptTeamInvitationRequest::class, parameters: [
+        'source' => 'email',
+    ]);
+
+    expect($acceptRequest->validationData())->toMatchArray([
+        'source' => 'email',
+        'invitation' => null,
+    ]);
+
+    $createRequest = coverageFormRequest(CreateTeamInvitationRequest::class);
+    $route = new Illuminate\Routing\Route(['POST'], '/teams/{team}/invitations', []);
+    $route->bind($createRequest);
+    $route->setParameter('team', 'missing-team');
+    $createRequest->setRouteResolver(fn () => $route);
+
+    expect(fn () => $createRequest->rules())->toThrow(NotFoundHttpException::class);
+});
+
+test('current team redirect rejects requests without a resolved user', function () {
+    $redirector = new class
+    {
+        use RedirectsToCurrentTeam;
+
+        public function pathFor(Request $request): string
+        {
+            return $this->redirectPathForCurrentTeam($request, '/dashboard');
+        }
+    };
+
+    expect(fn () => $redirector->pathFor(Request::create('/login', 'POST')))
+        ->toThrow(HttpException::class);
+});
+
+test('team validation rules reject non string values', function () {
+    $team = Team::factory()->create();
+
+    expect(validationFailuresFor(new TeamName, ['settings']))->toHaveCount(1);
+    expect(validationFailuresFor(new UniqueTeamInvitation($team), ['owner@example.com']))->toHaveCount(1);
 });
 
 test('app service provider configures production password defaults', function () {

@@ -20,37 +20,36 @@ The design language should communicate:
 
 The base palette is derived from Leadprenuer colors found on `leadprenuer.com.ng`.
 
-| Token | Hex | Usage |
-| --- | --- | --- |
-| Leadprenuer Blue | `#001c72` | Primary actions, navigation, key dashboard anchors, trust-heavy headers. |
-| Growth Green | `#61ce70` | Verified states, successful payments, completed KYC, healthy metrics. |
-| Operational Gray | `#6c757d` | Secondary buttons, muted labels, helper text, metadata. |
-| Ink | `#1d1d1d` | Primary text and dense operational data. |
-| Field Amber | `#f59e0b` | Pending KYC, payout review, retries, caution states. |
-| Risk Red | `#dc2626` | Failed payments, rejected KYC, suspensions, destructive actions. |
-| Surface | `#f8fafc` | App background and quiet work surfaces. |
-| Border | `#d8dee8` | Dividers, cards, tables, input boundaries. |
+| Token            | Hex       | Usage                                                                                  |
+| ---------------- | --------- | -------------------------------------------------------------------------------------- |
+| Leadprenuer Blue | `#001c72` | Primary actions, navigation, key dashboard anchors, trust-heavy headers.               |
+| Lartisan Orange  | `#f59e0b` | Secondary actions, pending KYC, payout review, retries, attention states.              |
+| Operational Gray | `#6c757d` | Tertiary actions, muted labels, helper text, metadata.                                 |
+| Ink              | `#1d1d1d` | Tertiary text emphasis and dense operational data.                                     |
+| Risk Red         | `#dc2626` | Tertiary risk states: failed payments, rejected KYC, suspensions, destructive actions. |
+| Surface          | `#f8fafc` | Tertiary app background and quiet work surfaces.                                       |
+| Border           | `#d8dee8` | Tertiary dividers, cards, tables, input boundaries.                                    |
 
 ### Usage Rules
 
 - Use blue for primary commitments: create booking, approve profile, save policy, process payout.
-- Use green only when the state is genuinely successful or verified.
-- Use amber for waiting, review, retry, or needs-attention states.
+- Use orange for secondary actions and states that need attention: assign agent, review payout, pending KYC, retry upload.
 - Use red only for destructive, failed, rejected, or high-risk states.
-- Avoid pages dominated by blue. Pair blue with white, green, gray, amber, and restrained red.
-- Keep dark mode readable: green becomes the primary action color on very dark blue backgrounds.
+- Treat gray, ink, red, surface, and border as tertiary/support colors.
+- Avoid pages dominated by blue. Pair blue with white, orange, gray, and restrained red.
+- Keep dark mode readable: blue remains primary, while orange remains secondary for attention and review states.
 
 ## 3. Typography
 
 Use Instrument Sans as the application font. It is already configured in the app and works well for both product pages and operational dashboards.
 
-| Style | Usage |
-| --- | --- |
-| Page title | Main screen identity, one per page. |
-| Section heading | Form sections, dashboard groups, admin modules. |
-| Body text | Descriptions, instructions, support copy. |
-| Label | Inputs, filters, table metadata. |
-| Code/ID | References, transaction IDs, payout references, webhook IDs. |
+| Style           | Usage                                                        |
+| --------------- | ------------------------------------------------------------ |
+| Page title      | Main screen identity, one per page.                          |
+| Section heading | Form sections, dashboard groups, admin modules.              |
+| Body text       | Descriptions, instructions, support copy.                    |
+| Label           | Inputs, filters, table metadata.                             |
+| Code/ID         | References, transaction IDs, payout references, webhook IDs. |
 
 Guidelines:
 
@@ -97,11 +96,11 @@ Field-agent workflows must work cleanly on mobile:
 
 ### Buttons
 
-| Button | Usage |
-| --- | --- |
-| Primary | Main action on a screen or modal. |
-| Secondary | Useful but lower-priority action. |
-| Outline | Navigation, evidence viewing, non-committal actions. |
+| Button      | Usage                                                       |
+| ----------- | ----------------------------------------------------------- |
+| Primary     | Main action on a screen or modal.                           |
+| Secondary   | Useful but lower-priority action.                           |
+| Outline     | Navigation, evidence viewing, non-committal actions.        |
 | Destructive | Suspend, delete, reject, cancel payout, close with penalty. |
 
 Use icons for recognizable tools and status actions when available through `lucide-vue-next`.
@@ -110,13 +109,13 @@ Use icons for recognizable tools and status actions when available through `luci
 
 Badges should represent stable state, not decorative emphasis.
 
-| State | Color |
-| --- | --- |
-| Approved, verified, completed, paid | Green. |
-| Pending, queued, in review | Amber or neutral. |
-| Escalated, needs evidence | Orange/amber. |
-| Rejected, failed, suspended | Red. |
-| Draft, inactive, archived | Gray. |
+| State                               | Color              |
+| ----------------------------------- | ------------------ |
+| Approved, verified, completed, paid | Blue or neutral.   |
+| Pending, queued, in review          | Orange or neutral. |
+| Escalated, needs evidence           | Orange.            |
+| Rejected, failed, suspended         | Red.               |
+| Draft, inactive, archived           | Gray.              |
 
 ### Tables
 
@@ -143,21 +142,21 @@ Forms should:
 
 Use consistent verbs and status names across customer, artisan, and admin views.
 
-| Avoid | Prefer |
-| --- | --- |
-| Done | Completed |
-| OK | Approved |
-| Bad | Rejected |
-| Waiting | Pending |
-| Problem | Escalated |
-| Money sent | Paid |
+| Avoid      | Prefer    |
+| ---------- | --------- |
+| Done       | Completed |
+| OK         | Approved  |
+| Bad        | Rejected  |
+| Waiting    | Pending   |
+| Problem    | Escalated |
+| Money sent | Paid      |
 
 Status labels should match the backend enum vocabulary wherever practical.
 
 ## 7. Accessibility
 
 - Primary blue buttons require white text.
-- Green backgrounds need dark text unless used as a small badge on dark surfaces.
+- Orange backgrounds need ink or very dark blue text unless used as a small badge on dark surfaces.
 - Do not rely on color alone for status; pair with text and icons.
 - Maintain visible focus states through the existing `ring` token.
 - Keep touch targets at least 40px where possible.

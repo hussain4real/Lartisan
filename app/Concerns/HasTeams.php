@@ -122,10 +122,14 @@ trait HasTeams
      */
     public function teamRole(Team $team): ?TeamRole
     {
-        return $this->teamMemberships()
+        $role = $this->teamMemberships()
             ->where('team_id', $team->id)
             ->first()
             ?->role;
+
+        return $role instanceof TeamRole
+            ? $role
+            : TeamRole::tryFrom((string) $role);
     }
 
     /**
@@ -180,10 +184,13 @@ trait HasTeams
 
     public function fallbackTeam(?Team $excluding = null): ?Team
     {
-        return $this->teams()
-            ->when($excluding, fn ($query) => $query->where('teams.id', '!=', $excluding->id))
-            ->orderByRaw('LOWER(teams.name)')
-            ->first();
+        $query = $this->teams();
+
+        if ($excluding instanceof Team) {
+            $query->where('teams.id', '!=', $excluding->id);
+        }
+
+        return $query->orderByRaw('LOWER(teams.name)')->first();
     }
 
     /**

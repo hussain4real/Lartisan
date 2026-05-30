@@ -22,11 +22,21 @@ class AcceptTeamInvitationRequest extends FormRequest
 
     /**
      * Get the validation data from the request.
+     *
+     * @return array<string, mixed>
      */
     public function validationData(): array
     {
-        return array_merge(parent::validationData(), [
-            'invitation' => $this->route('invitation'),
-        ]);
+        $data = [];
+
+        foreach (parent::validationData() as $key => $value) {
+            if (is_string($key)) {
+                $data[$key] = $value;
+            }
+        }
+
+        $data['invitation'] = $this->route('invitation');
+
+        return $data;
     }
 }

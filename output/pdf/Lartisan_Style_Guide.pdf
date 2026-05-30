@@ -1,156 +1,396 @@
 %PDF-1.4
-%“Œ‹ž ReportLab Generated PDF document (opensource)
+%âãÏÓ
 1 0 obj
-<<
-/F1 2 0 R /F2 3 0 R /F3 8 0 R
->>
+<< /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<<
-/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
->>
+<< /Type /Pages /Count 4 /Kids [6 0 R 8 0 R 10 0 R 12 0 R] >>
 endobj
 3 0 obj
-<<
-/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
->>
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
 4 0 obj
-<<
-/Contents 13 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 12 0 R /Resources <<
-/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
->> /Rotate 0 /Trans <<
-
->> 
-  /Type /Page
->>
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
 endobj
 5 0 obj
-<<
-/Contents 14 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 12 0 R /Resources <<
-/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
->> /Rotate 0 /Trans <<
-
->> 
-  /Type /Page
->>
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
 endobj
 6 0 obj
-<<
-/Contents 15 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 12 0 R /Resources <<
-/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
->> /Rotate 0 /Trans <<
-
->> 
-  /Type /Page
->>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 7 0 R >>
 endobj
 7 0 obj
-<<
-/Contents 16 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 12 0 R /Resources <<
-/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
->> /Rotate 0 /Trans <<
-
->> 
-  /Type /Page
->>
+<< /Length 2409 >>
+stream
+q 0.9608 0.6196 0.0431 rg 0.00 819.89 166.68 22.00 re f Q
+q 0.0000 0.1098 0.4471 rg 166.68 819.89 428.60 22.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 34.00 m 539.28 34.00 l S Q
+BT /F1 7.50 Tf 0.4235 0.4588 0.4902 rg 56.00 20.00 Td (Lartisan Style Guide) Tj ET
+BT /F1 7.50 Tf 0.4235 0.4588 0.4902 rg 503.28 20.00 Td (Page 1) Tj ET
+q 0.0000 0.1098 0.4471 rg 56.00 605.89 483.28 146.00 re f Q
+BT /F2 32.00 Tf 1.0000 1.0000 1.0000 rg 74.00 707.89 Td (Lartisan Style Guide) Tj ET
+BT /F1 13.00 Tf 1.0000 0.9529 0.8745 rg 74.00 679.89 Td (Version 1.0 | 29 May 2026) Tj ET
+BT /F1 13.00 Tf 1.0000 0.9529 0.8745 rg 74.00 643.89 Td (Primary is Leadprenuer blue. Secondary is Lartisan orange.) Tj ET
+BT /F1 13.00 Tf 1.0000 0.9529 0.8745 rg 74.00 623.89 Td (All other colors support tertiary, status, and surface roles.) Tj ET
+q 0.9608 0.6196 0.0431 rg 56.00 600.89 483.28 5.00 re f Q
+q 1.0000 0.9569 0.9020 rg 56.00 527.89 483.28 34.00 re f Q
+q 1.0000 0.8431 0.6510 RG 0.70 w 56.00 527.89 483.28 34.00 re S Q
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 66.00 540.89 Td (Palette source: Leadprenuer homepage brand variables.) Tj ET
+BT /F2 20.00 Tf 0.0000 0.1098 0.4471 rg 56.00 485.89 Td (Brand Position) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 458.89 Td (Lartisan should feel trustworthy, local, premium, and operationally competent. The interface must) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 445.39 Td (balance marketplace warmth with dashboard clarity for customers, artisans, field agents, LGA admins,) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 431.89 Td (state coordinators, and finance/support operators.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 408.39 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 408.39 Td (Verified local skill.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 392.89 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 392.89 Td (Clear accountability.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 377.39 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 377.39 Td (Practical field operations.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 361.89 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 361.89 Td (Financial trust.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 346.39 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 346.39 Td (Calm, fast decision-making.) Tj ET
+endstream
 endobj
 8 0 obj
-<<
-/BaseFont /Courier /Encoding /WinAnsiEncoding /Name /F3 /Subtype /Type1 /Type /Font
->>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 9 0 R >>
 endobj
 9 0 obj
-<<
-/Contents 17 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 12 0 R /Resources <<
-/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
->> /Rotate 0 /Trans <<
-
->> 
-  /Type /Page
->>
+<< /Length 9939 >>
+stream
+q 0.9608 0.6196 0.0431 rg 0.00 819.89 166.68 22.00 re f Q
+q 0.0000 0.1098 0.4471 rg 166.68 819.89 428.60 22.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 34.00 m 539.28 34.00 l S Q
+BT /F1 7.50 Tf 0.4235 0.4588 0.4902 rg 56.00 20.00 Td (Lartisan Style Guide) Tj ET
+BT /F1 7.50 Tf 0.4235 0.4588 0.4902 rg 503.28 20.00 Td (Page 2) Tj ET
+BT /F2 20.00 Tf 0.0000 0.1098 0.4471 rg 56.00 781.89 Td (Color System) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 754.89 Td (The base palette is derived from Leadprenuer colors found on leadprenuer.com.ng. Blue is the only) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 741.39 Td (primary color. Orange is the only secondary color. Gray, ink, red, surface, and border are) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 727.89 Td (tertiary/support colors.) Tj ET
+q 0.0000 0.1098 0.4471 rg 56.00 684.39 483.00 24.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 684.39 483.00 24.00 re S Q
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 63.00 693.39 Td (Token) Tj ET
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 191.00 693.39 Td (Hex) Tj ET
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 261.00 693.39 Td (Usage) Tj ET
+q 0.0000 0.1098 0.4471 rg 56.00 648.39 128.00 36.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 648.39 128.00 36.00 re S Q
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 63.00 669.39 Td (Leadprenuer Blue) Tj ET
+q 0.9725 0.9804 0.9882 rg 184.00 648.39 70.00 36.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 184.00 648.39 70.00 36.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 191.00 669.39 Td (#001c72) Tj ET
+q 0.9725 0.9804 0.9882 rg 254.00 648.39 285.00 36.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 254.00 648.39 285.00 36.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 261.00 669.39 Td (Primary actions, navigation, key dashboard anchors, trust-heavy) Tj ET
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 261.00 658.39 Td (headers.) Tj ET
+q 0.9608 0.6196 0.0431 rg 56.00 612.39 128.00 36.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 612.39 128.00 36.00 re S Q
+BT /F2 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 633.39 Td (Lartisan Orange) Tj ET
+q 1.0000 1.0000 1.0000 rg 184.00 612.39 70.00 36.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 184.00 612.39 70.00 36.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 191.00 633.39 Td (#f59e0b) Tj ET
+q 1.0000 1.0000 1.0000 rg 254.00 612.39 285.00 36.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 254.00 612.39 285.00 36.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 261.00 633.39 Td (Secondary actions, pending KYC, payout review, retries, attention) Tj ET
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 261.00 622.39 Td (states.) Tj ET
+q 0.4235 0.4588 0.4902 rg 56.00 587.39 128.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 587.39 128.00 25.00 re S Q
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 63.00 597.39 Td (Operational Gray) Tj ET
+q 0.9725 0.9804 0.9882 rg 184.00 587.39 70.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 184.00 587.39 70.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 191.00 597.39 Td (#6c757d) Tj ET
+q 0.9725 0.9804 0.9882 rg 254.00 587.39 285.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 254.00 587.39 285.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 261.00 597.39 Td (Tertiary actions, muted labels, helper text, metadata.) Tj ET
+q 0.1137 0.1137 0.1137 rg 56.00 562.39 128.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 562.39 128.00 25.00 re S Q
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 63.00 572.39 Td (Ink) Tj ET
+q 1.0000 1.0000 1.0000 rg 184.00 562.39 70.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 184.00 562.39 70.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 191.00 572.39 Td (#1d1d1d) Tj ET
+q 1.0000 1.0000 1.0000 rg 254.00 562.39 285.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 254.00 562.39 285.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 261.00 572.39 Td (Tertiary text emphasis and dense operational data.) Tj ET
+q 0.8627 0.1490 0.1490 rg 56.00 526.39 128.00 36.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 526.39 128.00 36.00 re S Q
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 63.00 547.39 Td (Risk Red) Tj ET
+q 0.9725 0.9804 0.9882 rg 184.00 526.39 70.00 36.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 184.00 526.39 70.00 36.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 191.00 547.39 Td (#dc2626) Tj ET
+q 0.9725 0.9804 0.9882 rg 254.00 526.39 285.00 36.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 254.00 526.39 285.00 36.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 261.00 547.39 Td (Tertiary risk states: failed payments, rejected KYC, suspensions,) Tj ET
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 261.00 536.39 Td (destructive actions.) Tj ET
+q 0.9725 0.9804 0.9882 rg 56.00 501.39 128.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 501.39 128.00 25.00 re S Q
+BT /F2 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 511.39 Td (Surface) Tj ET
+q 1.0000 1.0000 1.0000 rg 184.00 501.39 70.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 184.00 501.39 70.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 191.00 511.39 Td (#f8fafc) Tj ET
+q 1.0000 1.0000 1.0000 rg 254.00 501.39 285.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 254.00 501.39 285.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 261.00 511.39 Td (Tertiary app background and quiet work surfaces.) Tj ET
+q 0.8471 0.8706 0.9098 rg 56.00 476.39 128.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 476.39 128.00 25.00 re S Q
+BT /F2 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 486.39 Td (Border) Tj ET
+q 0.9725 0.9804 0.9882 rg 184.00 476.39 70.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 184.00 476.39 70.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 191.00 486.39 Td (#d8dee8) Tj ET
+q 0.9725 0.9804 0.9882 rg 254.00 476.39 285.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 254.00 476.39 285.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 261.00 486.39 Td (Tertiary dividers, cards, tables, input boundaries.) Tj ET
+BT /F2 13.00 Tf 0.1137 0.1137 0.1137 rg 56.00 462.39 Td (Usage Rules) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 444.84 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 444.84 Td (Use blue for primary commitments: create booking, approve profile, save policy, process payout.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 429.34 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 429.34 Td (Use orange for secondary actions and states that need attention: assign agent, review payout,) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 415.84 Td (pending KYC, retry upload.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 400.34 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 400.34 Td (Use red only for destructive, failed, rejected, or high-risk states.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 384.84 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 384.84 Td (Treat gray, ink, red, surface, and border as tertiary/support colors.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 369.34 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 369.34 Td (Avoid pages dominated by blue. Pair blue with white, orange, gray, and restrained red.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 353.84 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 353.84 Td (Keep dark mode readable: blue remains primary, while orange remains secondary for attention and) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 340.34 Td (review states.) Tj ET
+BT /F2 20.00 Tf 0.0000 0.1098 0.4471 rg 56.00 312.84 Td (Typography) Tj ET
+q 0.0000 0.1098 0.4471 rg 56.00 265.84 483.00 24.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 265.84 483.00 24.00 re S Q
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 63.00 274.84 Td (Style) Tj ET
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 208.00 274.84 Td (Usage) Tj ET
+q 0.9725 0.9804 0.9882 rg 56.00 240.84 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 240.84 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 250.84 Td (Page title) Tj ET
+q 0.9725 0.9804 0.9882 rg 201.00 240.84 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 240.84 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 250.84 Td (Main screen identity, one per page.) Tj ET
+q 1.0000 1.0000 1.0000 rg 56.00 215.84 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 215.84 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 225.84 Td (Section heading) Tj ET
+q 1.0000 1.0000 1.0000 rg 201.00 215.84 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 215.84 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 225.84 Td (Form sections, dashboard groups, admin modules.) Tj ET
+q 0.9725 0.9804 0.9882 rg 56.00 190.84 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 190.84 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 200.84 Td (Body text) Tj ET
+q 0.9725 0.9804 0.9882 rg 201.00 190.84 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 190.84 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 200.84 Td (Descriptions, instructions, support copy.) Tj ET
+q 1.0000 1.0000 1.0000 rg 56.00 165.84 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 165.84 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 175.84 Td (Label) Tj ET
+q 1.0000 1.0000 1.0000 rg 201.00 165.84 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 165.84 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 175.84 Td (Inputs, filters, table metadata.) Tj ET
+q 0.9725 0.9804 0.9882 rg 56.00 140.84 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 140.84 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 150.84 Td (Code / ID) Tj ET
+q 0.9725 0.9804 0.9882 rg 201.00 140.84 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 140.84 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 150.84 Td (References, transaction IDs, payout references, webhook IDs.) Tj ET
+endstream
 endobj
 10 0 obj
-<<
-/PageMode /UseNone /Pages 12 0 R /Type /Catalog
->>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 11 0 R >>
 endobj
 11 0 obj
-<<
-/Author (Lartisan) /CreationDate (D:20260529141149+03'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20260529141149+03'00') /Producer (ReportLab PDF Library - \(opensource\)) 
-  /Subject (\(unspecified\)) /Title (Lartisan Style Guide) /Trapped /False
->>
+<< /Length 7291 >>
+stream
+q 0.9608 0.6196 0.0431 rg 0.00 819.89 166.68 22.00 re f Q
+q 0.0000 0.1098 0.4471 rg 166.68 819.89 428.60 22.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 34.00 m 539.28 34.00 l S Q
+BT /F1 7.50 Tf 0.4235 0.4588 0.4902 rg 56.00 20.00 Td (Lartisan Style Guide) Tj ET
+BT /F1 7.50 Tf 0.4235 0.4588 0.4902 rg 503.28 20.00 Td (Page 3) Tj ET
+BT /F2 20.00 Tf 0.0000 0.1098 0.4471 rg 56.00 781.89 Td (Layout Principles) Tj ET
+BT /F2 13.00 Tf 0.1137 0.1137 0.1137 rg 56.00 752.89 Td (Customer Surfaces) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 735.34 Td (Customer discovery may be more visual and inviting. It should still show verified artisans, location) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 721.84 Td (match, rating, completed jobs, starting price, availability, and a clear next action.) Tj ET
+BT /F2 13.00 Tf 0.1137 0.1137 0.1137 rg 56.00 696.34 Td (Operations Surfaces) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 678.79 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 678.79 Td (Tables for queues and finance records.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 663.29 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 663.29 Td (Filters for state, LGA, area, status, owner, and date.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 647.79 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 647.79 Td (Cards only for summary metrics or repeated records.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 632.29 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 632.29 Td (No nested cards.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 616.79 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 616.79 Td (Keep page sections unframed unless the user is acting inside a specific tool or list item.) Tj ET
+BT /F2 13.00 Tf 0.1137 0.1137 0.1137 rg 56.00 593.29 Td (Mobile) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 575.74 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 575.74 Td (Large touch targets.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 560.24 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 560.24 Td (Single-column forms.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 544.74 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 544.74 Td (Persistent action area for save or submit where useful.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 529.24 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 529.24 Td (Upload progress and retry states.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 513.74 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 513.74 Td (Clear offline or failed-upload messaging.) Tj ET
+BT /F2 20.00 Tf 0.0000 0.1098 0.4471 rg 56.00 486.24 Td (Components) Tj ET
+BT /F2 13.00 Tf 0.1137 0.1137 0.1137 rg 56.00 457.24 Td (Buttons) Tj ET
+q 0.0000 0.1098 0.4471 rg 56.00 419.69 483.00 24.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 419.69 483.00 24.00 re S Q
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 63.00 428.69 Td (Button) Tj ET
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 208.00 428.69 Td (Usage) Tj ET
+q 0.9725 0.9804 0.9882 rg 56.00 394.69 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 394.69 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 404.69 Td (Primary) Tj ET
+q 0.9725 0.9804 0.9882 rg 201.00 394.69 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 394.69 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 404.69 Td (Main action on a screen or modal.) Tj ET
+q 1.0000 1.0000 1.0000 rg 56.00 369.69 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 369.69 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 379.69 Td (Secondary) Tj ET
+q 1.0000 1.0000 1.0000 rg 201.00 369.69 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 369.69 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 379.69 Td (Useful but lower-priority action using orange.) Tj ET
+q 0.9725 0.9804 0.9882 rg 56.00 344.69 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 344.69 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 354.69 Td (Outline) Tj ET
+q 0.9725 0.9804 0.9882 rg 201.00 344.69 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 344.69 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 354.69 Td (Navigation, evidence viewing, non-committal actions.) Tj ET
+q 1.0000 1.0000 1.0000 rg 56.00 319.69 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 319.69 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 329.69 Td (Destructive) Tj ET
+q 1.0000 1.0000 1.0000 rg 201.00 319.69 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 319.69 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 329.69 Td (Suspend, delete, reject, cancel payout, close with penalty.) Tj ET
+BT /F2 13.00 Tf 0.1137 0.1137 0.1137 rg 56.00 305.69 Td (Badges) Tj ET
+q 0.0000 0.1098 0.4471 rg 56.00 268.14 483.00 24.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 268.14 483.00 24.00 re S Q
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 63.00 277.14 Td (State) Tj ET
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 378.00 277.14 Td (Color) Tj ET
+q 0.9725 0.9804 0.9882 rg 56.00 243.14 315.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 243.14 315.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 253.14 Td (Approved / verified / completed / paid) Tj ET
+q 0.9333 0.9529 1.0000 rg 371.00 243.14 168.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 371.00 243.14 168.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 378.00 253.14 Td (Blue or neutral) Tj ET
+q 1.0000 1.0000 1.0000 rg 56.00 218.14 315.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 218.14 315.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 228.14 Td (Pending / queued / in review) Tj ET
+q 1.0000 0.9569 0.9020 rg 371.00 218.14 168.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 371.00 218.14 168.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 378.00 228.14 Td (Orange or neutral) Tj ET
+q 0.9725 0.9804 0.9882 rg 56.00 193.14 315.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 193.14 315.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 203.14 Td (Escalated / needs evidence) Tj ET
+q 1.0000 0.9569 0.9020 rg 371.00 193.14 168.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 371.00 193.14 168.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 378.00 203.14 Td (Orange) Tj ET
+q 1.0000 1.0000 1.0000 rg 56.00 168.14 315.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 168.14 315.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 178.14 Td (Rejected / failed / suspended) Tj ET
+q 0.9961 0.9255 0.9255 rg 371.00 168.14 168.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 371.00 168.14 168.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 378.00 178.14 Td (Red) Tj ET
+q 0.9725 0.9804 0.9882 rg 56.00 143.14 315.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 143.14 315.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 153.14 Td (Draft / inactive / archived) Tj ET
+q 0.9490 0.9569 0.9686 rg 371.00 143.14 168.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 371.00 143.14 168.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 378.00 153.14 Td (Gray) Tj ET
+endstream
 endobj
 12 0 obj
-<<
-/Count 5 /Kids [ 4 0 R 5 0 R 6 0 R 7 0 R 9 0 R ] /Type /Pages
->>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 13 0 R >>
 endobj
 13 0 obj
-<<
-/Filter [ /ASCII85Decode /FlateDecode ] /Length 1321
->>
+<< /Length 5688 >>
 stream
-Gb!#Z9lK&M&A@sB%$4,nLq+cW9&e]N[nVAs"ZBY]G=J<:DY2nN<!!1#nJtN5X>k42!IBP2>7re8RX&fm`IQs7`W*4Epp,L4QOF^deJ_O^;HR5BDl^k7$OVPa=jRjRRc[R?Y]l!@h$PJ8B068>"l[#5J9-n83Qo6R=FXG7UnES*5RNqrBnH>/`Nj.U/B`VeJ*()Hq+-'lU&ZBmkP4WUr<<$g/f>ptA;.h\#"2?#;=OLf<l=[N=B\HfW(i;+Od%5FA+11"o2(sQ9ZDiT#<'#'b/+;oN"lb%%@gcUl]"gpI.t6V_c:V)r<o]U_!48m4nlut(/44qrnl4r"uc(__*1(VRIPmMN+RmlCG7FcYVAI0=tihgZ@M&D2"ZpMa?sAJA/[br'?'dt/B)u3!(or-_W"Ec.&<PmO-^iL(at5Gq6-[N4=Ln!iR?qRk&SPMa-OdlI.2rj,iVsE&Q!:5Xq$8n,3Jnu>A(M_(npF0+L6Kq*H90-=!-F=fi*&LrFabd<I.TD)BOk'n_eT9lNYq2"`J`MYFt=QrmGNX?qLlfZM3'kCPCs-<a4[j!!fO2STF\K4tk<kCTtAX(gDr3CSU2&O@QFnX6Zh4TW6"b43f@[U$OgER9'./7dF*_R)Edj\;MfAC+F9%G2$.ak!s4X6GIuihiEumN:WFR@jE;<.@bWRj7qFMFZnc3IT&ioQLY$lMZtB#aMkt<@'mrYa#4r`)02Sge`oF!Gkjhg9?>.!N$UJ#E-sbp!lHJ?'1%dI1_UK(j)io,,6Y18D5fb9[8ti/lF,:[2@/A%9`M4(c$rR@W7tK;!ah0"W7?^>-TIlcPrZU0Z](/1Vr=Gq7:%,@d-ZcliHkRqdJ+1!VUWm/$jY64[^u36eLnE:B(Tt7!gU4V!@b!afAfT?dEO2gkBlFA"?V2u5gW(dU)mN&"$U#rlq^Ge^J*gV1Rj^tSYVB=ckNsKP;Gn.S.&0VkYm>kb8Y=eLasQDrDbq#f7I^"Nnd2t3@)R,/Y/((+1.IjFdoPSfjAN#&%_=fo=N[]%,u;Y3i!_D2Zm&,=]'=T6g1#A%L!DGD)>F><F:%XHDKA%N[A@<`g,A4[_!An:n<5<U"XU>3O(/Z*H^XKeNmpi4=])..jHo%jYjT=Z5&T];VpkK@bPf,di>j3I0ZCO.@I1)CnsjN):"R'@G(=($472$9-T-2@Gr,ji?\Ye<`Rpr%/+5]F`@)PY,B\XG-;V%jbtPTZcK>X<]6lal@`6JVOliB;aiJ<mZIE*D;N;QIoE>FOma@;bP3i#e>OF,X"R9*4d9;RNT.EJcJosIRda4bCt-.4mnT2VMgkbJ3?SS~>endstream
-endobj
-14 0 obj
-<<
-/Filter [ /ASCII85Decode /FlateDecode ] /Length 2892
->>
-stream
-Gb!;f=``=W&q9SYkc0($:<<bBnXR'6?@0ALXnC>h<p_,"64tML6W-hSn$a5u7)u#i/"A(b\SR**)@_)MkgLL[r8ILU*s6nZ_1t)^>ek.VgghbU^;)sF=+=Hm^pr@6L'c'\*Q.Fj?X>$Lk&QLh/o7aSM[@G05mV'a%X0$sYk[=;9jM8o$"0pp\E4LinVQ#(kdbODSTmTl<rA>C+0H!qX7l(*O7X49Gf&JpopG,Mpc8Upl8$NtcJ`%3cWBee*+mUO]_Z$['N7Z_i[-90k]!-04hWj$i&*VK(L]%VF-jcqL?gKJ0>g+'n6GB+"o"K?:k+8R2jjP196]V48s`cA-2jTD.M*VXh\#%+`"k4'#J[gXbu$ZQ@d%bd^nS5$g^-4GnXr4q8Zt.,:Us.#GYF%"%+F8@gZ+6Ha39i(j*^+t$\&$OOZdoUW-5tmA!J*0=ga+>8jT,-E1&s:PN@PE^J[p0JA3PU1fel&Z!8gKdq"#;-7,b14A;&3jbF$-\q&Td7')a6Q<pJWb%7R0QV,7$c:\L%JOhB1H.32])V6M21kK2#0;PcY=JRtTp:noeR&B0e="5PYaaK*fX)I6W^'%l,D+]N>#e=E.ASGJVo>oUVdm<D"OU25adg.o/]Iukl%q'/j*DID$Yc0pt]O,&f=X\qK;IugM,`)&2WrcDaBae@5%'j+a)jR2FE3f]7#/No/`.p)0V_Li1W.WJe+di7dAsPGLSY0i]PfR^Oe,l2V105s)1a,B2DNX<1<$VYi-!8Ls\Sm.!5bW.3+S.b_dX5=l/54X!<[t0Cih.nZJj>X-jdY:2,q@+=fp]@k`+dnf<PpoDCbYC_lZt2=#c"h?r=h.eE3t@SAT=G0+UkZLguKm#j-9N)9iDCZ;ialNX,j,7GRp?XdjBY!aN$P]D4"7tCook#BFgeP$caM^\4=qoe7?#8MiEM(1@^$(NKJu$S[SDPNF$:Ege(;>B-&?UZq=<L839I3h\jhQb!p$6b,&+,K(JKpQ*k./F8&t[of>Qbo?t&3\'aClX*n:!i1K:]n++?":iXif?,$6g!f_O["%:/9;(s@u(2V^+ljsh6\[G+9UI,5s!)*W86d9)`T>0Cc2oFRf,6kqB.bi!+N6/e*?[KElFKOY.mEq^EX*H2dTWt_bb/E/<Phb]Sdn7"'7DFh'1go=[%DS4XI@flL(#4ur+!@>Ni-e!_2YWJH%$8l8D#`79WD`#sU%VNF:"0J'cl6T\:N;h`5u974\_9EPauo;l$ck;Q*DZt$598X*O.LEC5T3t(Lr4Ef-Q!td&Xbhl+i/P)QMSbB)aZ]NEtoE'*IFLi.Fn056Kh&L$;SG+>3NXP_uCl_T83?KrYV$oJ:>dR4t>1(8eJ!_#Wj)RSO2#<fVM40)Y^j?70.dpk:/]Ws%dStK)`^YPVGC`s/90E<>&,CUb,6)a^Eo0%Fo?JT4hWR.f"*PZDanT.9W%h`GYN$/Cs<dqA$5grP2qPfE5L5_EJM-W*Jd:VPQT!`olWVnllc7Cl/Yi605R1"\-7c?@8dlB7<GU_A^fL5?A`lH("R5f4.mu?-%_L?7)FfrKq/`^&%&+Y#A4R7Xo5@<U(!tXTb5HhAQjt:MCjYYs=Xr4E_7j5UlFik2W_Z%C[L7Qt0UqJAP)SWpql=1,M@>&q_G;F:@bjiU=6S`BNG"Y*3)1L[;Tu5t/LUDmM61]Qe;+R+dsMF>8MajK=]9G:2'LN`?/;*S)mt@@^tRL\6RK(fT\e+?h\N3a;$2l/uYTkJWoWrS.hH]XK\qT:8-;b]X3`F#DT^]S&lRcp`q@DP]:<7e:SdnU#39`"L9-NcoQc-VTMC_AhcAD=O^-?!2s\':q+\IKO=G>i7%L`\1D+<ho'<4MQAeE.+K!;Jg^+$#m]jPNkI@VGD2!KlEP=$g9h_k#=L=dUcGa=dVau@AuE8YMeRN]m3Q(S:Jhh4@L'=Ii%==cj<9i8u'bj:ZsAV-?Y-k?H<5hI^l93Zm2LC$Wg=o9Ts-#]+ocF=/q.&W/S8daX0\\[-sl*#]3LQHlF8iop8Jt8R\jSTUcKaXX2fU&Cgi;&uC3>7[>@#eWCto&0@/9QdCh!"dONJ,b;/U!Xg$p*PsdqbUQl#DK6)"0>V2a^3^mr\4o<t@[F*F+H=9,;?T)=CWjWR;20@-KQ^e7U/jsel9]o!Nh98h<`S$u_GfG7UT\UK:[!&[]Dh`*</.A'7Zqa0O=F6^KO8N$1KS7[&OnN:fo+!YeL7+$$/1hr[=ebW&?EN>Z\7Xdd(6U?1hAAqB.8]m>P2'Q%SSI<=`8K7Vn.M&+Wh?.KB1D;=XF:VNZ(0)Aa$ODr;aPq0V#"I5Mk6k.]Y13mH:D_Uq;15=-`g_Nl[CoCPA&37nU4taQin1g_=;gksG8_7"?'%mC#Ap$!.G[/C`:GYG>$^?;I@1/Tb7-*U*>=6@p:p+>M2"V]9>rT&>o5jlB,Ufq%#7On;K6M",=-HHoBNDLLGJ>NBl@ZaZp,qs=8Ae.adgo(^2I+7!(:c(<s,^bH0S'W@=+3TO_G1B'5dAgi%DX`Um4/1CQin0VS*5hc2b($U`ZCA$D[('R/RkCFJ8qd#Z2e3C+j.Yfnh)<6[errK\t1@p`*%',\RYcU]8:mFo(__EXu>D5Z]Ai1K8;Fa1PWA]Xt_Qs-4<3pnaTeBBJ57bW04<LM2JHs3=WRMXl?-4#6,T*_VnsKQ;&+FObrp\r&I8UH<X2J)NI>ArMN`mKAMbZS60P@<G.nhs;r$TZKK)\Xm)-G=$-h\6rlL@V0k?V(mKN!_(f2J,nB%+HD'TSk$GJ2jBMWZa!Z[2'`FD^V(cAK[d<Uj(+J[Xi<JM7Fh^\9NKlFR/;MTfbaLkKkCs#q/HrR&$S6OlhUaS1-s$LJ4[0Z[dT:]F6\$2<$VmG@\8$Wm?5)*.E]~>endstream
-endobj
-15 0 obj
-<<
-/Filter [ /ASCII85Decode /FlateDecode ] /Length 2106
->>
-stream
-Gb!#]>?BQ=&:WeDbTkl+BJ'&:2bLPB]1Z@3_S.P/P)-NJ<0fo#?b[i=!<]%6C`[s`+d&nSBYGA/9b]_fU[EV4!kb#=miNrS#."K[J-7R<J3RWnhbQ?We4UH.!"oF>(T*jl-P_dj1aS*d#f8DD/.Nn4N'qYZA'b8mDbc+\G^dec,[QuD518JI7Si5^'NmKjKKa,GOT`F^"A%87j4d)"&!82M.0Vp^;%hmK&jef+@D_%$B*DP2FJ?`"['HO!?mK-/aDgYLQY':.e>'"t*"pU.Si\PU,U&ujKin_[(L.n^o*VYE[Lhr5Oh(5rAiDDjA!cW4,ErKDfgGU/^(fN".)$nN4-GDB/.iKR7hJ2gi9T6o*r&d%ZIP?*1rcV!KMk$HiKJ2nK[Zo1B*Ed.;P+1HfOL)Q4R@\.Qs)*#Ufe2*f<kUM)7^?`&UIc9XP?oXoijC[YI3)?$(TPR>ZMO5-8ncW:>i.Of:pFT"/E>9#K6SP%[-d`KK_ss%a',%Pqp]/2CkKO[$Eo[R-e'"3]3?5jLegD("YIIGpS=dP_N?Y,HGAb$`2$m(ab480\LeZ*rsh_^]7.KMSL3*VZD>V^/^/D9.d2<Xp\)k0[[SHUGVB.4q'n[e_L^=J)_Y64`>)18tjWroR^]\YtmIp%;$^;WK=LbIDR&n+I@5*VQ71&nh&&hPR;ie7b/#%J6+aGE[.^##lJD0?E'gCTf02)m,/Y<`g+>C4\,/PY)D]%"/Nb?FQCI?O3hnj71Pk!*+l3Ji:lk$:'iRQ`iTJ5eXLA49K[Fg@oqSIDXH!mEMc>jjT^uqUZMXnks_@KjHZu.MR'CmbetXo0II^N,0r/P(47_BBnjUR0M4j=]CQ)p-</u[l10[>&dIkV_SZ;NoOTV]o*=r=\.l6%"NQEnB6bp\J%GE"2SgfZ%H^X`r*gRI@?em@&@f>)$=U0]E@>4TTj6h.Y;#pr%u<ECQ]cIOAhi=e9M92^"Q(0Gi(o9K6<:bA"I9LbdePRe(8S=8WGtQ/5o)rR<pWT[c4mc(]JYMBSq+DSKPh5Da#V%6^fk77\j+5g),oXsfX=%%A]\e@L,FY.>RmmT>&YG+?=aCN0R?+]N0T*qXb7Q6/>"#E?H%C%Z,W4<X5dBj<?sEO6Ltg9DCRdE240Z5Q'DPV]?#N]]rS.m?r`V'EghPVWiu\)8BerI&`k^Bd-mi%MB8B(#&*P4oC^R_`5`6&+/C=UBcA.3Q2Yu)W7r4_>Emb`A/JY?6*aXrgYi2'_2fhX7W(I->bgg+eRU0ap9to_8Gk10WF;;P?D5U[@[a9j.B?OW$[b/Z]cJg]gu6qok1cb_0%RFZT5TBuQo+D4U,fE1Frk)>'Z4<dhWRsf]e1#FZ$oPCD4R;YmFq9Xg,*31hE<cC]sh^j=tC"`3@ung`Y&$RBn7ZE"MV6[QQ^sef]rkCgAY2Fi#M&o<M<82:][dCkqW-d60)<]%*$/NRF8n>jY5#(m]#B3"G2;i,Y8YKJ@FjSVb,fFS=c[;L+t<old\3H^c:oe8`5_=57+akd#%bSjP6$<:9GFs&G\@qqF((&;3L>Y_h-\rj7OOA(,>(Z,Rb9i=#7?U6[Tm*4\(6"oL4R&&e-Vu7f;(.M+N%n]Ip?oC2&mgQfU7Xf2)=IX`$!"hNaW)I$Q8FpO;kYIUZ!Od0u&COXnZAX8F(?Nlq+MKbmff@j35kFKMCfdVL!a-h[PU6<rSR)u7o!lPX%Fs/90eo8R"d*lnK&#'4WcCtl!1oY_EA</&FbM8@isk'3B)rsFnXBH);Z`K4umrR8rO*09LCrDbIdqfIF=m0;mA$!(Vn9S!q;]gonITkXV;d]<H3o:jj7lYZ5Hr7q58ZBN4Gg[j1]]iT%mfLsN4mCW,8Hgo[70XWiRmpa3G4-%E-L.S"EjIqY!]l`;j9BZ;$0AUmIdKP9[9/g`q;AQb,Z?s2&h!aXrZa%hh"QqkM[snH+*,.@j#UPeMqNRC";&?D.OJue;J(jmd.mMd!XmOC"%Y[VXd=&HO><?c"<O5prd:@L#VOL%KD9)8DZZ@Kel<.!$J[.D%?1<5e85D%=,Tb8&=o;I3]<7tGCWpa'44?0*\iuIo8Bl!1LV$2k;6Et?.tbkR_9%2u1PaB~>endstream
-endobj
-16 0 obj
-<<
-/Filter [ /ASCII85Decode /FlateDecode ] /Length 2207
->>
-stream
-Gb!#]=``=U&:XAWfLIl1,6W7h:X8&slSOX(:7i[BOq<hM!g7U%n%/QKM6]mrE^u=M`<4<&\%CGU,6\>P;>W;o!T"@Fm:Qcj_-dDq,9@82i7$WNa-d$_3cX5*5Wg]Ar##)$9VGQVA&9W%^lNo\69bIi8.^M4">+$Rk)?g4j2MKujFiZYU-,$p?qm3sJWXGXnkl0C7/.Ea5iQAtGLn83UJ/m@$>rOhaN)IaphiLtLkX#f);LjlcpH_2CiKiAGg,gu52=%G1BT7QBP]V_!jji264<CA:ME4*OMgl'f9IntK)=g^'6%7#<;ZrQmkAur*o3)O;b#8LX7E`I/AURBHp^!A70;&?$mM$+5sWg^G^Bpl`$+_8gc(\M%pEVU1aF+\)lSBQ%+'Dtm(juh#]"9K;':YrZjj9"kqg/s+jkI)1mDX%N>pM+ahT(9Ak<WU!IEU=[GA+`=dA\#%(.\8kRhEkj1a?gp/f6#qMjKp2.trD)qg72Cpo/c\\1@dI)OkYR8OjG$dX<(K>IXY>iWo7T,EA`C`dIMj.jr(VGgdE6jdj@-F=aaH^GNC1_Z-;SoU7%pqH'BQ[,]#IXP.:D,]%i#dmZF#_A%#4I-.gKhA0[,LR[AW%DPZcmpn$*r"]D_,f-,?faYKU!TH#?"ont0S/Cs+<J]/T?;h"]Q(Cn+tWiCVa;\=^B%ZFO`^bReQcOc5mqXAMB2IH6*[3D^D#Knd_HrERG!4u/uKO(idf[2_-Y\eE482E#l`4*J(/jFfi[E/-"d8i\P=JrF9(<-h8Z<nSNgu<pF#t?^8muk&0>[k2C0UR0;9_LilI^[.]TT@c4+FJZI;t/=gI!P`:[>/[cV[4f^no+D-?,Y[-.%M[VBo%g@P,7>6HuGm<Nbo;)c_E<f3cbs6Z4uQBaG&h+E'fP89;/2H@Kac[ZN^;/VALV+qP^HL(4c@1e\mWB3lY;k\I_$cOp#lkZ7a'Qo^N]I$dPMK];A$)<b<[^:qB1fsKVU#!G"35;g-9db)q2LJn&8JC]S=IWWc[Lj;b;E4]OcFLO9Ju8eu.%Uf%8%)[2"/Fn#b^Putmuq31hEb:QKt2`'l`1E;1kK)%1g`?pTmIsVU[[?XHB1ngZ6-.j3dF6Pn?N+"/S+P(&"W0Z][Qiq59"]ulA*W\-h"T-=[&5)D5q0@d<Y4@&NFuJObjrW<Bn,kr!SpAF*7:`kkotjJs-r>N`TJef!_.i:e/0[i\Yl5%fW@?OCWrYaS8SB-#f-d6tBChTe_1)W6BQnJZLO6`([,0KNqteILuHUQ05b"Dk*[fY'!T;9mk]p#,g0+m0V56:>Y70PN!0d4Hla]Q#Lh4s&Tl]i9^c9"t/lg>:iI@EDid6=i#)5K3Y482iU6ZZu-kT]Q6:OC*[p3W@09&2^95QE2h*oX%R0\`De+g7*kT8D)^rGkVr(/.jjd&WB2r+APEdH#W-B.gu-C_oC7",@&_gJTY9qVc95uJ.^s[6%=i^4':PW!L/%(dS%Y5E)D<AI-qd+rZ79mg:&eo6d0mRNVn#c7kalgGWQh1)b`VKHREXW\%sd^g:emrMLKTc/@@_Doel:E*VH;59,Wm=K9gYV*\@\;?Vd,9,il-k$ad`P%(jR_k4KBW-6_Fenp0==Z<Gmr('5]rG43DFTTdJ>$@l,VBjpXj`WY5Gg2/%Rq,.&L))THSolsM3?(Qm'UmL'_:dM]/!;%'[Q"b^qZ,4K*9[_GR1<(GI5@F"Z9+J4\:nUCFP5JX$DS29!)_^hqVHd<3.bbJpCe!R=+)mAT)Qci"$nU?]me_9TeYJUff:o=[P[J>958(G1YjBmHG?J"lSe'/Pj=@)]!4J(-Ybo`6t:qsFeFu`cRi@t,;ZZHQU]NDG7J=E:e?,X;mGAtt05C%)=D`q]//P_V1[aN4Gp\)!?#P<cpJZC%.-$H:DPLV"Cs1)GU\Y9c+b&=]39s6M"C&u5`Wj)69Icj3QZ0?P(a@b*)]2q3lBt"7.:#,H#/==_,N0CYA9Db7k;Q_)[I\Bd[qASW3YB'!>U!.eJTgWY0kG`')=mHYqHI<6^X-opU:>%`O$W'9'pkC-u2CUEQ#rBK+$6qZJL6:B<VfWB/ZC3U.1W+uAqMoK&Cnp*fmI>m'<H1*#23[=(^u;>^e4Z_e(dm>?V(0DZ*8Sj%GA[=Y"\r)]5Cf8QFSmH''VX%`6KWSF.XXH1aFp894_OVtARhW,BoTM@5FhZW%)+li~>endstream
-endobj
-17 0 obj
-<<
-/Filter [ /ASCII85Decode /FlateDecode ] /Length 1076
->>
-stream
-Gatm9fl#P('Rf^Wgdb-O1F0AjH(8d99F<%D!J<QNXMi1P,uUS8V#L6t;I8G(*r'0V6KDFu\VF]\n]ephd/s66_p*N4N'mRM/1*+4GOR4lr)cc<N(QBG+E<q!7"VHT#2KEGKJT2d+qqi",R)IbRUn#PVr@/\5pAT>aaj_dM)[hOHt)=jJ!QtgO2(6%;a)Dp:C&(`WoK]^kb"N/jH;eS8Lb?XDBXi>8Hd?LCCPYtCg5(Rid6mD`^n=KKOaKg6Z_.TUeHO&d"-&mfk97M8Ji*LneRO8apiKs%"'*SNJ7sR?0XWsItIU@LS"AfP_(4Zf`,8X)NpN/"6-t78bk7j,!r"\A]PC"c[o&NHnXm*(_)FDh\KWOb'<LBhc6mcKlk'!ZUXO+(iYd/:-&6h*NV@rBU"jfr1q&B-oXW'FTI1RK/Nf[A*dk9h;Ud4l<2YsqM$sm=pKb^LUp:kFDBk1YMnq'Dm%KaKX#<o.\Rs6TV5I<;sBn?5W[s7E1I1aVDH"_cKu4$g\*Vb`*n-X@(6mRmcnG5L>-dK3@/L6qD*jU`-ZmRUq;FV2<8N^NA%":79$u,W97:6VY=k@*7foi,!'Cj:(K^/.^U.40;t;EH-J,80,,;(,/sYNA@bD3-PhXH+U.WfJi4]'6?q6mZlPef1j?8Vo-SRgW\/o`'p>5u;d\s,K-Wf]:Bm/,^bUuHBc9/F;!QW#IW1*]Ns"7s#Wpf)rYgMcB.Kmko`h")?0H'KZD04%",1bA)YcT>HhaJ\b1le*=2e!?"7',Pjbi_c^n0d#c\*;EbC4<KV?Hj6)r+=S+Nr+l>E2X4_R?!m?>G?C<6i2tPk#n%7L=p>bg%Er%s#6=3'._n.`L^^58($d3)'Pc&LWBa5FfT%Z:cViq]BNe]-\LU.Y)$qTPkDseB@gFpX%L:=k?#TMuI=4EdnP`rYj9\g+ncM0g=1;8#+I:"`@.8#C9,R0S+`$1B]^M8,qp03Y&sXQ2Y=c(9MW79D`0b?Df<5M5EEhEm4?8PB)Q.^[V--+PH0lN?a)a!Q$@LAFOW4V`bS*T)D)k!h-G9HF-B/Q8>"/TcV&i(;Bj+N=nG~>endstream
+q 0.9608 0.6196 0.0431 rg 0.00 819.89 166.68 22.00 re f Q
+q 0.0000 0.1098 0.4471 rg 166.68 819.89 428.60 22.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 34.00 m 539.28 34.00 l S Q
+BT /F1 7.50 Tf 0.4235 0.4588 0.4902 rg 56.00 20.00 Td (Lartisan Style Guide) Tj ET
+BT /F1 7.50 Tf 0.4235 0.4588 0.4902 rg 503.28 20.00 Td (Page 4) Tj ET
+BT /F2 20.00 Tf 0.0000 0.1098 0.4471 rg 56.00 781.89 Td (Tables and Forms) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 754.89 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 754.89 Td (Tables should include name, scope, status, last activity, next action, and risk or priority where) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 741.39 Td (relevant.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 725.89 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 725.89 Td (Forms should use clear labels, group related fields, show validation near the field, preserve) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 712.39 Td (media state, and confirm destructive decisions.) Tj ET
+BT /F2 20.00 Tf 0.0000 0.1098 0.4471 rg 56.00 684.89 Td (Status Language) Tj ET
+q 0.0000 0.1098 0.4471 rg 56.00 637.89 483.00 24.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 637.89 483.00 24.00 re S Q
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 63.00 646.89 Td (Avoid) Tj ET
+BT /F2 8.60 Tf 1.0000 1.0000 1.0000 rg 208.00 646.89 Td (Prefer) Tj ET
+q 0.9725 0.9804 0.9882 rg 56.00 612.89 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 612.89 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 622.89 Td (Done) Tj ET
+q 0.9725 0.9804 0.9882 rg 201.00 612.89 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 612.89 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 622.89 Td (Completed) Tj ET
+q 1.0000 1.0000 1.0000 rg 56.00 587.89 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 587.89 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 597.89 Td (OK) Tj ET
+q 1.0000 1.0000 1.0000 rg 201.00 587.89 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 587.89 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 597.89 Td (Approved) Tj ET
+q 0.9725 0.9804 0.9882 rg 56.00 562.89 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 562.89 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 572.89 Td (Bad) Tj ET
+q 0.9725 0.9804 0.9882 rg 201.00 562.89 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 562.89 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 572.89 Td (Rejected) Tj ET
+q 1.0000 1.0000 1.0000 rg 56.00 537.89 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 537.89 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 547.89 Td (Waiting) Tj ET
+q 1.0000 1.0000 1.0000 rg 201.00 537.89 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 537.89 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 547.89 Td (Pending) Tj ET
+q 0.9725 0.9804 0.9882 rg 56.00 512.89 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 512.89 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 522.89 Td (Problem) Tj ET
+q 0.9725 0.9804 0.9882 rg 201.00 512.89 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 512.89 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 522.89 Td (Escalated) Tj ET
+q 1.0000 1.0000 1.0000 rg 56.00 487.89 145.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 56.00 487.89 145.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 63.00 497.89 Td (Money sent) Tj ET
+q 1.0000 1.0000 1.0000 rg 201.00 487.89 338.00 25.00 re f Q
+q 0.8471 0.8706 0.9098 RG 0.70 w 201.00 487.89 338.00 25.00 re S Q
+BT /F1 8.60 Tf 0.1137 0.1137 0.1137 rg 208.00 497.89 Td (Paid) Tj ET
+BT /F2 20.00 Tf 0.0000 0.1098 0.4471 rg 56.00 469.89 Td (Accessibility) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 442.89 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 442.89 Td (Primary blue buttons require white text.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 427.39 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 427.39 Td (Orange backgrounds need ink or very dark blue text unless used as a small badge on dark surfaces.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 411.89 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 411.89 Td (Do not rely on color alone for status; pair with text and icons.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 396.39 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 396.39 Td (Maintain visible focus states through the existing ring token.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 380.89 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 380.89 Td (Keep touch targets at least 40px where possible.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 365.39 Td (-) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 70.00 365.39 Td (Make dynamic content announcements available for critical payment, KYC, and upload state changes.) Tj ET
+BT /F2 20.00 Tf 0.0000 0.1098 0.4471 rg 56.00 337.89 Td (Live Style Guide) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 310.89 Td (The live style guide is available inside authenticated settings at:) Tj ET
+q 0.9333 0.9529 1.0000 rg 56.00 263.39 483.28 24.00 re f Q
+BT /F3 10.00 Tf 0.0000 0.1098 0.4471 rg 64.00 271.39 Td (/settings/style-guide) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 245.39 Td (It demonstrates color roles, typography voice, journey cards, status badges, and action hierarchy.) Tj ET
+BT /F1 10.00 Tf 0.1137 0.1137 0.1137 rg 56.00 231.89 Td (The live page should evolve as the production component set grows.) Tj ET
+endstream
 endobj
 xref
-0 18
-0000000000 65535 f 
-0000000061 00000 n 
-0000000112 00000 n 
-0000000219 00000 n 
-0000000331 00000 n 
-0000000536 00000 n 
-0000000741 00000 n 
-0000000946 00000 n 
-0000001151 00000 n 
-0000001256 00000 n 
-0000001461 00000 n 
-0000001531 00000 n 
-0000001814 00000 n 
-0000001898 00000 n 
-0000003311 00000 n 
-0000006295 00000 n 
-0000008493 00000 n 
-0000010792 00000 n 
+0 14
+0000000000 65535 f
+0000000015 00000 n
+0000000064 00000 n
+0000000141 00000 n
+0000000211 00000 n
+0000000286 00000 n
+0000000354 00000 n
+0000000506 00000 n
+0000002967 00000 n
+0000003119 00000 n
+0000013110 00000 n
+0000013264 00000 n
+0000020608 00000 n
+0000020762 00000 n
 trailer
-<<
-/ID 
-[<6b45395346ba1a331f813dc20b0fa3c8><6b45395346ba1a331f813dc20b0fa3c8>]
-% ReportLab generated PDF document -- digest (opensource)
-
-/Info 11 0 R
-/Root 10 0 R
-/Size 18
->>
+<< /Size 14 /Root 1 0 R >>
 startxref
-11960
+26503
 %%EOF

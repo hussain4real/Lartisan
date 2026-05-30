@@ -35,8 +35,8 @@ class TeamInvitation extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $team = $this->invitation->team;
-        $inviter = $this->invitation->inviter;
+        $team = $this->invitation->team()->firstOrFail();
+        $inviter = $this->invitation->inviter()->firstOrFail();
 
         return (new MailMessage)
             ->subject(__("You've been invited to join :teamName", ['teamName' => $team->name]))
@@ -57,7 +57,7 @@ class TeamInvitation extends Notification implements ShouldQueue
         return [
             'invitation_id' => $this->invitation->id,
             'team_id' => $this->invitation->team_id,
-            'team_name' => $this->invitation->team->name,
+            'team_name' => $this->invitation->team()->firstOrFail()->name,
             'role' => $this->invitation->role->value,
         ];
     }

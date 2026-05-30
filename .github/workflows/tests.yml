@@ -52,5 +52,8 @@ jobs:
       - name: Build Assets
         run: npm run build
 
+      - name: Static Analysis
+        run: composer analyse
+
       - name: Tests
         run: ./vendor/bin/pest --coverage --min=100

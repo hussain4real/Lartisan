@@ -70,10 +70,14 @@ enum TeamRole: string
      */
     public static function assignable(): array
     {
-        return collect(self::cases())
-            ->filter(fn (self $role) => $role !== self::Owner)
-            ->map(fn (self $role) => ['value' => $role->value, 'label' => $role->label()])
-            ->values()
-            ->toArray();
+        $roles = [];
+
+        foreach (self::cases() as $role) {
+            if ($role !== self::Owner) {
+                $roles[] = ['value' => $role->value, 'label' => $role->label()];
+            }
+        }
+
+        return $roles;
     }
 }

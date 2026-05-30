@@ -33,39 +33,45 @@ defineOptions({
 const palette = [
     {
         name: 'Leadprenuer blue',
+        tier: 'Primary',
         role: 'Primary action, navigation, trust anchor',
         value: '#001c72',
         class: 'bg-[#001c72]',
     },
     {
-        name: 'Growth green',
-        role: 'Success, verified state, progress',
-        value: '#61ce70',
-        class: 'bg-[#61ce70]',
+        name: 'Lartisan orange',
+        tier: 'Secondary',
+        role: 'Secondary actions, review states, attention',
+        value: '#f59e0b',
+        class: 'bg-[#f59e0b]',
     },
     {
         name: 'Operational gray',
-        role: 'Secondary actions, subdued labels',
+        tier: 'Tertiary',
+        role: 'Tertiary actions, subdued labels',
         value: '#6c757d',
         class: 'bg-[#6c757d]',
     },
     {
         name: 'Ink',
-        role: 'Primary text and dense data',
+        tier: 'Tertiary',
+        role: 'Text emphasis and dense data',
         value: '#1d1d1d',
         class: 'bg-[#1d1d1d]',
     },
     {
-        name: 'Field amber',
-        role: 'Pending verification and warnings',
-        value: '#f59e0b',
-        class: 'bg-[#f59e0b]',
-    },
-    {
         name: 'Risk red',
+        tier: 'Tertiary',
         role: 'Disputes, failed payments, destructive actions',
         value: '#dc2626',
         class: 'bg-[#dc2626]',
+    },
+    {
+        name: 'Surface',
+        tier: 'Tertiary',
+        role: 'Quiet app background and work surfaces',
+        value: '#f8fafc',
+        class: 'bg-[#f8fafc]',
     },
 ];
 
@@ -96,12 +102,12 @@ const statusPatterns = [
     {
         label: 'Approved',
         icon: CheckCircle2,
-        class: 'border-[#61ce70]/50 bg-[#61ce70]/15 text-[#16551f]',
+        class: 'border-[#001c72]/40 bg-[#001c72]/10 text-[#001c72] dark:border-blue-300/50 dark:bg-blue-300/15 dark:text-blue-100',
     },
     {
         label: 'Pending',
         icon: Clock3,
-        class: 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200',
+        class: 'border-[#f59e0b]/50 bg-[#f59e0b]/15 text-[#7c3f00] dark:border-orange-300/50 dark:bg-orange-300/15 dark:text-orange-100',
     },
     {
         label: 'Escalated',
@@ -153,9 +159,16 @@ const statusPatterns = [
                             <div
                                 class="flex items-center justify-between gap-3"
                             >
-                                <p class="text-sm font-medium">
-                                    {{ color.name }}
-                                </p>
+                                <div>
+                                    <p class="text-sm font-medium">
+                                        {{ color.name }}
+                                    </p>
+                                    <p
+                                        class="text-[0.6875rem] font-medium text-muted-foreground uppercase"
+                                    >
+                                        {{ color.tier }}
+                                    </p>
+                                </div>
                                 <code class="text-xs text-muted-foreground">
                                     {{ color.value }}
                                 </code>

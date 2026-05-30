@@ -10,8 +10,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property bool $is_personal
+ */
 #[Fillable(['name', 'slug', 'is_personal'])]
 class Team extends Model
 {
@@ -41,7 +48,7 @@ class Team extends Model
     /**
      * Get the team owner.
      */
-    public function owner(): ?Model
+    public function owner(): ?User
     {
         return $this->members()
             ->wherePivot('role', TeamRole::Owner->value)
@@ -51,7 +58,7 @@ class Team extends Model
     /**
      * Get all members of this team.
      *
-     * @return BelongsToMany<Model, $this>
+     * @return BelongsToMany<User, $this, Membership, 'pivot'>
      */
     public function members(): BelongsToMany
     {
@@ -79,6 +86,16 @@ class Team extends Model
     public function invitations(): HasMany
     {
         return $this->hasMany(TeamInvitation::class);
+    }
+
+    /**
+     * Get the artisan marketplace profile for this business workspace.
+     *
+     * @return HasOne<ArtisanProfile, $this>
+     */
+    public function artisanProfile(): HasOne
+    {
+        return $this->hasOne(ArtisanProfile::class);
     }
 
     /**
