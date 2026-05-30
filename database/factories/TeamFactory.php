@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\TeamKind;
 use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -23,6 +24,7 @@ class TeamFactory extends Factory
         return [
             'name' => $name,
             'slug' => Str::slug($name),
+            'kind' => TeamKind::Workspace,
             'is_personal' => false,
         ];
     }
@@ -33,7 +35,19 @@ class TeamFactory extends Factory
     public function personal(): static
     {
         return $this->state(fn (array $attributes) => [
+            'kind' => TeamKind::Personal,
             'is_personal' => true,
+        ]);
+    }
+
+    /**
+     * Indicate that the team is an artisan business workspace.
+     */
+    public function artisanBusiness(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'kind' => TeamKind::ArtisanBusiness,
+            'is_personal' => false,
         ]);
     }
 

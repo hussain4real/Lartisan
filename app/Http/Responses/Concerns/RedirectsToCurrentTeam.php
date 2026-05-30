@@ -2,11 +2,14 @@
 
 namespace App\Http\Responses\Concerns;
 
+use App\Models\Team;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 
 trait RedirectsToCurrentTeam
 {
-    protected function redirectPathForCurrentTeam($request, string $redirect): string
+    protected function redirectPathForCurrentTeam(Request $request, string $redirect): string
     {
         $team = $this->currentTeam($request);
 
@@ -15,15 +18,14 @@ trait RedirectsToCurrentTeam
         return "/{$team->slug}{$redirect}";
     }
 
-    protected function currentTeam($request)
+    protected function currentTeam(Request $request): Team
     {
         $user = $request->user();
-        $team = $user?->currentTeam ?? $user?->personalTeam();
 
-        if (! $team) {
+        if (! $user instanceof User) {
             abort(403);
         }
 
-        return $team;
+        return $user->currentTeam ?? $user->personalTeam() ?? abort(403);
     }
 }

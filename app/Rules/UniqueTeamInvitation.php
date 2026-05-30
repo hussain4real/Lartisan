@@ -22,6 +22,12 @@ class UniqueTeamInvitation implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        if (! is_string($value)) {
+            $fail(__('The email address is invalid.'));
+
+            return;
+        }
+
         $email = strtolower($value);
 
         $isMember = $this->team->members()

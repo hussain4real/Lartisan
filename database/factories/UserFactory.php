@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\PreferredChannel;
 use App\Enums\TeamRole;
+use App\Enums\UserStatus;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -31,6 +33,12 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'phone_country_code' => null,
+            'phone_number' => null,
+            'phone_e164' => null,
+            'phone_verified_at' => null,
+            'status' => UserStatus::Active,
+            'preferred_channel' => PreferredChannel::Whatsapp,
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
@@ -75,6 +83,20 @@ class UserFactory extends Factory
             'two_factor_secret' => encrypt('secret'),
             'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
             'two_factor_confirmed_at' => now(),
+        ]);
+    }
+
+    public function guest(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => UserStatus::Guest,
+        ]);
+    }
+
+    public function pendingClaim(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => UserStatus::PendingClaim,
         ]);
     }
 }

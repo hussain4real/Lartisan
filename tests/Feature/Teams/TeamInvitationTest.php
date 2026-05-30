@@ -153,8 +153,8 @@ test('team invitations can be accepted', function () {
 
     $response->assertRedirect(route('dashboard'));
 
-    expect($invitedUser->fresh()->belongsToTeam($team))->toBeTrue();
-    expect($invitation->fresh()->accepted_at)->not->toBeNull();
+    expect(User::query()->findOrFail($invitedUser->id)->belongsToTeam($team))->toBeTrue();
+    expect(TeamInvitation::query()->findOrFail($invitation->id)->accepted_at)->not->toBeNull();
 });
 
 test('team invitations cannot be accepted by uninvited user', function () {
@@ -176,7 +176,7 @@ test('team invitations cannot be accepted by uninvited user', function () {
 
     $response->assertSessionHasErrors('invitation');
 
-    expect($uninvitedUser->fresh()->belongsToTeam($team))->toBeFalse();
+    expect(User::query()->findOrFail($uninvitedUser->id)->belongsToTeam($team))->toBeFalse();
 });
 
 test('expired invitations cannot be accepted', function () {
@@ -198,5 +198,5 @@ test('expired invitations cannot be accepted', function () {
 
     $response->assertSessionHasErrors('invitation');
 
-    expect($invitedUser->fresh()->belongsToTeam($team))->toBeFalse();
+    expect(User::query()->findOrFail($invitedUser->id)->belongsToTeam($team))->toBeFalse();
 });

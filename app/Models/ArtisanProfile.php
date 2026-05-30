@@ -1,0 +1,375 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\AdminProfileStatus;
+use App\Enums\ArtisanAvailabilityStatus;
+use App\Enums\ArtisanSubscriptionStatus;
+use App\Enums\ArtisanVerificationStatus;
+use App\Enums\PlatformPermission;
+use App\Enums\PlatformRole;
+use App\Enums\SubscriptionStatus;
+use Database\Factories\ArtisanProfileFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Carbon;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\File;
+
+/**
+ * @property int $id
+ * @property int $team_id
+ * @property int $user_id
+ * @property string $business_name
+ * @property string|null $public_summary
+ * @property int|null $years_experience
+ * @property int|null $service_radius_km
+ * @property string|null $public_phone
+ * @property string|null $public_email
+ * @property ArtisanVerificationStatus $verification_status
+ * @property ArtisanSubscriptionStatus $subscription_status
+ * @property ArtisanAvailabilityStatus $availability_status
+ * @property int|null $country_id
+ * @property int|null $state_id
+ * @property int|null $local_government_id
+ * @property int|null $territory_id
+ * @property int|null $onboarded_by_agent_id
+ * @property int|null $approved_by
+ * @property Carbon|null $approved_at
+ * @property bool $is_public
+ * @property int|null $suspension_reason_code_id
+ * @property int|null $suspended_by
+ * @property Carbon|null $suspended_at
+ */
+#[Fillable([
+    'team_id',
+    'user_id',
+    'business_name',
+    'public_summary',
+    'years_experience',
+    'service_radius_km',
+    'public_phone',
+    'public_email',
+    'verification_status',
+    'subscription_status',
+    'availability_status',
+    'country_id',
+    'state_id',
+    'local_government_id',
+    'territory_id',
+    'onboarded_by_agent_id',
+    'approved_by',
+    'approved_at',
+    'is_public',
+    'internal_notes',
+    'suspension_reason_code_id',
+    'suspended_by',
+    'suspended_at',
+])]
+class ArtisanProfile extends Model implements HasMedia
+{
+    /** @use HasFactory<ArtisanProfileFactory> */
+    use HasFactory, InteractsWithMedia;
+
+    public const PORTFOLIO_COLLECTION = 'portfolio';
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(self::PORTFOLIO_COLLECTION)
+            ->useDisk('public')
+            ->acceptsFile(fn (File $file): bool => in_array($file->mimeType, [
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+            ], true));
+    }
+
+    /**
+     * @return BelongsTo<Team, $this>
+     */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<Country, $this>
+     */
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    /**
+     * @return BelongsTo<State, $this>
+     */
+    public function state(): BelongsTo
+    {
+        return $this->belongsTo(State::class);
+    }
+
+    /**
+     * @return BelongsTo<LocalGovernment, $this>
+     */
+    public function localGovernment(): BelongsTo
+    {
+        return $this->belongsTo(LocalGovernment::class);
+    }
+
+    /**
+     * @return BelongsTo<Territory, $this>
+     */
+    public function territory(): BelongsTo
+    {
+        return $this->belongsTo(Territory::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function onboardedByAgent(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'onboarded_by_agent_id');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function suspendedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'suspended_by');
+    }
+
+    /**
+     * @return BelongsTo<ReasonCode, $this>
+     */
+    public function suspensionReasonCode(): BelongsTo
+    {
+        return $this->belongsTo(ReasonCode::class, 'suspension_reason_code_id');
+    }
+
+    /**
+     * @return HasMany<ArtisanService, $this>
+     */
+    public function services(): HasMany
+    {
+        return $this->hasMany(ArtisanService::class);
+    }
+
+    /**
+     * @return HasMany<Booking, $this>
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * @return HasMany<Subscription, $this>
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * @return HasOne<Subscription, $this>
+     */
+    public function activeSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)
+            ->where('status', SubscriptionStatus::Active->value)
+            ->latestOfMany('ends_at');
+    }
+
+    /**
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * @return HasOne<Wallet, $this>
+     */
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    /**
+     * @return HasMany<PayoutAccount, $this>
+     */
+    public function payoutAccounts(): HasMany
+    {
+        return $this->hasMany(PayoutAccount::class);
+    }
+
+    /**
+     * @return HasMany<KycSubmission, $this>
+     */
+    public function kycSubmissions(): HasMany
+    {
+        return $this->hasMany(KycSubmission::class);
+    }
+
+    /**
+     * @return HasMany<FieldVisit, $this>
+     */
+    public function fieldVisits(): HasMany
+    {
+        return $this->hasMany(FieldVisit::class);
+    }
+
+    /**
+     * @return MorphMany<StatusHistory, $this>
+     */
+    public function statusHistories(): MorphMany
+    {
+        return $this->morphMany(StatusHistory::class, 'statusable');
+    }
+
+    /**
+     * @param  Builder<ArtisanProfile>  $query
+     */
+    public function scopeOwnedBy(Builder $query, User $user): void
+    {
+        $query->where('user_id', $user->id);
+    }
+
+    /**
+     * @param  Builder<ArtisanProfile>  $query
+     */
+    public function scopeInState(Builder $query, State|int $state): void
+    {
+        $query->where('state_id', $state instanceof State ? $state->id : $state);
+    }
+
+    /**
+     * @param  Builder<ArtisanProfile>  $query
+     */
+    public function scopeInLocalGovernment(Builder $query, LocalGovernment|int $localGovernment): void
+    {
+        $query->where('local_government_id', $localGovernment instanceof LocalGovernment ? $localGovernment->id : $localGovernment);
+    }
+
+    /**
+     * @param  Builder<ArtisanProfile>  $query
+     */
+    public function scopeInTerritory(Builder $query, Territory|int $territory): void
+    {
+        $query->where('territory_id', $territory instanceof Territory ? $territory->id : $territory);
+    }
+
+    /**
+     * @param  Builder<ArtisanProfile>  $query
+     */
+    public function scopeVisibleTo(Builder $query, User $user): void
+    {
+        if ($user->can(PlatformPermission::ViewGlobalReports->value)) {
+            return;
+        }
+
+        $adminProfile = $user->adminProfile()->first();
+
+        $query->where(function (Builder $query) use ($adminProfile, $user): void {
+            $query->ownedBy($user);
+
+            if (! $adminProfile instanceof AdminProfile || $adminProfile->status !== AdminProfileStatus::Active) {
+                return;
+            }
+
+            if ($adminProfile->role === PlatformRole::StateCoordinator) {
+                $this->scopeStateVisibility($query, $adminProfile);
+
+                return;
+            }
+
+            if ($adminProfile->role === PlatformRole::LocalGovernmentAdmin) {
+                $this->scopeLocalGovernmentVisibility($query, $adminProfile);
+
+                return;
+            }
+
+            if ($adminProfile->role === PlatformRole::AreaAgent) {
+                $this->scopeAreaAgentVisibility($query, $user);
+            }
+        });
+    }
+
+    /**
+     * @param  Builder<ArtisanProfile>  $query
+     */
+    private function scopeStateVisibility(Builder $query, AdminProfile $adminProfile): void
+    {
+        if ($adminProfile->scope_type === (new State)->getMorphClass() && $adminProfile->scope_id !== null) {
+            $query->orWhere('state_id', $adminProfile->scope_id);
+        }
+    }
+
+    /**
+     * @param  Builder<ArtisanProfile>  $query
+     */
+    private function scopeLocalGovernmentVisibility(Builder $query, AdminProfile $adminProfile): void
+    {
+        if ($adminProfile->scope_type === (new LocalGovernment)->getMorphClass() && $adminProfile->scope_id !== null) {
+            $query->orWhere('local_government_id', $adminProfile->scope_id);
+        }
+    }
+
+    /**
+     * @param  Builder<ArtisanProfile>  $query
+     */
+    private function scopeAreaAgentVisibility(Builder $query, User $user): void
+    {
+        $query
+            ->orWhere('onboarded_by_agent_id', $user->id)
+            ->orWhereIn(
+                'territory_id',
+                $user->areaAgentAssignments()
+                    ->whereNull('ends_at')
+                    ->select('territory_id'),
+            );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'approved_at' => 'datetime',
+            'availability_status' => ArtisanAvailabilityStatus::class,
+            'is_public' => 'boolean',
+            'service_radius_km' => 'integer',
+            'subscription_status' => ArtisanSubscriptionStatus::class,
+            'suspended_at' => 'datetime',
+            'verification_status' => ArtisanVerificationStatus::class,
+            'years_experience' => 'integer',
+        ];
+    }
+}

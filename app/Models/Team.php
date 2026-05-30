@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\GeneratesUniqueTeamSlugs;
+use App\Enums\TeamKind;
 use App\Enums\TeamRole;
 use Database\Factories\TeamFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -10,9 +11,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['name', 'slug', 'is_personal'])]
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property TeamKind|null $kind
+ * @property bool $is_personal
+ */
+#[Fillable(['name', 'slug', 'kind', 'is_personal'])]
 class Team extends Model
 {
     /** @use HasFactory<TeamFactory> */
@@ -26,6 +35,14 @@ class Team extends Model
         parent::boot();
 
         static::creating(function (Team $team) {
+            if (empty($team->kind)) {
+                $team->kind = $team->is_personal ? TeamKind::Personal : TeamKind::Workspace;
+            }
+
+            if ($team->kind === TeamKind::Personal) {
+                $team->is_personal = true;
+            }
+
             if (empty($team->slug)) {
                 $team->slug = static::generateUniqueTeamSlug($team->name);
             }
@@ -41,7 +58,7 @@ class Team extends Model
     /**
      * Get the team owner.
      */
-    public function owner(): ?Model
+    public function owner(): ?User
     {
         return $this->members()
             ->wherePivot('role', TeamRole::Owner->value)
@@ -51,7 +68,7 @@ class Team extends Model
     /**
      * Get all members of this team.
      *
-     * @return BelongsToMany<Model, $this>
+     * @return BelongsToMany<User, $this, Membership, 'pivot'>
      */
     public function members(): BelongsToMany
     {
@@ -82,6 +99,16 @@ class Team extends Model
     }
 
     /**
+     * Get the artisan marketplace profile for this business workspace.
+     *
+     * @return HasOne<ArtisanProfile, $this>
+     */
+    public function artisanProfile(): HasOne
+    {
+        return $this->hasOne(ArtisanProfile::class);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -90,6 +117,7 @@ class Team extends Model
     {
         return [
             'is_personal' => 'boolean',
+            'kind' => TeamKind::class,
         ];
     }
 

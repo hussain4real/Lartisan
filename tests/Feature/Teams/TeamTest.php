@@ -165,12 +165,12 @@ test('deleting current team switches to alphabetically first remaining team', fu
         'id' => $zuluTeam->id,
     ]);
 
-    expect($user->fresh()->current_team_id)->toEqual($alphaTeam->id);
+    expect(User::query()->findOrFail($user->id)->current_team_id)->toEqual($alphaTeam->id);
 });
 
 test('deleting current team falls back to personal team when alphabetically first', function () {
     $user = User::factory()->create();
-    $personalTeam = $user->personalTeam();
+    $personalTeam = $user->teams()->where('is_personal', true)->firstOrFail();
     $team = Team::factory()->create(['name' => 'Zulu Team']);
     $team->members()->attach($user, ['role' => TeamRole::Owner->value]);
 
@@ -188,12 +188,12 @@ test('deleting current team falls back to personal team when alphabetically firs
         'id' => $team->id,
     ]);
 
-    expect($user->fresh()->current_team_id)->toEqual($personalTeam->id);
+    expect(User::query()->findOrFail($user->id)->current_team_id)->toEqual($personalTeam->id);
 });
 
 test('deleting non current team leaves current team unchanged', function () {
     $user = User::factory()->create();
-    $personalTeam = $user->personalTeam();
+    $personalTeam = $user->teams()->where('is_personal', true)->firstOrFail();
     $team = Team::factory()->create();
     $team->members()->attach($user, ['role' => TeamRole::Owner->value]);
 
@@ -211,7 +211,7 @@ test('deleting non current team leaves current team unchanged', function () {
         'id' => $team->id,
     ]);
 
-    expect($user->fresh()->current_team_id)->toEqual($personalTeam->id);
+    expect(User::query()->findOrFail($user->id)->current_team_id)->toEqual($personalTeam->id);
 });
 
 test('deleting team switches other affected users to their personal team', function () {
@@ -233,13 +233,15 @@ test('deleting team switches other affected users to their personal team', funct
 
     $response->assertRedirect();
 
-    expect($member->fresh()->current_team_id)->toEqual($member->personalTeam()->id);
+    $memberPersonalTeam = $member->teams()->where('is_personal', true)->firstOrFail();
+
+    expect(User::query()->findOrFail($member->id)->current_team_id)->toEqual($memberPersonalTeam->id);
 });
 
 test('personal teams cannot be deleted', function () {
     $user = User::factory()->create();
 
-    $personalTeam = $user->personalTeam();
+    $personalTeam = $user->teams()->where('is_personal', true)->firstOrFail();
 
     $response = $this
         ->actingAs($user)
@@ -284,7 +286,7 @@ test('users can switch teams', function () {
 
     $response->assertRedirect();
 
-    expect($user->fresh()->current_team_id)->toEqual($team->id);
+    expect(User::query()->findOrFail($user->id)->current_team_id)->toEqual($team->id);
 });
 
 test('users cannot switch to team they dont belong to', function () {

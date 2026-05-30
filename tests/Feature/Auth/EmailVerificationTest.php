@@ -15,7 +15,7 @@ test('email verification screen can be rendered', function () {
 
 test('email can be verified', function () {
     $user = User::factory()->unverified()->create();
-    $team = $user->personalTeam();
+    $team = $user->teams()->where('is_personal', true)->firstOrFail();
 
     Event::fake();
 
@@ -26,9 +26,10 @@ test('email can be verified', function () {
     );
 
     $response = $this->actingAs($user)->get($verificationUrl);
+    $freshUser = User::query()->findOrFail($user->id);
 
     Event::assertDispatched(Verified::class);
-    expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
+    expect($freshUser->hasVerifiedEmail())->toBeTrue();
     $response->assertRedirect("/{$team->slug}/dashboard?verified=1");
 });
 
@@ -44,9 +45,10 @@ test('email is not verified with invalid hash', function () {
     );
 
     $this->actingAs($user)->get($verificationUrl);
+    $freshUser = User::query()->findOrFail($user->id);
 
     Event::assertNotDispatched(Verified::class);
-    expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
+    expect($freshUser->hasVerifiedEmail())->toBeFalse();
 });
 
 test('email is not verified with invalid user id', function () {
@@ -61,9 +63,10 @@ test('email is not verified with invalid user id', function () {
     );
 
     $this->actingAs($user)->get($verificationUrl);
+    $freshUser = User::query()->findOrFail($user->id);
 
     Event::assertNotDispatched(Verified::class);
-    expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
+    expect($freshUser->hasVerifiedEmail())->toBeFalse();
 });
 
 test('verified user is redirected to dashboard from verification prompt', function () {
@@ -79,7 +82,7 @@ test('verified user is redirected to dashboard from verification prompt', functi
 
 test('already verified user visiting verification link is redirected without firing event again', function () {
     $user = User::factory()->create();
-    $team = $user->personalTeam();
+    $team = $user->teams()->where('is_personal', true)->firstOrFail();
 
     Event::fake();
 
@@ -91,7 +94,8 @@ test('already verified user visiting verification link is redirected without fir
 
     $this->actingAs($user)->get($verificationUrl)
         ->assertRedirect("/{$team->slug}/dashboard?verified=1");
+    $freshUser = User::query()->findOrFail($user->id);
 
     Event::assertNotDispatched(Verified::class);
-    expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
+    expect($freshUser->hasVerifiedEmail())->toBeTrue();
 });
