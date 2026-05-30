@@ -8,6 +8,7 @@ use App\Enums\ArtisanSubscriptionStatus;
 use App\Enums\ArtisanVerificationStatus;
 use App\Enums\PlatformPermission;
 use App\Enums\PlatformRole;
+use App\Enums\SubscriptionStatus;
 use Database\Factories\ArtisanProfileFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
 use Spatie\MediaLibrary\HasMedia;
@@ -175,6 +177,48 @@ class ArtisanProfile extends Model implements HasMedia
     public function services(): HasMany
     {
         return $this->hasMany(ArtisanService::class);
+    }
+
+    /**
+     * @return HasMany<Subscription, $this>
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * @return HasOne<Subscription, $this>
+     */
+    public function activeSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)
+            ->where('status', SubscriptionStatus::Active->value)
+            ->latestOfMany('ends_at');
+    }
+
+    /**
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * @return HasOne<Wallet, $this>
+     */
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    /**
+     * @return HasMany<PayoutAccount, $this>
+     */
+    public function payoutAccounts(): HasMany
+    {
+        return $this->hasMany(PayoutAccount::class);
     }
 
     /**

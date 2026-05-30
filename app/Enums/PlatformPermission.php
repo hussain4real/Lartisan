@@ -35,6 +35,7 @@ enum PlatformPermission: string
 
     case ManageOwnArtisanProfile = 'artisan.profile.manage';
     case ManageOwnServices = 'artisan.services.manage';
+    case ManageOwnSubscription = 'artisan.subscription.manage';
     case ViewOwnWallet = 'artisan.wallet.view';
 
     case ManageOwnBookings = 'customer.bookings.manage';

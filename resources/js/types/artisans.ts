@@ -108,3 +108,72 @@ export type KycSubmissionDetail = ArtisanKycSummary & {
     notes: string | null;
     media: Record<string, KycMediaItem | null>;
 };
+
+export type SubscriptionPlanOption = {
+    id: number;
+    name: string;
+    slug: string;
+    description: string | null;
+    priceAmount: number;
+    price: string;
+    currencyCode: string;
+    interval: string;
+    durationDays: number;
+    features: string[];
+};
+
+export type ArtisanSubscriptionDetail = {
+    id: number;
+    status: string;
+    startsAt: string | null;
+    endsAt: string | null;
+    graceEndsAt: string | null;
+    plan: SubscriptionPlanOption;
+    paymentReference: string | null;
+};
+
+export type ArtisanPaymentItem = {
+    id: number;
+    status: string;
+    reference: string;
+    amount: number;
+    amountDisplay: string;
+    currencyCode: string;
+    checkoutUrl: string | null;
+    paidAt: string | null;
+    failedAt: string | null;
+    failureReason: string | null;
+    planName: string | null;
+};
+
+export type ArtisanWalletSummary = {
+    id: number | null;
+    currencyCode: string;
+    availableBalance: number;
+    pendingBalance: number;
+    availableDisplay: string;
+    pendingDisplay: string;
+};
+
+export type WalletLedgerEntryItem = {
+    id: number;
+    type: string;
+    direction: string;
+    amount: number;
+    amountDisplay: string;
+    availableBalanceAfter: number;
+    pendingBalanceAfter: number;
+    immutableReference: string;
+    description: string | null;
+    postedAt: string | null;
+};
+
+export type PayoutAccountItem = {
+    id: number;
+    provider: string;
+    bankName: string;
+    accountName: string;
+    recipientCode: string | null;
+    status: string;
+    verifiedAt: string | null;
+};

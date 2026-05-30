@@ -76,6 +76,7 @@ class SeedPlatformAccess
                 PlatformRole::Artisan => [
                     PlatformPermission::ManageOwnArtisanProfile,
                     PlatformPermission::ManageOwnServices,
+                    PlatformPermission::ManageOwnSubscription,
                     PlatformPermission::ViewOwnWallet,
                 ],
                 PlatformRole::Customer => [

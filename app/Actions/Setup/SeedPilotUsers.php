@@ -45,6 +45,7 @@ class SeedPilotUsers
         private readonly SeedGeography $seedGeography,
         private readonly SeedPlatformAccess $seedPlatformAccess,
         private readonly SeedReasonCodes $seedReasonCodes,
+        private readonly SeedSubscriptionPlans $seedSubscriptionPlans,
         private readonly CreateArtisanBusinessProfile $createArtisanBusinessProfile,
         private readonly UpdateArtisanBusinessLocation $updateArtisanBusinessLocation,
         private readonly CreateCustomerProfile $createCustomerProfile,
@@ -74,6 +75,7 @@ class SeedPilotUsers
         $this->seedGeography->handle();
         $this->seedPlatformAccess->handle();
         $this->seedReasonCodes->handle();
+        $this->seedSubscriptionPlans->handle();
 
         return DB::transaction(function (): array {
             $country = Country::query()->where('iso_code', 'NG')->firstOrFail();

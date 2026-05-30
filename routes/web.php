@@ -6,14 +6,19 @@ use App\Http\Controllers\Artisan\KycController;
 use App\Http\Controllers\Artisan\OnboardingController;
 use App\Http\Controllers\Artisan\ProfileController as ArtisanProfileController;
 use App\Http\Controllers\Artisan\ServiceController as ArtisanServiceController;
+use App\Http\Controllers\Artisan\SubscriptionController as ArtisanSubscriptionController;
+use App\Http\Controllers\Artisan\WalletController as ArtisanWalletController;
 use App\Http\Controllers\Identity\AccountClaimController;
 use App\Http\Controllers\Identity\PhoneVerificationController;
 use App\Http\Controllers\Teams\TeamInvitationController;
+use App\Http\Controllers\Webhooks\PaystackWebhookController;
 use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
+
+Route::post('webhooks/paystack', PaystackWebhookController::class)->name('webhooks.paystack');
 
 Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])
@@ -32,6 +37,9 @@ Route::prefix('{current_team}')
             Route::get('kyc', [KycController::class, 'show'])->name('kyc.show');
             Route::post('kyc', [KycController::class, 'store'])->name('kyc.store');
             Route::post('field-visits', [FieldVisitController::class, 'store'])->name('field-visits.store');
+            Route::get('subscription', [ArtisanSubscriptionController::class, 'show'])->name('subscription.show');
+            Route::post('subscription', [ArtisanSubscriptionController::class, 'store'])->name('subscription.store');
+            Route::get('wallet', [ArtisanWalletController::class, 'show'])->name('wallet.show');
         });
     });
 

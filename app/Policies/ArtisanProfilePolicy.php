@@ -50,6 +50,22 @@ class ArtisanProfilePolicy
             && $this->view($user, $artisanProfile);
     }
 
+    public function manageSubscription(User $user, ArtisanProfile $artisanProfile): bool
+    {
+        return $artisanProfile->user_id === $user->id
+            && $user->can(PlatformPermission::ManageOwnSubscription->value);
+    }
+
+    public function viewWallet(User $user, ArtisanProfile $artisanProfile): bool
+    {
+        if ($artisanProfile->user_id === $user->id) {
+            return $user->can(PlatformPermission::ViewOwnWallet->value);
+        }
+
+        return $user->can(PlatformPermission::ViewPayments->value)
+            && $this->view($user, $artisanProfile);
+    }
+
     /**
      * Determine whether the user can delete the model.
      */

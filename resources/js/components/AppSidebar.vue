@@ -4,10 +4,12 @@ import {
     BookOpen,
     BriefcaseBusiness,
     ClipboardCheck,
+    CreditCard,
     FolderGit2,
     IdCard,
     LayoutGrid,
     Smartphone,
+    WalletCards,
     Wrench,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -32,6 +34,8 @@ import { show as artisanKyc } from '@/routes/artisan/kyc';
 import { create as artisanOnboarding } from '@/routes/artisan/onboarding';
 import { edit as artisanProfile } from '@/routes/artisan/profile';
 import { index as artisanServices } from '@/routes/artisan/services';
+import { show as artisanSubscription } from '@/routes/artisan/subscription';
+import { show as artisanWallet } from '@/routes/artisan/wallet';
 import type { NavItem } from '@/types';
 
 const page = usePage();
@@ -73,6 +77,20 @@ const mainNavItems = computed<NavItem[]>(() => [
             ? artisanKyc(page.props.currentTeam.slug).url
             : '/',
         icon: ClipboardCheck,
+    },
+    {
+        title: 'Subscription',
+        href: page.props.currentTeam
+            ? artisanSubscription(page.props.currentTeam.slug).url
+            : '/',
+        icon: CreditCard,
+    },
+    {
+        title: 'Wallet',
+        href: page.props.currentTeam
+            ? artisanWallet(page.props.currentTeam.slug).url
+            : '/',
+        icon: WalletCards,
     },
     {
         title: 'Onboarding',
