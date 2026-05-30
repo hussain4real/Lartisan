@@ -1,9 +1,9 @@
 # Lartisan App Technical Specification
 
-Version: 3.0 implementation blueprint
-Date: 29 May 2026
+Version: 3.1 implementation blueprint
+Date: 30 May 2026
 Source: `docs/lartisan_brs.md`
-Status: Build-ready product and engineering specification
+Status: Build-ready product and engineering specification; implementation notes current through Phase 6
 
 ## 1. Executive Technical Summary
 
@@ -227,7 +227,7 @@ This section defines the target model set. Exact migrations should be generated 
 | Field visit          | Scheduled, InProgress, Completed, Failed, NeedsRevisit, Cancelled.                                                      |
 | Service              | Draft, Active, Hidden, Suspended, Archived.                                                                             |
 | Availability         | Online, Busy, Offline, Vacation.                                                                                        |
-| Booking              | Requested, Accepted, Rejected, Cancelled, InProgress, Finished, CustomerConfirmed, Paid, Disputed, Settled, Reviewed.   |
+| Booking              | Requested, Accepted, Rejected, InProgress, Finished, Confirmed, Cancelled. Paid, Disputed, Settled, and Reviewed are later lifecycle extensions. |
 | Payment              | Pending, Processing, Successful, Failed, Refunded, PartiallyRefunded, Reversed.                                         |
 | Wallet ledger        | BookingCredit, CommissionDebit, FeeDebit, PayoutDebit, RefundDebit, AdjustmentCredit, AdjustmentDebit.                  |
 | Payout               | Pending, InReview, Approved, Processing, Paid, Failed, Retrying, Cancelled, Adjusted.                                   |
@@ -260,6 +260,8 @@ Use PHP backed enums with TitleCase keys for statuses and role names.
 6. Artisan claims the account before managing bookings or payouts.
 
 ### 8.3 Booking And Payment
+
+Phase 6 currently implements marketplace discovery, guest and registered booking requests, secure tracker links, customer confirmation, artisan booking lifecycle actions, booking status history, and wallet release after confirmed quoted work. OTP-at-booking, booking checkout/escrow, transactional notifications, chat, disputes, and verified reviews remain later phases.
 
 1. Customer selects category, location, schedule, description, and optional images.
 2. Guest customers verify phone by OTP; registered customers may reuse saved addresses.
@@ -296,29 +298,40 @@ Use PHP backed enums with TitleCase keys for statuses and role names.
 
 ### 9.1 Customer Inertia Routes
 
-| Method | Route                         | Purpose                                                |
-| ------ | ----------------------------- | ------------------------------------------------------ |
-| GET    | `/`                           | Marketplace home, category discovery, location search. |
-| GET    | `/services`                   | Search and filtered discovery.                         |
-| GET    | `/artisans/{artisan}`         | Public artisan profile.                                |
-| POST   | `/bookings`                   | Create guest or registered booking request.            |
-| GET    | `/bookings/{booking}`         | Secure booking tracker.                                |
-| POST   | `/bookings/{booking}/pay`     | Start checkout.                                        |
-| POST   | `/bookings/{booking}/confirm` | Confirm completion.                                    |
-| POST   | `/bookings/{booking}/reviews` | Submit verified review.                                |
+| Method | Route                                                   | Purpose                                                          |
+| ------ | ------------------------------------------------------- | ---------------------------------------------------------------- |
+| GET    | `/`                                                     | Welcome entry point.                                             |
+| GET    | `/marketplace`                                          | Search verified subscribed artisans by keyword, category, and geography. |
+| GET    | `/marketplace/artisans/{artisanProfile}`                | Public artisan profile, services, location, availability, and portfolio. |
+| GET    | `/marketplace/artisans/{artisanProfile}/book`           | Guest or registered booking request form.                        |
+| POST   | `/marketplace/artisans/{artisanProfile}/bookings`       | Create guest or registered booking request.                      |
+| GET    | `/booking-tracker/{trackerCode}?token=...`              | Secure single-booking tracker link.                              |
+| POST   | `/booking-tracker/{trackerCode}/confirm`                | Confirm completion from the secure tracker.                      |
+| GET    | `/customer/bookings`                                    | Registered customer booking list.                                |
+| GET    | `/customer/bookings/{booking}`                          | Registered customer booking detail.                              |
+| POST   | `/customer/bookings/{booking}/confirm`                  | Confirm completion from the signed-in customer surface.           |
+
+Booking payment, review submission, saved-address selection, and guest account upgrade routes are intentionally outside the current Phase 6 route set.
 
 ### 9.2 Artisan Routes
 
-| Method    | Route                         | Purpose                          |
-| --------- | ----------------------------- | -------------------------------- |
-| GET       | `/artisan`                    | Artisan dashboard.               |
-| GET/PATCH | `/artisan/profile`            | Business profile.                |
-| GET/POST  | `/artisan/kyc`                | KYC submission and corrections.  |
-| CRUD      | `/artisan/services`           | Catalog management.              |
-| PATCH     | `/artisan/bookings/{booking}` | Accept, reject, update progress. |
-| GET       | `/artisan/wallet`             | Ledger and payout history.       |
-| POST      | `/artisan/payouts`            | Request payout.                  |
-| GET/POST  | `/artisan/subscription`       | Plan selection and renewal.      |
+Authenticated artisan routes are scoped under the current team prefix: `/{current_team}/artisan`.
+
+| Method    | Route                              | Purpose                          |
+| --------- | ---------------------------------- | -------------------------------- |
+| GET       | `/artisan`                         | Artisan dashboard.               |
+| GET/PATCH | `/artisan/profile`                 | Business profile.                |
+| POST      | `/artisan/profile/portfolio`       | Public portfolio media upload.   |
+| GET/POST  | `/artisan/kyc`                     | KYC submission and corrections.  |
+| POST      | `/artisan/field-visits`            | Field visit evidence capture.    |
+| GET/POST  | `/artisan/services`                | Catalog management.              |
+| GET       | `/artisan/bookings`                | Artisan booking queue.           |
+| POST      | `/artisan/bookings/{booking}/accept` | Accept requested booking.      |
+| POST      | `/artisan/bookings/{booking}/reject` | Reject requested booking.      |
+| POST      | `/artisan/bookings/{booking}/start` | Start accepted work.            |
+| POST      | `/artisan/bookings/{booking}/finish` | Mark in-progress work finished. |
+| GET       | `/artisan/wallet`                  | Ledger and payout history.       |
+| GET/POST  | `/artisan/subscription`            | Plan selection and renewal.      |
 
 ### 9.3 Operational Panels
 
@@ -348,7 +361,7 @@ Use private disks for sensitive identity, address, finance, and dispute media.
 | ArtisanProfile | `portfolio`                                                                   | Public after moderation.                  |
 | KycSubmission  | `government_id`, `self_portrait`, `address_evidence`, `business_registration` | Private.                                  |
 | FieldVisit     | `visit_photos`, `shop_photos`, `checklist_evidence`                           | Private operations.                       |
-| Booking        | `customer_job_photos`, `artisan_completion_photos`                            | Scoped to booking parties and operations. |
+| Booking        | `booking_attachments`                                                         | Scoped to booking parties and operations; dedicated customer/artisan proof collections can be split later. |
 | Dispute        | `evidence`                                                                    | Private operations and involved parties.  |
 | Review         | `proof_of_work`                                                               | Public only after moderation rules pass.  |
 

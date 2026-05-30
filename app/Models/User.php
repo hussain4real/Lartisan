@@ -37,6 +37,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read Team|null $currentTeam
  * @property-read Membership|null $pivot
  * @property-read Collection<int, ArtisanProfile> $artisanProfiles
+ * @property-read Collection<int, Booking> $customerBookings
  * @property-read CustomerProfile|null $customerProfile
  */
 #[Fillable([
@@ -91,6 +92,14 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
     public function customerProfile(): HasOne
     {
         return $this->hasOne(CustomerProfile::class);
+    }
+
+    /**
+     * @return HasMany<Booking, $this>
+     */
+    public function customerBookings(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'customer_id');
     }
 
     /**
@@ -195,6 +204,14 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
     public function statusHistories(): HasMany
     {
         return $this->hasMany(StatusHistory::class, 'actor_id');
+    }
+
+    /**
+     * @return HasMany<BookingStatusHistory, $this>
+     */
+    public function bookingStatusHistories(): HasMany
+    {
+        return $this->hasMany(BookingStatusHistory::class, 'actor_id');
     }
 
     public function canAccessPanel(Panel $panel): bool

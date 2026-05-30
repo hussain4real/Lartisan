@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import {
     BookOpen,
     BriefcaseBusiness,
+    CalendarCheck,
     ClipboardCheck,
     CreditCard,
     FolderGit2,
@@ -30,6 +31,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { dashboard as artisanDashboard } from '@/routes/artisan';
+import { index as artisanBookings } from '@/routes/artisan/bookings';
 import { show as artisanKyc } from '@/routes/artisan/kyc';
 import { create as artisanOnboarding } from '@/routes/artisan/onboarding';
 import { edit as artisanProfile } from '@/routes/artisan/profile';
@@ -70,6 +72,13 @@ const mainNavItems = computed<NavItem[]>(() => [
             ? artisanServices(page.props.currentTeam.slug).url
             : '/',
         icon: Wrench,
+    },
+    {
+        title: 'Bookings',
+        href: page.props.currentTeam
+            ? artisanBookings(page.props.currentTeam.slug).url
+            : '/',
+        icon: CalendarCheck,
     },
     {
         title: 'KYC',

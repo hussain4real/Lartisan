@@ -50,7 +50,6 @@ Local Government Admins own day-to-day Lartisan operations inside one LGA. They 
 
 ## Current Limitations
 
-- Customer booking and dispute queues are planned later.
+- Operations booking exception and dispute queues are planned later.
 - Payout approval queues are planned later.
 - LGA finance reporting is not yet a complete operations panel.
-

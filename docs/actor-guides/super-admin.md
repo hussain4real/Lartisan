@@ -45,5 +45,4 @@ Super Admins govern the whole Lartisan platform. They own global access, risk po
 
 - Subscription plan management is seeded in code; a Super Admin plan-management UI is not implemented yet.
 - Payout processing and finance operation panels are planned later.
-- Booking, dispute, and review panels are planned later.
-
+- Operations booking exception, dispute, and review panels are planned later.

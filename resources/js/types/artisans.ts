@@ -177,3 +177,117 @@ export type PayoutAccountItem = {
     status: string;
     verifiedAt: string | null;
 };
+
+export type MarketplaceTerritoryOption = {
+    id: number;
+    name: string;
+};
+
+export type MarketplaceLocalGovernmentOption = {
+    id: number;
+    name: string;
+    territories: MarketplaceTerritoryOption[];
+};
+
+export type MarketplaceStateOption = {
+    id: number;
+    name: string;
+    localGovernments: MarketplaceLocalGovernmentOption[];
+};
+
+export type MarketplaceFilters = {
+    query: string | null;
+    serviceCategoryId: number | null;
+    stateId: number | null;
+    localGovernmentId: number | null;
+    territoryId: number | null;
+};
+
+export type MarketplaceArtisanCard = {
+    id: number;
+    businessName: string;
+    availabilityStatus: string;
+    verificationStatus: string;
+    subscriptionStatus: string;
+    location: string;
+    servicesCount: number;
+};
+
+export type MarketplaceService = {
+    id: number;
+    title: string;
+    description: string | null;
+    startingPrice: string | null;
+    currencyCode: string;
+    category: ServiceCategoryOption;
+};
+
+export type MarketplacePortfolioItem = {
+    id: number;
+    name: string;
+    url: string;
+};
+
+export type MarketplaceArtisanDetail = MarketplaceArtisanCard & {
+    publicSummary: string | null;
+    yearsExperience: number | null;
+    serviceRadiusKm: number | null;
+    publicPhone: string | null;
+    publicEmail: string | null;
+    services: MarketplaceService[];
+    portfolio: MarketplacePortfolioItem[];
+};
+
+export type BookingServiceSummary = {
+    id: number;
+    title: string;
+    category: string;
+};
+
+export type BookingArtisanSummary = {
+    id: number;
+    businessName: string;
+};
+
+export type BookingHistoryItem = {
+    id: number;
+    fromStatus: string | null;
+    toStatus: string;
+    notes: string | null;
+    actorName: string | null;
+    createdAt: string | null;
+};
+
+export type BookingAddressSnapshot = {
+    line_1?: string | null;
+    line_2?: string | null;
+    landmark?: string | null;
+    country_id?: number | null;
+    state_id?: number | null;
+    local_government_id?: number | null;
+    territory_id?: number | null;
+};
+
+export type BookingDetail = {
+    id: number;
+    trackerCode: string;
+    status: string;
+    customerName: string;
+    customerPhone?: string;
+    customerEmail?: string | null;
+    scheduledAt: string | null;
+    description?: string | null;
+    quotedAmount?: number | null;
+    quotedAmountDisplay: string | null;
+    currencyCode: string;
+    address?: BookingAddressSnapshot;
+    artisan: BookingArtisanSummary;
+    service: BookingServiceSummary | null;
+    histories?: BookingHistoryItem[];
+};
+
+export type ArtisanBookingItem = BookingDetail & {
+    customerPhone: string;
+    customerEmail: string | null;
+    address: BookingAddressSnapshot;
+};

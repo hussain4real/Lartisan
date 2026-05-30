@@ -44,5 +44,5 @@ Area Agents handle field execution. They support artisan onboarding, collect ver
 
 - A dedicated mobile field app is not implemented yet.
 - Offline capture and later sync are planned later.
+- Customer booking management is not part of the Area Agent panel yet.
 - Support case and dispute flows are planned later.
-
