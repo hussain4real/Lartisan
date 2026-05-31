@@ -14,6 +14,8 @@ Area Agents handle field execution. They support artisan onboarding, collect ver
 - Capture visit status, notes, coordinates, and checklist evidence.
 - Support agent-assisted artisan onboarding.
 - Flag incomplete, suspicious, or mismatched field evidence for LGA Admin review.
+- View and support dispute queues for assigned territories.
+- Capture local context for support cases and dispute follow-up.
 
 ## Standard Workflow
 
@@ -24,6 +26,7 @@ Area Agents handle field execution. They support artisan onboarding, collect ver
 5. Confirm physical presence, service type, and location consistency.
 6. Record field visit status, notes, coordinates, and checklist evidence.
 7. Submit findings for LGA Admin review.
+8. Follow up on local dispute evidence when assigned or when the artisan belongs to an assigned territory.
 
 ## Field Visit Rules
 
@@ -39,10 +42,11 @@ Area Agents handle field execution. They support artisan onboarding, collect ver
 - Suspicious profile: flag to LGA Admin.
 - Severe safety, fraud, or misconduct issue: escalate to LGA Admin immediately.
 - Multi-territory or repeated issue: LGA Admin escalates to State Coordinator.
+- Dispute needing formal decision: escalate to LGA Admin with notes and evidence.
 
 ## Current Limitations
 
 - A dedicated mobile field app is not implemented yet.
 - Offline capture and later sync are planned later.
 - Customer booking management is not part of the Area Agent panel yet.
-- Support case and dispute flows are planned later.
+- Area Agents support dispute evidence and follow-up; formal policy decisions should remain with LGA Admin, State Coordinator, or Super Admin.

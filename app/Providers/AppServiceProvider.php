@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\Documents\DocumentRenderer;
 use App\Contracts\Payments\PaymentProvider;
+use App\Services\Documents\LaravelPdfDocumentRenderer;
 use App\Services\Payments\PaystackPaymentProvider;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -17,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(DocumentRenderer::class, LaravelPdfDocumentRenderer::class);
         $this->app->bind(PaymentProvider::class, PaystackPaymentProvider::class);
     }
 

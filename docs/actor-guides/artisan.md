@@ -4,7 +4,7 @@ Primary surface: `/{team}/artisan`
 
 ## Purpose
 
-Artisans use Lartisan to prepare a verified public business listing, manage services, submit KYC, activate a paid listing subscription, manage booking requests, and view wallet information.
+Artisans use Lartisan to prepare a verified public business listing, manage services, submit KYC, activate a paid listing subscription, manage booking requests, view wallet information, request payouts, and raise booking disputes when support is needed.
 
 ## Current Workspace Pages
 
@@ -15,7 +15,7 @@ Artisans use Lartisan to prepare a verified public business listing, manage serv
 | Services | Add catalog entries, service category, description, price, currency, and status. |
 | KYC | Upload verification evidence and view latest submission status. |
 | Subscription | Select a listing plan and start Paystack checkout. |
-| Wallet | View wallet balances, ledger entries, and payout account records. |
+| Wallet | View wallet balances, ledger entries, payout account records, payout request form, and recent payouts. |
 | Bookings | View customer booking requests and move work through the booking lifecycle. |
 | Onboarding | Complete assisted onboarding details. |
 | Phone verification | Verify account phone number with OTP. |
@@ -36,6 +36,8 @@ Artisans use Lartisan to prepare a verified public business listing, manage serv
 12. Start accepted work when the job begins.
 13. Mark in-progress work as finished when ready for customer confirmation.
 14. Review wallet and ledger entries after confirmed booking completion.
+15. Request a payout when a verified payout account exists and available balance is sufficient.
+16. Open a booking dispute from the booking queue when customer, scope, or completion issues require operations support.
 
 ## Booking Workflow
 
@@ -76,9 +78,17 @@ Current KYC upload collections:
 - Balance corrections must be posted as adjustment entries.
 - Do not expect wallet records to be manually edited.
 - Confirmed bookings post booking-credit ledger entries once; repeated release attempts return the existing ledger entry.
-- Payout processing is planned later.
+- Payout requests require a verified payout account and sufficient available balance.
+- Approved payout requests post immutable payout-debit ledger entries.
+- Failed payout processing attempts remain visible in payout history and may be retried by operations.
+
+## Dispute Rules
+
+- Use booking disputes for service, customer, invoice, completion, or safety concerns that need operational review.
+- Add concise notes and evidence when available.
+- Dispute evidence is private to involved parties and authorized operations users.
+- Formal operational decisions are handled through scoped Filament queues.
 
 ## Current Limitations
 
-- Booking payment collection, chat, dispute handling, notifications, and reviews are planned later.
-- Payout requests and payout processing are planned later.
+- Booking payment collection, chat, notification delivery, payout account self-service, and artisan review responses are planned later.

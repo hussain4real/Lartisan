@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -158,6 +160,30 @@ class Booking extends Model implements HasMedia
     public function statusHistories(): HasMany
     {
         return $this->hasMany(BookingStatusHistory::class);
+    }
+
+    /**
+     * @return HasOne<Review, $this>
+     */
+    public function review(): HasOne
+    {
+        return $this->hasOne(Review::class);
+    }
+
+    /**
+     * @return HasMany<Dispute, $this>
+     */
+    public function disputes(): HasMany
+    {
+        return $this->hasMany(Dispute::class);
+    }
+
+    /**
+     * @return MorphMany<SupportCase, $this>
+     */
+    public function supportCases(): MorphMany
+    {
+        return $this->morphMany(SupportCase::class, 'supportable');
     }
 
     /**

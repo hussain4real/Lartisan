@@ -44,6 +44,14 @@ class Wallet extends Model
     }
 
     /**
+     * @return HasMany<Payout, $this>
+     */
+    public function payouts(): HasMany
+    {
+        return $this->hasMany(Payout::class);
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

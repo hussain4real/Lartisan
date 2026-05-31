@@ -94,7 +94,7 @@ class KycSubmissionsTable
 
     private static function reviewAction(): Action
     {
-        return self::decisionAction('review', 'Mark in review', PlatformPermission::ReviewStandardKyc);
+        return self::decisionAction('review', 'Mark in review');
     }
 
     private static function fieldVisitAction(): Action
@@ -149,25 +149,25 @@ class KycSubmissionsTable
 
     private static function approveAction(): Action
     {
-        return self::decisionAction('approve', 'Approve', PlatformPermission::ReviewStandardKyc);
+        return self::decisionAction('approve', 'Approve');
     }
 
     private static function returnAction(): Action
     {
-        return self::decisionAction('return', 'Return', PlatformPermission::ReviewStandardKyc);
+        return self::decisionAction('return', 'Return');
     }
 
     private static function rejectAction(): Action
     {
-        return self::decisionAction('reject', 'Reject', PlatformPermission::ReviewStandardKyc);
+        return self::decisionAction('reject', 'Reject');
     }
 
     private static function escalateAction(): Action
     {
-        return self::decisionAction('escalate', 'Escalate', PlatformPermission::ReviewStandardKyc);
+        return self::decisionAction('escalate', 'Escalate');
     }
 
-    private static function decisionAction(string $name, string $label, PlatformPermission $permission): Action
+    private static function decisionAction(string $name, string $label): Action
     {
         return Action::make($name)
             ->label($label)
@@ -187,7 +187,7 @@ class KycSubmissionsTable
                     ->maxLength(2000)
                     ->columnSpanFull(),
             ])
-            ->visible(fn (KycSubmission $record): bool => self::canRunDecision($record, $permission))
+            ->visible(fn (KycSubmission $record): bool => self::canRunDecision($record))
             ->action(function (KycSubmission $record, array $data) use ($name): void {
                 /** @var User $reviewer */
                 $reviewer = auth()->user();
@@ -210,12 +210,12 @@ class KycSubmissionsTable
             });
     }
 
-    private static function canRunDecision(KycSubmission $record, PlatformPermission $permission): bool
+    private static function canRunDecision(KycSubmission $record): bool
     {
         $user = auth()->user();
 
         return $user instanceof User
-            && $user->can($permission->value)
+            && self::hasDecisionPermission($user)
             && Gate::forUser($user)->allows('update', $record)
             && ! in_array($record->status, [
                 ArtisanVerificationStatus::Approved,
@@ -223,6 +223,12 @@ class KycSubmissionsTable
                 ArtisanVerificationStatus::Returned,
                 ArtisanVerificationStatus::Suspended,
             ], true);
+    }
+
+    private static function hasDecisionPermission(User $user): bool
+    {
+        return $user->can(PlatformPermission::ReviewStandardKyc->value)
+            || $user->can(PlatformPermission::ReviewEscalatedKyc->value);
     }
 
     private static function canRecordFieldVisit(KycSubmission $record): bool

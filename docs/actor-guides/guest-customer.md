@@ -33,7 +33,7 @@ Guest Customers can make limited one-off booking requests without creating a ful
 - Do not share the tracker link with people who should not see the booking.
 - Guest links must not expose unrelated customer, artisan, payment, or address records.
 - Provide accurate contact and address details so the artisan can respond safely.
-- Reviews should be allowed only after completed paid work.
+- Reviews are available from registered customer accounts after completed paid work.
 
 ## Escalation Path
 
@@ -44,5 +44,5 @@ Guest Customers can make limited one-off booking requests without creating a ful
 ## Current Limitations
 
 - Guest booking does not currently enforce OTP at submission time.
-- Booking payment, chat, support cases, notification delivery, and guest review flow are planned later.
+- Booking payment, chat, guest dispute submission, notification delivery, and guest review flow are planned later.
 - Guest account claiming is separate from agent-created artisan account claiming.

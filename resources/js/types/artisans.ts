@@ -178,6 +178,16 @@ export type PayoutAccountItem = {
     verifiedAt: string | null;
 };
 
+export type PayoutItem = {
+    id: number;
+    status: string;
+    amount: number;
+    amountDisplay: string;
+    currencyCode: string;
+    requestedAt: string | null;
+    failureReason: string | null;
+};
+
 export type MarketplaceTerritoryOption = {
     id: number;
     name: string;
@@ -258,6 +268,21 @@ export type BookingHistoryItem = {
     createdAt: string | null;
 };
 
+export type BookingReview = {
+    id: number;
+    rating: number;
+    comment: string | null;
+    status: string;
+};
+
+export type BookingDispute = {
+    id: number;
+    status: string;
+    severity: string;
+    subject: string;
+    openedAt: string | null;
+};
+
 export type BookingAddressSnapshot = {
     line_1?: string | null;
     line_2?: string | null;
@@ -284,6 +309,9 @@ export type BookingDetail = {
     artisan: BookingArtisanSummary;
     service: BookingServiceSummary | null;
     histories?: BookingHistoryItem[];
+    canReview?: boolean;
+    review?: BookingReview | null;
+    disputes?: BookingDispute[];
 };
 
 export type ArtisanBookingItem = BookingDetail & {

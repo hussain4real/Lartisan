@@ -15,6 +15,9 @@ Local Government Admins own day-to-day Lartisan operations inside one LGA. They 
 - Reassign territory coverage with a valid territory-assignment reason code.
 - Moderate artisan profiles within LGA scope.
 - Suspend artisan profiles when local evidence supports it.
+- Review, escalate, or resolve local booking and review disputes.
+- Monitor local support cases created from disputes.
+- Generate LGA-scoped report snapshots.
 
 ## Standard Workflow
 
@@ -26,6 +29,8 @@ Local Government Admins own day-to-day Lartisan operations inside one LGA. They 
 6. Return incomplete profiles with clear correction notes.
 7. Reject or escalate suspicious profiles using the right reason code.
 8. Review Area Agent coverage and reassign territories when coverage changes.
+9. Review local dispute queues and resolve standard local cases with clear notes.
+10. Escalate severe, repeated, high-value, or policy-sensitive disputes to State Coordinator.
 
 ## KYC Decision Rules
 
@@ -47,9 +52,10 @@ Local Government Admins own day-to-day Lartisan operations inside one LGA. They 
 - Local territory coverage.
 - Agent performance and local follow-up.
 - Local suspensions, unless a state-level policy or risk issue is involved.
+- Standard local dispute resolution and support-case follow-up.
 
 ## Current Limitations
 
-- Operations booking exception and dispute queues are planned later.
-- Payout approval queues are planned later.
-- LGA finance reporting is not yet a complete operations panel.
+- Operations booking exception queues and dedicated review moderation panels are planned later.
+- Payout approval remains a Super Admin finance responsibility.
+- LGA finance reporting is limited to scoped report snapshots and current operational metrics.

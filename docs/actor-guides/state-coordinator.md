@@ -15,6 +15,9 @@ State Coordinators supervise Lartisan operations within one state. They focus on
 - Review area assignments in the state.
 - Moderate artisan profiles within state scope.
 - View state-level reporting permissions where available.
+- Review and resolve scoped dispute queues for severe or escalated cases.
+- View scoped payout records where finance visibility is allowed.
+- Generate state report snapshots.
 
 ## Standard Workflow
 
@@ -25,6 +28,7 @@ State Coordinators supervise Lartisan operations within one state. They focus on
 5. Review artisan profile suspensions or suspicious verification changes.
 6. Work with LGA Admins to rebalance area coverage.
 7. Escalate platform-wide risk, finance, or policy issues to Super Admin.
+8. Review escalated disputes and state report snapshots.
 
 ## KYC Review Rules
 
@@ -39,8 +43,9 @@ State Coordinators supervise Lartisan operations within one state. They focus on
 - Multi-LGA fraud patterns.
 - State-level agent or LGA performance issues.
 - Severe local disputes that exceed one LGA's authority.
+- Repeated support cases or review disputes that show statewide policy risk.
 
 ## Current Limitations
 
-- Operations booking exception, dispute, review, and customer support queues are planned later.
-- State finance dashboards are not yet fully implemented beyond current permission and data foundations.
+- Operations booking exception queues, dedicated review moderation panels, and customer support inboxes are planned later.
+- State finance dashboards are scoped to current payment/payout visibility and report snapshots.

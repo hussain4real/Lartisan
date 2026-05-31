@@ -95,4 +95,16 @@ class BookingFactory extends Factory
             'finished_at' => now(),
         ]);
     }
+
+    public function confirmed(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => BookingStatus::Confirmed,
+            'accepted_at' => now()->subHours(3),
+            'started_at' => now()->subHours(2),
+            'finished_at' => now()->subHour(),
+            'confirmed_at' => now(),
+            'wallet_released_at' => now(),
+        ]);
+    }
 }

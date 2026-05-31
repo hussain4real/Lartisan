@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Artisan;
 
 use App\Http\Controllers\Controller;
+use App\Models\Payout;
 use App\Models\PayoutAccount;
 use App\Models\Wallet;
 use App\Models\WalletLedgerEntry;
@@ -41,6 +42,12 @@ class WalletController extends Controller
                 ->latest('id')
                 ->get()
                 ->map(fn (PayoutAccount $account): array => $this->payoutAccountPayload($account))
+                ->all(),
+            'payouts' => $profile->payouts()
+                ->latest('id')
+                ->limit(10)
+                ->get()
+                ->map(fn (Payout $payout): array => $this->payoutPayload($payout))
                 ->all(),
         ]);
     }
@@ -103,6 +110,22 @@ class WalletController extends Controller
             'recipientCode' => $account->recipient_code,
             'status' => $account->status->value,
             'verifiedAt' => $account->verified_at?->toISOString(),
+        ];
+    }
+
+    /**
+     * @return array{id: int, status: string, amount: int, amountDisplay: string, currencyCode: string, requestedAt: string|null, failureReason: string|null}
+     */
+    private function payoutPayload(Payout $payout): array
+    {
+        return [
+            'id' => $payout->id,
+            'status' => $payout->status->value,
+            'amount' => $payout->amount,
+            'amountDisplay' => number_format($payout->amount / 100, 2),
+            'currencyCode' => $payout->currency_code,
+            'requestedAt' => $payout->requested_at->toISOString(),
+            'failureReason' => $payout->failure_reason,
         ];
     }
 }

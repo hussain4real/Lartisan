@@ -1,9 +1,9 @@
 # Lartisan App Technical Specification
 
-Version: 3.1 implementation blueprint
-Date: 30 May 2026
+Version: 3.2 implementation blueprint
+Date: 31 May 2026
 Source: `docs/lartisan_brs.md`
-Status: Build-ready product and engineering specification; implementation notes current through Phase 6
+Status: Build-ready product and engineering specification; implementation notes current through Phase 7
 
 ## 1. Executive Technical Summary
 
@@ -261,7 +261,7 @@ Use PHP backed enums with TitleCase keys for statuses and role names.
 
 ### 8.3 Booking And Payment
 
-Phase 6 currently implements marketplace discovery, guest and registered booking requests, secure tracker links, customer confirmation, artisan booking lifecycle actions, booking status history, and wallet release after confirmed quoted work. OTP-at-booking, booking checkout/escrow, transactional notifications, chat, disputes, and verified reviews remain later phases.
+Phase 6 and Phase 7 currently implement marketplace discovery, guest and registered booking requests, secure tracker links, customer confirmation, artisan booking lifecycle actions, booking status history, wallet release after confirmed quoted work, verified reviews, booking/review disputes, support case creation from disputes, payout requests, manual payout processing, and scoped report snapshots. OTP-at-booking, booking checkout/escrow, transactional notifications, chat, guest review submission, and dedicated support inboxes remain later phases.
 
 1. Customer selects category, location, schedule, description, and optional images.
 2. Guest customers verify phone by OTP; registered customers may reuse saved addresses.
@@ -275,6 +275,8 @@ Phase 6 currently implements marketplace discovery, guest and registered booking
 
 ### 8.4 Dispute Flow
 
+Phase 7 implements booking and linked-review disputes for registered customers, artisans, and scoped operations users. Each dispute creates an operational support case, can attach private evidence media, and writes audit logs for open, escalate, and resolve actions. Review-linked disputes can mark the review disputed and resolution can hide the review when policy requires it.
+
 1. Customer, artisan, or operations user opens a dispute against a booking, review, payment, or profile.
 2. Evidence media is stored in dispute collections.
 3. Area Agent may collect local evidence.
@@ -283,7 +285,11 @@ Phase 6 currently implements marketplace discovery, guest and registered booking
 6. Finance or Super Admin handles refund, adjustment, or payout exceptions.
 7. Resolution writes audit logs and immutable ledger adjustments where money changes.
 
+Payment/profile dispute targets and money-changing dispute adjustments are future extensions on top of the current booking/review dispute implementation.
+
 ### 8.5 Payout Flow
+
+Phase 7 implements artisan payout requests from verified payout accounts, Super Admin approval, immutable payout-debit ledger entries, manual processing, payout attempts, retry states, and failed payout records. Provider transfer dispatch, transfer webhooks, polling, and scheduled payout batches are future extensions.
 
 1. Artisan submits payout account.
 2. Account is verified by provider or manual review.
@@ -310,8 +316,11 @@ Phase 6 currently implements marketplace discovery, guest and registered booking
 | GET    | `/customer/bookings`                                    | Registered customer booking list.                                |
 | GET    | `/customer/bookings/{booking}`                          | Registered customer booking detail.                              |
 | POST   | `/customer/bookings/{booking}/confirm`                  | Confirm completion from the signed-in customer surface.           |
+| POST   | `/customer/bookings/{booking}/reviews`                  | Submit a verified review for an eligible confirmed paid booking.  |
+| GET    | `/customer/bookings/{booking}/disputes/create`          | Open a dispute for an owned booking.                              |
+| POST   | `/customer/bookings/{booking}/disputes`                 | Create a customer booking or review dispute with optional evidence. |
 
-Booking payment, review submission, saved-address selection, and guest account upgrade routes are intentionally outside the current Phase 6 route set.
+Booking payment, saved-address selection, guest dispute submission, guest review submission, and guest account upgrade routes are intentionally outside the current Phase 7 route set.
 
 ### 9.2 Artisan Routes
 
@@ -331,16 +340,19 @@ Authenticated artisan routes are scoped under the current team prefix: `/{curren
 | POST      | `/artisan/bookings/{booking}/start` | Start accepted work.            |
 | POST      | `/artisan/bookings/{booking}/finish` | Mark in-progress work finished. |
 | GET       | `/artisan/wallet`                  | Ledger and payout history.       |
+| POST      | `/artisan/wallet/payouts`          | Request payout from available balance using a verified payout account. |
+| GET       | `/artisan/bookings/{booking}/disputes/create` | Open a dispute for a workspace booking. |
+| POST      | `/artisan/bookings/{booking}/disputes` | Create an artisan booking dispute with optional evidence. |
 | GET/POST  | `/artisan/subscription`            | Plan selection and renewal.      |
 
 ### 9.3 Operational Panels
 
 | Panel             | Route prefix | Main modules                                                                           |
 | ----------------- | ------------ | -------------------------------------------------------------------------------------- |
-| Super Admin       | `/admin`     | Settings, roles, states, LGAs, categories, plans, finance, risk, reports.              |
-| State Coordinator | `/state`     | State dashboard, LGA admins, escalated KYC, disputes, state reporting.                 |
-| LGA Admin         | `/lga`       | Area agents, local KYC queue, visits, disputes, support, LGA metrics.                  |
-| Area Agent        | `/agent`     | Assigned territories, assisted registrations, visits, support tasks, evidence capture. |
+| Super Admin       | `/admin`     | Settings, roles, states, LGAs, categories, plans, finance, payout processing, disputes, risk, reports. |
+| State Coordinator | `/state`     | State dashboard, LGA admins, escalated KYC, scoped disputes, payout visibility, state reporting. |
+| LGA Admin         | `/lga`       | Area agents, local KYC queue, visits, local disputes, support cases, LGA report snapshots. |
+| Area Agent        | `/agent`     | Assigned territories, assisted registrations, visits, support tasks, dispute evidence capture. |
 
 ### 9.4 Webhooks
 
@@ -362,12 +374,12 @@ Use private disks for sensitive identity, address, finance, and dispute media.
 | KycSubmission  | `government_id`, `self_portrait`, `address_evidence`, `business_registration` | Private.                                  |
 | FieldVisit     | `visit_photos`, `shop_photos`, `checklist_evidence`                           | Private operations.                       |
 | Booking        | `booking_attachments`                                                         | Scoped to booking parties and operations; dedicated customer/artisan proof collections can be split later. |
-| Dispute        | `evidence`                                                                    | Private operations and involved parties.  |
+| Dispute        | `dispute_evidence`                                                            | Private operations and involved parties.  |
 | Review         | `proof_of_work`                                                               | Public only after moderation rules pass.  |
 
 ## 11. PDF Documents
 
-Create a `DocumentRenderer` service that wraps Spatie Laravel PDF.
+`DocumentRenderer` wraps Spatie Laravel PDF so controllers and Filament actions do not depend on a specific PDF driver.
 
 | Document                 | Trigger                             | Storage                                |
 | ------------------------ | ----------------------------------- | -------------------------------------- |
@@ -376,6 +388,7 @@ Create a `DocumentRenderer` service that wraps Spatie Laravel PDF.
 | Verification report      | KYC approval, rejection, escalation | Private operations.                    |
 | Dispute pack             | Escalation or legal/support export  | Private operations.                    |
 | Invoice                  | Subscription payment                | Artisan account and finance archive.   |
+| Scoped report snapshot   | Operations report render action     | Private operations.                    |
 
 Default driver: Browsershot. Keep driver configuration centralized so Gotenberg or Cloudflare can replace it without changing controllers.
 

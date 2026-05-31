@@ -11,7 +11,6 @@ use App\Enums\AdminProfileStatus;
 use App\Enums\ArtisanVerificationStatus;
 use App\Enums\FieldVisitStatus;
 use App\Enums\KycRiskLevel;
-use App\Enums\PlatformPermission;
 use App\Enums\PlatformRole;
 use App\Enums\ReasonCodeCategory;
 use App\Filament\Resources\AreaAgentAssignments\AreaAgentAssignmentResource;
@@ -270,7 +269,7 @@ test('filament operation pages dispatch verification actions', function () {
     ]);
     $decisionActionMethod = new ReflectionMethod(KycSubmissionsTable::class, 'decisionAction');
     $decisionActionMethod->setAccessible(true);
-    $unsupportedDecisionAction = $decisionActionMethod->invoke(null, 'unsupported', 'Unsupported', PlatformPermission::ReviewStandardKyc);
+    $unsupportedDecisionAction = $decisionActionMethod->invoke(null, 'unsupported', 'Unsupported');
     assert($unsupportedDecisionAction instanceof Action);
     $unsupportedDecisionActionFunction = $unsupportedDecisionAction->getActionFunction();
     assert($unsupportedDecisionActionFunction instanceof Closure);
@@ -333,13 +332,34 @@ test('filament operation pages dispatch verification actions', function () {
         ])
         ->assertHasNoTableActionErrors();
 
+    $stateEscalatedSubmission = KycSubmission::factory()->submitted()->create([
+        'artisan_profile_id' => phaseFourProfileFor($amac)->id,
+        'risk_level' => KycRiskLevel::High,
+        'status' => ArtisanVerificationStatus::Escalated,
+    ]);
+
+    phaseFourUsePanel('state');
+    phaseFourLivewire($users['stateCoordinator'], ListKycSubmissions::class)
+        ->assertTableActionVisible('review', phaseFourRecordKey($stateEscalatedSubmission))
+        ->assertTableActionVisible('approve', phaseFourRecordKey($stateEscalatedSubmission))
+        ->assertTableActionVisible('return', phaseFourRecordKey($stateEscalatedSubmission))
+        ->assertTableActionVisible('reject', phaseFourRecordKey($stateEscalatedSubmission))
+        ->callTableAction('approve', phaseFourRecordKey($stateEscalatedSubmission), [
+            'reason_code_id' => $documentsComplete->id,
+            'risk_level' => KycRiskLevel::High->value,
+            'notes' => 'Approved from the state queue.',
+        ])
+        ->assertHasNoTableActionErrors();
+
     expect($reviewSubmission->refresh()->status)->toBe(ArtisanVerificationStatus::LgaReview);
     expect($approveSubmission->refresh()->status)->toBe(ArtisanVerificationStatus::Approved);
     expect($returnSubmission->refresh()->status)->toBe(ArtisanVerificationStatus::Returned);
     expect($rejectSubmission->refresh()->status)->toBe(ArtisanVerificationStatus::Rejected);
     expect($escalateSubmission->refresh()->status)->toBe(ArtisanVerificationStatus::Escalated);
+    expect($stateEscalatedSubmission->refresh()->status)->toBe(ArtisanVerificationStatus::Approved);
 
     $suspendProfile = phaseFourProfileFor($amac);
+    phaseFourUsePanel('lga');
     phaseFourLivewire($users['localGovernmentAdmin'], ListArtisanProfiles::class)
         ->assertTableActionVisible('suspend', phaseFourRecordKey($suspendProfile))
         ->callTableAction('suspend', phaseFourRecordKey($suspendProfile), [
