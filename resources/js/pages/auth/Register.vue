@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { computed, watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
@@ -10,8 +11,9 @@ import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
 
-defineProps<{
+const props = defineProps<{
     passwordRules: string;
+    registrationIntent?: 'artisan' | 'customer';
 }>();
 
 defineOptions({
@@ -20,17 +22,49 @@ defineOptions({
         description: 'Enter your details below to create your account',
     },
 });
+
+const isArtisanIntent = computed(() => props.registrationIntent === 'artisan');
+
+const registrationContent = computed(() => ({
+    title: isArtisanIntent.value
+        ? 'Create your artisan account'
+        : 'Create an account',
+    description: isArtisanIntent.value
+        ? 'Create your account to start artisan onboarding'
+        : 'Enter your details below to create your account',
+    button: isArtisanIntent.value ? 'Continue to onboarding' : 'Create account',
+}));
+
+const registerForm = computed(() =>
+    store.form(
+        isArtisanIntent.value ? { query: { intent: 'artisan' } } : undefined,
+    ),
+);
+
+watchEffect(() => {
+    setLayoutProps({
+        title: registrationContent.value.title,
+        description: registrationContent.value.description,
+    });
+});
 </script>
 
 <template>
     <Head title="Register" />
 
     <Form
-        v-bind="store.form()"
+        v-bind="registerForm"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"
         class="flex flex-col gap-6"
     >
+        <input
+            v-if="isArtisanIntent"
+            type="hidden"
+            name="intent"
+            value="artisan"
+        />
+
         <div class="grid gap-6">
             <div class="grid gap-2">
                 <Label for="name">Name</Label>
@@ -97,7 +131,7 @@ defineOptions({
                 data-test="register-user-button"
             >
                 <Spinner v-if="processing" />
-                Create account
+                {{ registrationContent.button }}
             </Button>
         </div>
 

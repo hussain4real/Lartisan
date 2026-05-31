@@ -17,7 +17,13 @@ export type User = {
 };
 
 export type Auth = {
-    user: User;
+    user: User | null;
+    operationPanel: OperationPanel | null;
+};
+
+export type OperationPanel = {
+    id: 'admin' | 'state' | 'lga' | 'agent';
+    title: string;
 };
 
 /* @chisel-passkeys */

@@ -2,6 +2,7 @@
 
 namespace App\Concerns;
 
+use App\Enums\TeamKind;
 use App\Enums\TeamPermission;
 use App\Enums\TeamRole;
 use App\Models\Membership;
@@ -152,11 +153,15 @@ trait HasTeams
     public function toUserTeam(Team $team): UserTeam
     {
         $role = $this->teamRole($team);
+        $kind = $team->kind;
+
+        assert($kind instanceof TeamKind);
 
         return new UserTeam(
             id: $team->id,
             name: $team->name,
             slug: $team->slug,
+            kind: $kind->value,
             isPersonal: $team->is_personal,
             role: $role?->value,
             roleLabel: $role?->label(),

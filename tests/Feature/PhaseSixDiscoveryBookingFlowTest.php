@@ -223,6 +223,11 @@ test('search finds only verified subscribed public artisans and ranks by categor
         query: 'Electrical',
         category: $category,
         state: $primary['state'],
+    );
+    $localResults = app(SearchArtisans::class)->handle(
+        query: 'Electrical',
+        category: $category,
+        state: $primary['state'],
         localGovernment: $primary['localGovernment'],
         territory: $primary['territory'],
     );
@@ -231,7 +236,72 @@ test('search finds only verified subscribed public artisans and ranks by categor
     expect($results->pluck('id')->all())->toContain($primary['profile']->id, $busy['profile']->id, $offline['profile']->id);
     expect($results->first()?->is($primary['profile']))->toBeTrue();
     expect($results->pluck('id')->all())->not->toContain($vacation['profile']->id, $trial['profile']->id);
+    expect($localResults->pluck('id')->all())->toBe([$primary['profile']->id]);
     expect($unfiltered)->toHaveCount(2);
+});
+
+test('marketplace geography filters are scoped and stale child selections are normalized', function () {
+    $context = phaseSixArtisanContext();
+    $otherLocalGovernment = LocalGovernment::factory()->create([
+        'state_id' => $context['state']->id,
+        'name' => 'Phase Six Other LGA',
+    ]);
+    $otherState = State::factory()->create([
+        'country_id' => $context['country']->id,
+        'name' => 'Phase Six Other State',
+    ]);
+    $otherStateLocalGovernment = LocalGovernment::factory()->create([
+        'state_id' => $otherState->id,
+        'name' => 'Phase Six Mismatched LGA',
+    ]);
+    $otherStateTerritory = Territory::factory()->create([
+        'local_government_id' => $otherStateLocalGovernment->id,
+        'name' => 'Phase Six Mismatched Territory',
+    ]);
+
+    $this->get(route('marketplace.index', [
+        'state_id' => $context['state']->id,
+        'local_government_id' => $otherLocalGovernment->id,
+    ]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page): Assert => $page
+            ->component('marketplace/Index')
+            ->where('filters.stateId', $context['state']->id)
+            ->where('filters.localGovernmentId', $otherLocalGovernment->id)
+            ->has('artisans', 0));
+
+    $this->get(route('marketplace.index', [
+        'state_id' => $context['state']->id,
+        'local_government_id' => $otherStateLocalGovernment->id,
+    ]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page): Assert => $page
+            ->component('marketplace/Index')
+            ->where('filters.stateId', $context['state']->id)
+            ->where('filters.localGovernmentId', null)
+            ->where('artisans.0.businessName', 'Phase Six Electrical'));
+
+    $this->get(route('marketplace.index', [
+        'state_id' => $context['state']->id,
+        'territory_id' => $context['territory']->id,
+    ]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page): Assert => $page
+            ->component('marketplace/Index')
+            ->where('filters.stateId', $context['state']->id)
+            ->where('filters.territoryId', $context['territory']->id)
+            ->where('artisans.0.businessName', 'Phase Six Electrical'));
+
+    $this->get(route('marketplace.index', [
+        'state_id' => $context['state']->id,
+        'territory_id' => $otherStateTerritory->id,
+    ]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page): Assert => $page
+            ->component('marketplace/Index')
+            ->where('filters.stateId', $context['state']->id)
+            ->where('filters.territoryId', null)
+            ->where('artisans.0.businessName', 'Phase Six Electrical'));
 });
 
 test('guest and registered customers can create bookings and use secure tracker screens', function () {

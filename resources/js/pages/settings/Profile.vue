@@ -24,7 +24,15 @@ defineOptions({
 });
 
 const page = usePage();
-const user = computed(() => page.props.auth.user);
+const user = computed(() => {
+    const currentUser = page.props.auth.user;
+
+    if (currentUser === null) {
+        throw new Error('Profile settings require an authenticated user.');
+    }
+
+    return currentUser;
+});
 </script>
 
 <template>

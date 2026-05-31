@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\PlatformPermission;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -42,10 +44,39 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $user,
+                'operationPanel' => $this->operationPanelFor($user),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'currentTeam' => fn () => $user?->currentTeam ? $user->toUserTeam($user->currentTeam) : null,
             'teams' => fn () => $user?->toUserTeams(includeCurrent: true) ?? [],
         ];
+    }
+
+    /**
+     * @return array{id: 'admin'|'state'|'lga'|'agent', title: string}|null
+     */
+    private function operationPanelFor(?User $user): ?array
+    {
+        if (! $user instanceof User) {
+            return null;
+        }
+
+        if ($user->can(PlatformPermission::ViewGlobalReports->value)) {
+            return ['id' => 'admin', 'title' => 'Admin panel'];
+        }
+
+        if ($user->can(PlatformPermission::ViewStateReports->value)) {
+            return ['id' => 'state', 'title' => 'State panel'];
+        }
+
+        if ($user->can(PlatformPermission::ViewLocalGovernmentReports->value)) {
+            return ['id' => 'lga', 'title' => 'LGA panel'];
+        }
+
+        if ($user->can(PlatformPermission::ViewAreaReports->value)) {
+            return ['id' => 'agent', 'title' => 'Agent panel'];
+        }
+
+        return null;
     }
 }

@@ -63,6 +63,18 @@ class SearchArtisans
             $builder = $this->applyTextSearch($builder, $queryText);
         }
 
+        if ($state instanceof State) {
+            $builder->where('state_id', $state->id);
+        }
+
+        if ($localGovernment instanceof LocalGovernment) {
+            $builder->where('local_government_id', $localGovernment->id);
+        }
+
+        if ($territory instanceof Territory) {
+            $builder->where('territory_id', $territory->id);
+        }
+
         $profiles = $builder->orderBy('business_name')->get();
 
         /** @var Collection<int, ArtisanProfile> $ranked */
