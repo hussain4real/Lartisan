@@ -113,6 +113,24 @@ const processFlow = [
         icon: WalletCards,
     },
 ];
+
+const mobileProcessFlow = [
+    {
+        title: 'Verified',
+        text: 'KYC cleared',
+        icon: BadgeCheck,
+    },
+    {
+        title: 'Booked',
+        text: 'Work tracked',
+        icon: CalendarCheck,
+    },
+    {
+        title: 'Settled',
+        text: 'Ledger posted',
+        icon: WalletCards,
+    },
+];
 </script>
 
 <template>
@@ -122,10 +140,10 @@ const processFlow = [
     </Head>
 
     <main
-        class="min-h-screen bg-[#f7f3ea] text-[#171915] dark:bg-[#11130f] dark:text-[#f7f3ea]"
+        class="min-h-screen bg-[#f8fafc] text-[#1d1d1d] dark:bg-[#11130f] dark:text-[#f8fafc]"
     >
         <section
-            class="relative isolate min-h-svh overflow-hidden bg-[#171915] text-white"
+            class="relative isolate min-h-svh overflow-hidden bg-[#1d1d1d] text-white"
         >
             <div class="absolute inset-0 hidden lg:block" aria-hidden="true">
                 <div class="absolute inset-y-0 right-0 w-[52%] overflow-hidden">
@@ -161,7 +179,7 @@ const processFlow = [
                                     </p>
                                 </div>
                                 <div
-                                    class="grid size-14 place-items-center rounded-lg bg-[#f8b84e] text-[#2a1b05]"
+                                    class="grid size-14 place-items-center rounded-lg bg-[#f59e0b] text-[#1d1d1d]"
                                 >
                                     <BriefcaseBusiness class="size-6" />
                                 </div>
@@ -182,7 +200,7 @@ const processFlow = [
                                 </div>
                                 <div class="mt-3 h-2 rounded-full bg-white/10">
                                     <div
-                                        class="h-full w-2/3 rounded-full bg-[#f8b84e]"
+                                        class="h-full w-2/3 rounded-full bg-[#f59e0b]"
                                     />
                                 </div>
                             </div>
@@ -231,7 +249,7 @@ const processFlow = [
                         </div>
                     </div>
                 </div>
-                <div class="absolute inset-0 bg-[#171915]/30" />
+                <div class="absolute inset-0 bg-[#1d1d1d]/30" />
             </div>
 
             <header
@@ -243,7 +261,7 @@ const processFlow = [
                     prefetch
                 >
                     <span
-                        class="grid size-10 place-items-center rounded-lg bg-[#f8b84e] text-[#171915] shadow-lg shadow-black/20"
+                        class="grid size-10 place-items-center rounded-lg bg-[#f59e0b] text-[#1d1d1d] shadow-lg shadow-black/20"
                     >
                         <AppLogoIcon class="size-5 fill-current" />
                     </span>
@@ -274,7 +292,7 @@ const processFlow = [
                         </Link>
                         <Link
                             :href="artisanRegisterUrl"
-                            class="rounded-full bg-white px-4 py-2 font-medium text-[#171915] shadow-lg shadow-black/15 transition hover:-translate-y-0.5 hover:bg-[#f8b84e] motion-reduce:hover:translate-y-0"
+                            class="rounded-full bg-white px-4 py-2 font-medium text-[#1d1d1d] shadow-lg shadow-black/15 transition hover:-translate-y-0.5 hover:bg-[#f59e0b] motion-reduce:hover:translate-y-0"
                         >
                             Join
                         </Link>
@@ -289,7 +307,7 @@ const processFlow = [
                     <div
                         class="inline-flex items-center gap-2 rounded-full border border-white/16 bg-white/8 px-3 py-1.5 text-sm text-white/78 backdrop-blur"
                     >
-                        <Sparkles class="size-4 text-[#f8b84e]" />
+                        <Sparkles class="size-4 text-[#f59e0b]" />
                         Built for verified local service
                     </div>
 
@@ -311,7 +329,7 @@ const processFlow = [
                         <Button
                             as-child
                             size="lg"
-                            class="h-12 rounded-full bg-[#f8b84e] px-6 text-[#171915] hover:bg-[#ffd37a]"
+                            class="h-12 rounded-full bg-[#f59e0b] px-6 text-[#1d1d1d] hover:bg-[#fbbf24]"
                         >
                             <Link :href="marketplaceIndex().url" prefetch>
                                 Find artisans
@@ -331,6 +349,38 @@ const processFlow = [
                         </Button>
                     </div>
 
+                    <div
+                        class="mobile-process-strip mt-7 lg:hidden"
+                        aria-label="Service process"
+                    >
+                        <div
+                            class="mobile-process-track"
+                            v-for="(stage, index) in mobileProcessFlow"
+                            :key="stage.title"
+                        >
+                            <div class="mobile-process-step">
+                                <span class="mobile-process-icon">
+                                    <component
+                                        :is="stage.icon"
+                                        class="size-4"
+                                    />
+                                </span>
+                                <span class="mobile-process-title">
+                                    {{ stage.title }}
+                                </span>
+                                <span class="mobile-process-text">
+                                    {{ stage.text }}
+                                </span>
+                            </div>
+                            <span
+                                v-if="index < mobileProcessFlow.length - 1"
+                                class="mobile-process-link"
+                            >
+                                <span />
+                            </span>
+                        </div>
+                    </div>
+
                     <dl
                         class="mt-12 grid max-w-3xl gap-3 sm:grid-cols-3 lg:max-w-[34rem] 2xl:max-w-[38rem]"
                     >
@@ -339,7 +389,7 @@ const processFlow = [
                             :key="metric.value"
                             class="rounded-lg border border-white/12 bg-white/8 p-4 backdrop-blur"
                         >
-                            <dt class="text-lg font-semibold text-[#f8b84e]">
+                            <dt class="text-lg font-semibold text-[#f59e0b]">
                                 {{ metric.value }}
                             </dt>
                             <dd class="mt-1 text-sm leading-5 text-white/64">
@@ -352,12 +402,12 @@ const processFlow = [
         </section>
 
         <section
-            class="border-y border-[#191b18]/10 bg-[#fffdf8] py-5 dark:border-white/10 dark:bg-[#171915]"
+            class="border-y border-[#1d1d1d]/10 bg-[#f8fafc] py-5 dark:border-white/10 dark:bg-[#1d1d1d]"
         >
             <div
                 class="mx-auto flex max-w-7xl flex-col gap-3 px-5 text-sm text-[#565f4e] sm:px-8 lg:flex-row lg:items-center lg:justify-between dark:text-white/62"
             >
-                <p class="font-medium text-[#171915] dark:text-white">
+                <p class="font-medium text-[#1d1d1d] dark:text-white">
                     One operating loop for service discovery, verification,
                     bookings, subscriptions, wallets, and reports.
                 </p>
@@ -367,7 +417,7 @@ const processFlow = [
                         >Customers</span
                     >
                     <span
-                        class="rounded-full bg-[#f8b84e] px-3 py-1 text-[#2a1b05]"
+                        class="rounded-full bg-[#f59e0b] px-3 py-1 text-[#1d1d1d]"
                         >Artisans</span
                     >
                     <span
@@ -407,7 +457,7 @@ const processFlow = [
                     class="group rounded-lg border border-[#191b18]/10 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:hover:translate-y-0 dark:border-white/10 dark:bg-white/5"
                 >
                     <div
-                        class="grid size-11 place-items-center rounded-lg bg-[#f7f3ea] text-[#171915] transition group-hover:bg-[#f8b84e] dark:bg-white/10 dark:text-white"
+                        class="grid size-11 place-items-center rounded-lg bg-[#f8fafc] text-[#1d1d1d] transition group-hover:bg-[#f59e0b] dark:bg-white/10 dark:text-white"
                     >
                         <component :is="signal.icon" class="size-5" />
                     </div>
@@ -451,7 +501,7 @@ const processFlow = [
                             >0{{ index + 1 }}</span
                         >
                         <div
-                            class="mt-4 grid size-11 place-items-center rounded-lg bg-[#f8b84e] text-[#1f2a1a]"
+                            class="mt-4 grid size-11 place-items-center rounded-lg bg-[#f59e0b] text-[#1d1d1d]"
                         >
                             <component :is="step.icon" class="size-5" />
                         </div>
@@ -483,7 +533,7 @@ const processFlow = [
                 </div>
                 <Link
                     :href="marketplaceIndex().url"
-                    class="inline-flex items-center gap-2 text-sm font-medium text-[#171915] transition hover:gap-3 dark:text-white"
+                    class="inline-flex items-center gap-2 text-sm font-medium text-[#1d1d1d] transition hover:gap-3 dark:text-white"
                     prefetch
                 >
                     Explore marketplace
@@ -516,13 +566,13 @@ const processFlow = [
 
         <section class="px-5 pb-20 sm:px-8">
             <div
-                class="mx-auto max-w-7xl overflow-hidden rounded-lg bg-[#171915] text-white"
+                class="mx-auto max-w-7xl overflow-hidden rounded-lg bg-[#1d1d1d] text-white"
             >
                 <div
                     class="grid gap-8 p-8 md:grid-cols-[1fr_auto] md:items-center lg:p-12"
                 >
                     <div>
-                        <div class="flex items-center gap-2 text-[#f8b84e]">
+                        <div class="flex items-center gap-2 text-[#f59e0b]">
                             <Star class="size-4 fill-current" />
                             <span class="text-sm font-medium"
                                 >Pilot-ready marketplace</span
@@ -539,7 +589,7 @@ const processFlow = [
                         <Button
                             as-child
                             size="lg"
-                            class="h-12 rounded-full bg-white px-6 text-[#171915] hover:bg-[#f8b84e]"
+                            class="h-12 rounded-full bg-white px-6 text-[#1d1d1d] hover:bg-[#f59e0b]"
                         >
                             <Link :href="marketplaceIndex().url" prefetch>
                                 Find service
@@ -565,8 +615,8 @@ const processFlow = [
 <style scoped>
 .artisan-scene {
     background:
-        linear-gradient(90deg, rgba(23, 25, 21, 0.1), rgba(23, 25, 21, 0.88)),
-        #24311f;
+        linear-gradient(90deg, rgba(29, 29, 29, 0.1), rgba(29, 29, 29, 0.88)),
+        #001c72;
 }
 
 .scene-grid {
@@ -617,8 +667,8 @@ const processFlow = [
 }
 
 .process-node-active {
-    border-color: rgba(248, 184, 78, 0.48);
-    background: rgba(248, 184, 78, 0.13);
+    border-color: rgba(245, 158, 11, 0.48);
+    background: rgba(245, 158, 11, 0.13);
 }
 
 .process-icon {
@@ -632,8 +682,8 @@ const processFlow = [
 }
 
 .process-node-active .process-icon {
-    background: #f8b84e;
-    color: #2a1b05;
+    background: #f59e0b;
+    color: #1d1d1d;
 }
 
 .process-index {
@@ -657,13 +707,88 @@ const processFlow = [
     width: 0.55rem;
     height: 0.55rem;
     border-radius: 999px;
-    background: #f8b84e;
-    box-shadow: 0 0 22px rgba(248, 184, 78, 0.85);
+    background: #f59e0b;
+    box-shadow: 0 0 22px rgba(245, 158, 11, 0.85);
     animation: process-travel 3.8s ease-in-out infinite;
 }
 
 .process-connector-delayed span {
     animation-delay: 1.35s;
+}
+
+.mobile-process-strip {
+    display: flex;
+    align-items: stretch;
+    gap: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.7rem;
+    backdrop-filter: blur(16px);
+}
+
+.mobile-process-track {
+    display: contents;
+}
+
+.mobile-process-step {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0;
+    text-align: center;
+}
+
+.mobile-process-icon {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border-radius: 0.5rem;
+    background: rgba(245, 158, 11, 0.18);
+    color: #f59e0b;
+}
+
+.mobile-process-title {
+    margin-top: 0.45rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.mobile-process-text {
+    margin-top: 0.15rem;
+    color: rgba(255, 255, 255, 0.54);
+    font-size: 0.68rem;
+    line-height: 1.25;
+}
+
+.mobile-process-link {
+    position: relative;
+    align-self: center;
+    flex: 0 0 1.35rem;
+    height: 2px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.mobile-process-link span {
+    position: absolute;
+    inset-block: 0;
+    width: 55%;
+    border-radius: inherit;
+    background: #f59e0b;
+    animation: mobile-process-travel 3s ease-in-out infinite;
+}
+
+@media (min-width: 1024px) {
+    .mobile-process-strip {
+        display: none;
+    }
 }
 
 .motion-layer {
@@ -701,9 +826,27 @@ const processFlow = [
     }
 }
 
+@keyframes mobile-process-travel {
+    0% {
+        opacity: 0;
+        transform: translateX(-120%);
+    }
+
+    20%,
+    76% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(220%);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .motion-layer,
-    .process-connector span {
+    .process-connector span,
+    .mobile-process-link span {
         animation: none;
     }
 }
