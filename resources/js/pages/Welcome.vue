@@ -139,15 +139,15 @@ const mobileProcessFlow = [
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
     </Head>
 
-    <main
-        class="min-h-screen bg-[#f8fafc] text-[#1d1d1d] dark:bg-[#11130f] dark:text-[#f8fafc]"
-    >
+    <main class="min-h-screen bg-background text-foreground">
         <section
-            class="relative isolate min-h-svh overflow-hidden bg-[#1d1d1d] text-white"
+            class="relative isolate min-h-svh overflow-hidden bg-background lg:min-h-[820px]"
         >
             <div class="absolute inset-0 hidden lg:block" aria-hidden="true">
-                <div class="absolute inset-y-0 right-0 w-[52%] overflow-hidden">
-                    <div class="artisan-scene absolute inset-0">
+                <div
+                    class="scene-shell absolute inset-y-0 right-0 w-[56%] overflow-hidden"
+                >
+                    <div class="artisan-scene absolute inset-0 text-white">
                         <div class="scene-grid" />
 
                         <div class="scene-panel scene-panel-main motion-layer">
@@ -163,7 +163,7 @@ const mobileProcessFlow = [
                                     </p>
                                 </div>
                                 <span
-                                    class="rounded-full bg-[#d5f7bd] px-3 py-1 text-xs font-medium text-[#17320f]"
+                                    class="rounded-full bg-[#001c72] px-3 py-1 text-xs font-medium text-white"
                                 >
                                     verified
                                 </span>
@@ -179,7 +179,7 @@ const mobileProcessFlow = [
                                     </p>
                                 </div>
                                 <div
-                                    class="grid size-14 place-items-center rounded-lg bg-[#f59e0b] text-[#1d1d1d]"
+                                    class="grid size-14 place-items-center rounded-lg bg-[#001c72] text-white"
                                 >
                                     <BriefcaseBusiness class="size-6" />
                                 </div>
@@ -200,7 +200,7 @@ const mobileProcessFlow = [
                                 </div>
                                 <div class="mt-3 h-2 rounded-full bg-white/10">
                                     <div
-                                        class="h-full w-2/3 rounded-full bg-[#f59e0b]"
+                                        class="h-full w-2/3 rounded-full bg-primary"
                                     />
                                 </div>
                             </div>
@@ -249,11 +249,11 @@ const mobileProcessFlow = [
                         </div>
                     </div>
                 </div>
-                <div class="absolute inset-0 bg-[#1d1d1d]/30" />
+                <div class="absolute inset-0 bg-background/30" />
             </div>
 
             <header
-                class="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8"
+                class="relative z-10 mx-auto flex w-full max-w-[92rem] items-center justify-between gap-4 px-5 py-5 sm:px-8 xl:px-10"
             >
                 <Link
                     :href="marketplaceIndex().url"
@@ -261,7 +261,7 @@ const mobileProcessFlow = [
                     prefetch
                 >
                     <span
-                        class="grid size-10 place-items-center rounded-lg bg-[#f59e0b] text-[#1d1d1d] shadow-lg shadow-black/20"
+                        class="grid size-10 place-items-center rounded-lg bg-[#001c72] text-white shadow-lg shadow-black/20"
                     >
                         <AppLogoIcon class="size-5 fill-current" />
                     </span>
@@ -271,7 +271,7 @@ const mobileProcessFlow = [
                 <nav class="flex items-center gap-2 text-sm">
                     <Link
                         :href="marketplaceIndex().url"
-                        class="hidden rounded-full px-4 py-2 text-white/78 transition hover:bg-white/10 hover:text-white sm:inline-flex"
+                        class="hidden rounded-full px-4 py-2 text-muted-foreground transition hover:bg-accent hover:text-foreground sm:inline-flex"
                         prefetch
                     >
                         Marketplace
@@ -279,20 +279,20 @@ const mobileProcessFlow = [
                     <Link
                         v-if="$page.props.auth.user"
                         :href="dashboardUrl"
-                        class="rounded-full border border-white/20 px-4 py-2 text-white transition hover:border-white/40 hover:bg-white/10"
+                        class="rounded-full border border-border px-4 py-2 text-foreground transition hover:bg-accent"
                     >
                         Dashboard
                     </Link>
                     <template v-else>
                         <Link
                             :href="login().url"
-                            class="rounded-full px-4 py-2 text-white/78 transition hover:bg-white/10 hover:text-white"
+                            class="rounded-full px-4 py-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
                         >
                             Log in
                         </Link>
                         <Link
                             :href="artisanRegisterUrl"
-                            class="rounded-full bg-white px-4 py-2 font-medium text-[#1d1d1d] shadow-lg shadow-black/15 transition hover:-translate-y-0.5 hover:bg-[#f59e0b] motion-reduce:hover:translate-y-0"
+                            class="rounded-full bg-[#001c72] px-4 py-2 font-medium text-white shadow-lg shadow-black/15 transition hover:-translate-y-0.5 hover:bg-[#00258f] motion-reduce:hover:translate-y-0"
                         >
                             Join
                         </Link>
@@ -301,24 +301,24 @@ const mobileProcessFlow = [
             </header>
 
             <div
-                class="relative z-10 mx-auto flex min-h-[calc(100svh-5rem)] w-full max-w-7xl items-center px-5 pt-10 pb-16 sm:px-8 lg:pb-24"
+                class="relative z-10 mx-auto flex min-h-[calc(100svh-5rem)] w-full max-w-[92rem] items-center px-5 pt-10 pb-16 sm:px-8 lg:min-h-[740px] lg:pb-18 xl:px-10"
             >
                 <div class="max-w-3xl lg:max-w-[34rem] 2xl:max-w-[38rem]">
                     <div
-                        class="inline-flex items-center gap-2 rounded-full border border-white/16 bg-white/8 px-3 py-1.5 text-sm text-white/78 backdrop-blur"
+                        class="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1.5 text-sm text-muted-foreground backdrop-blur"
                     >
-                        <Sparkles class="size-4 text-[#f59e0b]" />
+                        <Sparkles class="size-4 text-primary" />
                         Built for verified local service
                     </div>
 
                     <h1
-                        class="mt-8 max-w-3xl text-5xl leading-[1.02] font-semibold text-white sm:text-6xl lg:text-7xl"
+                        class="mt-8 max-w-3xl text-5xl leading-[1.02] font-semibold sm:text-6xl lg:text-7xl"
                     >
                         Lartisan
                     </h1>
 
                     <p
-                        class="mt-6 max-w-2xl text-xl leading-8 text-white/76 lg:max-w-[33rem] 2xl:max-w-xl"
+                        class="mt-6 max-w-2xl text-xl leading-8 text-muted-foreground lg:max-w-[33rem] 2xl:max-w-xl"
                     >
                         A trusted marketplace where customers find verified
                         artisans, artisans run their business identity, and
@@ -329,7 +329,7 @@ const mobileProcessFlow = [
                         <Button
                             as-child
                             size="lg"
-                            class="h-12 rounded-full bg-[#f59e0b] px-6 text-[#1d1d1d] hover:bg-[#fbbf24]"
+                            class="h-12 rounded-full bg-[#001c72] px-6 text-white hover:bg-[#00258f]"
                         >
                             <Link :href="marketplaceIndex().url" prefetch>
                                 Find artisans
@@ -340,7 +340,7 @@ const mobileProcessFlow = [
                             as-child
                             size="lg"
                             variant="outline"
-                            class="h-12 rounded-full border-white/24 bg-white/8 px-6 text-white hover:bg-white/14 hover:text-white"
+                            class="h-12 rounded-full border-border bg-card/70 px-6 text-foreground hover:bg-accent hover:text-foreground"
                         >
                             <Link :href="artisanRegisterUrl">
                                 Become an artisan
@@ -387,12 +387,14 @@ const mobileProcessFlow = [
                         <div
                             v-for="metric in metrics"
                             :key="metric.value"
-                            class="rounded-lg border border-white/12 bg-white/8 p-4 backdrop-blur"
+                            class="rounded-lg border bg-card/80 p-4 shadow-sm backdrop-blur"
                         >
-                            <dt class="text-lg font-semibold text-[#f59e0b]">
+                            <dt class="text-lg font-semibold text-primary">
                                 {{ metric.value }}
                             </dt>
-                            <dd class="mt-1 text-sm leading-5 text-white/64">
+                            <dd
+                                class="mt-1 text-sm leading-5 text-muted-foreground"
+                            >
                                 {{ metric.label }}
                             </dd>
                         </div>
@@ -401,27 +403,24 @@ const mobileProcessFlow = [
             </div>
         </section>
 
-        <section
-            class="border-y border-[#1d1d1d]/10 bg-[#f8fafc] py-5 dark:border-white/10 dark:bg-[#1d1d1d]"
-        >
+        <section class="border-y bg-card/70 py-5">
             <div
-                class="mx-auto flex max-w-7xl flex-col gap-3 px-5 text-sm text-[#565f4e] sm:px-8 lg:flex-row lg:items-center lg:justify-between dark:text-white/62"
+                class="mx-auto flex max-w-[92rem] flex-col gap-3 px-5 text-sm text-muted-foreground sm:px-8 lg:flex-row lg:items-center lg:justify-between xl:px-10"
             >
-                <p class="font-medium text-[#1d1d1d] dark:text-white">
+                <p class="font-medium text-foreground">
                     One operating loop for service discovery, verification,
                     bookings, subscriptions, wallets, and reports.
                 </p>
                 <div class="flex flex-wrap gap-2">
                     <span
-                        class="rounded-full bg-[#d5f7bd] px-3 py-1 text-[#17320f]"
+                        class="rounded-full bg-muted px-3 py-1 text-muted-foreground"
                         >Customers</span
                     >
-                    <span
-                        class="rounded-full bg-[#f59e0b] px-3 py-1 text-[#1d1d1d]"
+                    <span class="rounded-full bg-[#001c72] px-3 py-1 text-white"
                         >Artisans</span
                     >
                     <span
-                        class="rounded-full bg-[#8cc8ff] px-3 py-1 text-[#08243d]"
+                        class="rounded-full bg-secondary px-3 py-1 text-secondary-foreground"
                         >Operations</span
                     >
                 </div>
@@ -429,10 +428,10 @@ const mobileProcessFlow = [
         </section>
 
         <section
-            class="mx-auto grid max-w-7xl gap-8 px-5 py-20 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:py-28"
+            class="mx-auto grid max-w-[92rem] gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:py-20 xl:px-10"
         >
             <div>
-                <p class="text-sm font-medium text-[#ef705d]">
+                <p class="text-sm font-medium text-primary">
                     Trust architecture
                 </p>
                 <h2
@@ -441,9 +440,7 @@ const mobileProcessFlow = [
                     The marketplace is only as good as the verification behind
                     it.
                 </h2>
-                <p
-                    class="mt-5 max-w-xl leading-7 text-[#5f6659] dark:text-white/62"
-                >
+                <p class="mt-5 max-w-xl leading-7 text-muted-foreground">
                     Lartisan connects public discovery with private evidence,
                     scoped operations, and auditable financial movement so the
                     trust loop does not disappear after a booking is made.
@@ -454,29 +451,27 @@ const mobileProcessFlow = [
                 <article
                     v-for="signal in trustSignals"
                     :key="signal.title"
-                    class="group rounded-lg border border-[#191b18]/10 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:hover:translate-y-0 dark:border-white/10 dark:bg-white/5"
+                    class="group rounded-lg border bg-card p-5 text-card-foreground shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:hover:translate-y-0"
                 >
                     <div
-                        class="grid size-11 place-items-center rounded-lg bg-[#f8fafc] text-[#1d1d1d] transition group-hover:bg-[#f59e0b] dark:bg-white/10 dark:text-white"
+                        class="grid size-11 place-items-center rounded-lg bg-primary/10 text-primary transition group-hover:bg-[#001c72] group-hover:text-white"
                     >
                         <component :is="signal.icon" class="size-5" />
                     </div>
                     <h3 class="mt-5 font-semibold">{{ signal.title }}</h3>
-                    <p
-                        class="mt-3 text-sm leading-6 text-[#5f6659] dark:text-white/62"
-                    >
+                    <p class="mt-3 text-sm leading-6 text-muted-foreground">
                         {{ signal.text }}
                     </p>
                 </article>
             </div>
         </section>
 
-        <section class="bg-[#1f2a1a] py-20 text-white lg:py-28">
+        <section class="bg-[#001c72] py-16 text-white lg:py-20">
             <div
-                class="mx-auto grid max-w-7xl gap-10 px-5 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center"
+                class="mx-auto grid max-w-[92rem] gap-10 px-5 sm:px-8 lg:grid-cols-[0.86fr_1.14fr] lg:items-center xl:px-10"
             >
                 <div>
-                    <p class="text-sm font-medium text-[#d5f7bd]">
+                    <p class="text-sm font-medium text-white/70">
                         Booking lifecycle
                     </p>
                     <h2
@@ -484,7 +479,7 @@ const mobileProcessFlow = [
                     >
                         From search to completion, every handoff has a state.
                     </h2>
-                    <p class="mt-5 leading-7 text-white/66">
+                    <p class="mt-5 leading-7 text-white/70">
                         Guests can book, customers can track, artisans can act,
                         and the back office can review the trail when something
                         needs attention.
@@ -495,20 +490,20 @@ const mobileProcessFlow = [
                     <article
                         v-for="(step, index) in steps"
                         :key="step.title"
-                        class="relative rounded-lg border border-white/12 bg-white/8 p-5 transition duration-300 hover:bg-white/12"
+                        class="relative rounded-lg border border-white/15 bg-white/10 p-5 transition duration-300 hover:bg-white/15"
                     >
-                        <span class="text-sm text-white/42"
+                        <span class="text-sm text-white/50"
                             >0{{ index + 1 }}</span
                         >
                         <div
-                            class="mt-4 grid size-11 place-items-center rounded-lg bg-[#f59e0b] text-[#1d1d1d]"
+                            class="mt-4 grid size-11 place-items-center rounded-lg bg-white text-[#001c72]"
                         >
                             <component :is="step.icon" class="size-5" />
                         </div>
                         <h3 class="mt-5 text-lg font-semibold">
                             {{ step.title }}
                         </h3>
-                        <p class="mt-3 text-sm leading-6 text-white/66">
+                        <p class="mt-3 text-sm leading-6 text-white/70">
                             {{ step.text }}
                         </p>
                     </article>
@@ -516,12 +511,14 @@ const mobileProcessFlow = [
             </div>
         </section>
 
-        <section class="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
+        <section
+            class="mx-auto max-w-[92rem] px-5 py-16 sm:px-8 lg:py-20 xl:px-10"
+        >
             <div
                 class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between"
             >
                 <div>
-                    <p class="text-sm font-medium text-[#ef705d]">
+                    <p class="text-sm font-medium text-primary">
                         Choose your path
                     </p>
                     <h2
@@ -533,7 +530,7 @@ const mobileProcessFlow = [
                 </div>
                 <Link
                     :href="marketplaceIndex().url"
-                    class="inline-flex items-center gap-2 text-sm font-medium text-[#1d1d1d] transition hover:gap-3 dark:text-white"
+                    class="inline-flex items-center gap-2 text-sm font-medium text-primary transition hover:gap-3"
                     prefetch
                 >
                     Explore marketplace
@@ -545,17 +542,17 @@ const mobileProcessFlow = [
                 <article
                     v-for="path in actorPaths"
                     :key="path.title"
-                    class="group rounded-lg border border-[#191b18]/10 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:hover:translate-y-0 dark:border-white/10 dark:bg-white/5"
+                    class="group rounded-lg border bg-card p-6 text-card-foreground shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:hover:translate-y-0"
                 >
                     <h3 class="text-xl font-semibold">{{ path.title }}</h3>
                     <p
-                        class="mt-4 min-h-20 text-sm leading-6 text-[#5f6659] dark:text-white/62"
+                        class="mt-4 min-h-20 text-sm leading-6 text-muted-foreground"
                     >
                         {{ path.text }}
                     </p>
                     <Link
                         :href="path.href"
-                        class="mt-8 inline-flex items-center gap-2 text-sm font-medium text-[#ef705d] transition group-hover:gap-3"
+                        class="mt-8 inline-flex items-center gap-2 text-sm font-medium text-primary transition group-hover:gap-3"
                     >
                         {{ path.action }}
                         <ArrowRight class="size-4" />
@@ -564,15 +561,15 @@ const mobileProcessFlow = [
             </div>
         </section>
 
-        <section class="px-5 pb-20 sm:px-8">
+        <section class="px-5 pb-16 sm:px-8 xl:px-10">
             <div
-                class="mx-auto max-w-7xl overflow-hidden rounded-lg bg-[#1d1d1d] text-white"
+                class="mx-auto max-w-[92rem] overflow-hidden rounded-lg border bg-card text-card-foreground"
             >
                 <div
                     class="grid gap-8 p-8 md:grid-cols-[1fr_auto] md:items-center lg:p-12"
                 >
                     <div>
-                        <div class="flex items-center gap-2 text-[#f59e0b]">
+                        <div class="flex items-center gap-2 text-primary">
                             <Star class="size-4 fill-current" />
                             <span class="text-sm font-medium"
                                 >Pilot-ready marketplace</span
@@ -589,7 +586,7 @@ const mobileProcessFlow = [
                         <Button
                             as-child
                             size="lg"
-                            class="h-12 rounded-full bg-white px-6 text-[#1d1d1d] hover:bg-[#f59e0b]"
+                            class="h-12 rounded-full bg-[#001c72] px-6 text-white hover:bg-[#00258f]"
                         >
                             <Link :href="marketplaceIndex().url" prefetch>
                                 Find service
@@ -599,7 +596,7 @@ const mobileProcessFlow = [
                             as-child
                             size="lg"
                             variant="outline"
-                            class="h-12 rounded-full border-white/24 bg-white/8 px-6 text-white hover:bg-white/14 hover:text-white"
+                            class="h-12 rounded-full px-6"
                         >
                             <Link :href="artisanRegisterUrl">
                                 List my business
@@ -613,9 +610,30 @@ const mobileProcessFlow = [
 </template>
 
 <style scoped>
+.scene-shell::before {
+    position: absolute;
+    inset-block: 0;
+    left: -10rem;
+    z-index: 2;
+    width: 16rem;
+    background: linear-gradient(
+        90deg,
+        var(--background) 0%,
+        color-mix(in srgb, var(--background) 82%, transparent) 38%,
+        transparent 100%
+    );
+    content: '';
+    pointer-events: none;
+}
+
 .artisan-scene {
     background:
-        linear-gradient(90deg, rgba(29, 29, 29, 0.1), rgba(29, 29, 29, 0.88)),
+        linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--background) 96%, transparent) 0%,
+            rgba(0, 28, 114, 0.78) 48%,
+            color-mix(in srgb, var(--background) 92%, #001c72) 100%
+        ),
         #001c72;
 }
 
@@ -667,8 +685,8 @@ const mobileProcessFlow = [
 }
 
 .process-node-active {
-    border-color: rgba(245, 158, 11, 0.48);
-    background: rgba(245, 158, 11, 0.13);
+    border-color: color-mix(in srgb, #527dff 58%, transparent);
+    background: color-mix(in srgb, #001c72 36%, transparent);
 }
 
 .process-icon {
@@ -677,13 +695,13 @@ const mobileProcessFlow = [
     height: 2.6rem;
     place-items: center;
     border-radius: 0.5rem;
-    background: #d5f7bd;
-    color: #17320f;
+    background: color-mix(in srgb, var(--primary) 16%, white);
+    color: var(--primary);
 }
 
 .process-node-active .process-icon {
-    background: #f59e0b;
-    color: #1d1d1d;
+    background: #001c72;
+    color: #fff;
 }
 
 .process-index {
@@ -707,8 +725,8 @@ const mobileProcessFlow = [
     width: 0.55rem;
     height: 0.55rem;
     border-radius: 999px;
-    background: #f59e0b;
-    box-shadow: 0 0 22px rgba(245, 158, 11, 0.85);
+    background: var(--primary);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--primary) 78%, transparent);
     animation: process-travel 3.8s ease-in-out infinite;
 }
 
@@ -748,8 +766,8 @@ const mobileProcessFlow = [
     height: 2rem;
     place-items: center;
     border-radius: 0.5rem;
-    background: rgba(245, 158, 11, 0.18);
-    color: #f59e0b;
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
+    color: var(--primary);
 }
 
 .mobile-process-title {
@@ -781,7 +799,7 @@ const mobileProcessFlow = [
     inset-block: 0;
     width: 55%;
     border-radius: inherit;
-    background: #f59e0b;
+    background: var(--primary);
     animation: mobile-process-travel 3s ease-in-out infinite;
 }
 
