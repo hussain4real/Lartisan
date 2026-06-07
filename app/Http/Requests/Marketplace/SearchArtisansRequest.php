@@ -49,6 +49,7 @@ class SearchArtisansRequest extends FormRequest
                 'integer',
                 Rule::exists((new Territory)->getTable(), 'id')->where('active', true),
             ],
+            'page' => ['nullable', 'integer', 'min:1'],
         ];
     }
 
@@ -111,5 +112,10 @@ class SearchArtisansRequest extends FormRequest
         }
 
         return $territory;
+    }
+
+    public function page(): int
+    {
+        return max(1, $this->integer('page', 1));
     }
 }

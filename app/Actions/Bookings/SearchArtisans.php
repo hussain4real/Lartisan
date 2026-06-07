@@ -15,6 +15,7 @@ use App\Models\Territory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class SearchArtisans
 {
@@ -28,6 +29,51 @@ class SearchArtisans
         ?LocalGovernment $localGovernment = null,
         ?Territory $territory = null,
         int $limit = 12,
+    ): Collection {
+        return $this->ranked($query, $category, $state, $localGovernment, $territory)
+            ->take($limit);
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $queryParameters
+     * @return LengthAwarePaginator<int, ArtisanProfile>
+     */
+    public function paginate(
+        ?string $query = null,
+        ?ServiceCategory $category = null,
+        ?State $state = null,
+        ?LocalGovernment $localGovernment = null,
+        ?Territory $territory = null,
+        int $perPage = 12,
+        int $page = 1,
+        string $path = '/',
+        array $queryParameters = [],
+    ): LengthAwarePaginator {
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
+        $ranked = $this->ranked($query, $category, $state, $localGovernment, $territory);
+
+        return new LengthAwarePaginator(
+            items: $ranked->forPage($page, $perPage)->values(),
+            total: $ranked->count(),
+            perPage: $perPage,
+            currentPage: $page,
+            options: [
+                'path' => $path,
+                'query' => $queryParameters,
+            ],
+        );
+    }
+
+    /**
+     * @return Collection<int, ArtisanProfile>
+     */
+    private function ranked(
+        ?string $query = null,
+        ?ServiceCategory $category = null,
+        ?State $state = null,
+        ?LocalGovernment $localGovernment = null,
+        ?Territory $territory = null,
     ): Collection {
         $queryText = $query === null ? null : trim($query);
 
@@ -80,8 +126,7 @@ class SearchArtisans
         /** @var Collection<int, ArtisanProfile> $ranked */
         $ranked = $profiles
             ->sortByDesc(fn (ArtisanProfile $profile): int => $this->score($profile, $category, $state, $localGovernment, $territory))
-            ->values()
-            ->take($limit);
+            ->values();
 
         return $ranked;
     }

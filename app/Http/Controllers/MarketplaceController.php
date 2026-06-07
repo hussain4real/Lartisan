@@ -19,12 +19,15 @@ use App\Models\State;
 use App\Models\Territory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Arr;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MarketplaceController extends Controller
 {
+    private const MARKETPLACE_ARTISANS_PER_PAGE = 12;
+
     public function index(SearchArtisansRequest $request, SearchArtisans $searchArtisans): Response
     {
         $queryText = $request->queryText();
@@ -32,13 +35,6 @@ class MarketplaceController extends Controller
         $state = $request->state();
         $localGovernment = $request->localGovernment();
         $territory = $request->territory();
-        $results = $searchArtisans->handle(
-            query: $queryText,
-            category: $category,
-            state: $state,
-            localGovernment: $localGovernment,
-            territory: $territory,
-        );
 
         return Inertia::render('marketplace/Index', [
             'filters' => [
@@ -50,7 +46,17 @@ class MarketplaceController extends Controller
             ],
             'categories' => $this->categoryOptions(),
             'states' => $this->stateOptions(),
-            'artisans' => $results->map(fn (ArtisanProfile $profile): array => $this->artisanCardPayload($profile))->all(),
+            'artisans' => Inertia::scroll(fn () => $searchArtisans->paginate(
+                query: $queryText,
+                category: $category,
+                state: $state,
+                localGovernment: $localGovernment,
+                territory: $territory,
+                perPage: self::MARKETPLACE_ARTISANS_PER_PAGE,
+                page: $request->page(),
+                path: route('marketplace.index'),
+                queryParameters: Arr::except($request->query(), ['page']),
+            )->through(fn (ArtisanProfile $profile): array => $this->artisanCardPayload($profile))),
         ]);
     }
 

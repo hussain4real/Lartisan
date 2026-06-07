@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, InfiniteScroll, Link, router } from '@inertiajs/vue3';
 import { Search, ShieldCheck, SlidersHorizontal } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,7 @@ import { index as marketplaceIndex } from '@/routes/marketplace';
 import { show as showArtisan } from '@/routes/marketplace/artisans';
 import { create as createBooking } from '@/routes/marketplace/bookings';
 import type {
-    MarketplaceArtisanCard,
+    MarketplaceArtisanPaginator,
     MarketplaceFilters,
     MarketplaceStateOption,
     ServiceCategoryOption,
@@ -21,7 +21,7 @@ type Props = {
     filters: MarketplaceFilters;
     categories: ServiceCategoryOption[];
     states: MarketplaceStateOption[];
-    artisans: MarketplaceArtisanCard[];
+    artisans: MarketplaceArtisanPaginator;
 };
 
 type FilterForm = {
@@ -58,6 +58,18 @@ const territories = computed(() => {
     );
 });
 
+const loadedResultCount = computed(() => props.artisans.data.length);
+const resultCountLabel = computed(() => {
+    const total = props.artisans.total;
+    const noun = total === 1 ? 'result' : 'results';
+
+    if (total === loadedResultCount.value) {
+        return `${loadedResultCount.value} ${noun}`;
+    }
+
+    return `${loadedResultCount.value} of ${total} ${noun}`;
+});
+
 watch(
     () => props.filters,
     (filters) => {
@@ -92,6 +104,7 @@ const visitMarketplace = (replace: boolean): void => {
         only: ['filters', 'artisans'],
         preserveScroll: true,
         replace,
+        reset: ['artisans'],
         onStart: () => {
             isFiltering.value = true;
         },
@@ -262,9 +275,7 @@ const submitSearch = (): void => {
                         class="flex items-center text-sm text-muted-foreground"
                     >
                         <SlidersHorizontal class="mr-2 size-4" />
-                        {{ artisans.length }} result{{
-                            artisans.length === 1 ? '' : 's'
-                        }}
+                        {{ resultCountLabel }}
                         <span v-if="isFiltering" class="ml-2">
                             Updating...
                         </span>
@@ -273,48 +284,94 @@ const submitSearch = (): void => {
             </section>
 
             <section class="grid gap-4">
-                <div
-                    v-if="artisans.length > 0"
-                    class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+                <InfiniteScroll
+                    v-if="loadedResultCount > 0"
+                    data="artisans"
+                    only-next
+                    :buffer="600"
+                    items-element="#marketplace-artisan-grid"
                 >
-                    <article
-                        v-for="artisan in artisans"
-                        :key="artisan.id"
-                        class="grid gap-4 rounded-lg border p-5"
+                    <TransitionGroup
+                        id="marketplace-artisan-grid"
+                        name="artisan-card"
+                        tag="div"
+                        class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
                     >
-                        <div class="space-y-2">
-                            <div class="flex items-start justify-between gap-3">
-                                <h2 class="font-semibold">
-                                    {{ artisan.businessName }}
-                                </h2>
-                                <Badge variant="outline">{{
-                                    artisan.availabilityStatus
-                                }}</Badge>
+                        <article
+                            v-for="artisan in artisans.data"
+                            :key="artisan.id"
+                            class="grid gap-4 rounded-lg border p-5"
+                        >
+                            <div class="space-y-2">
+                                <div
+                                    class="flex items-start justify-between gap-3"
+                                >
+                                    <h2 class="font-semibold">
+                                        {{ artisan.businessName }}
+                                    </h2>
+                                    <Badge variant="outline">{{
+                                        artisan.availabilityStatus
+                                    }}</Badge>
+                                </div>
+                                <p class="text-sm text-muted-foreground">
+                                    {{ artisan.location || 'Location pending' }}
+                                </p>
+                                <p class="text-sm">
+                                    {{ artisan.servicesCount }} active service{{
+                                        artisan.servicesCount === 1 ? '' : 's'
+                                    }}
+                                </p>
                             </div>
-                            <p class="text-sm text-muted-foreground">
-                                {{ artisan.location || 'Location pending' }}
-                            </p>
-                            <p class="text-sm">
-                                {{ artisan.servicesCount }} active service{{
-                                    artisan.servicesCount === 1 ? '' : 's'
-                                }}
-                            </p>
-                        </div>
 
-                        <div class="flex flex-wrap gap-2">
-                            <Button as-child variant="outline" size="sm">
-                                <Link :href="showArtisan(artisan.id).url">
-                                    View profile
-                                </Link>
-                            </Button>
-                            <Button as-child size="sm">
-                                <Link :href="createBooking(artisan.id).url">
-                                    Book
-                                </Link>
-                            </Button>
+                            <div class="flex flex-wrap gap-2">
+                                <Button as-child variant="outline" size="sm">
+                                    <Link :href="showArtisan(artisan.id).url">
+                                        View profile
+                                    </Link>
+                                </Button>
+                                <Button as-child size="sm">
+                                    <Link :href="createBooking(artisan.id).url">
+                                        Book
+                                    </Link>
+                                </Button>
+                            </div>
+                        </article>
+                    </TransitionGroup>
+
+                    <template #loading="{ loading }">
+                        <div
+                            v-if="loading"
+                            class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+                            aria-live="polite"
+                        >
+                            <article
+                                v-for="placeholder in 3"
+                                :key="placeholder"
+                                class="grid gap-4 rounded-lg border p-5"
+                            >
+                                <div class="space-y-3">
+                                    <div
+                                        class="h-5 w-3/4 animate-pulse rounded bg-muted"
+                                    ></div>
+                                    <div
+                                        class="h-4 w-1/2 animate-pulse rounded bg-muted"
+                                    ></div>
+                                    <div
+                                        class="h-4 w-2/3 animate-pulse rounded bg-muted"
+                                    ></div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <div
+                                        class="h-8 w-24 animate-pulse rounded bg-muted"
+                                    ></div>
+                                    <div
+                                        class="h-8 w-16 animate-pulse rounded bg-muted"
+                                    ></div>
+                                </div>
+                            </article>
                         </div>
-                    </article>
-                </div>
+                    </template>
+                </InfiniteScroll>
 
                 <p
                     v-else
@@ -326,3 +383,33 @@ const submitSearch = (): void => {
         </div>
     </main>
 </template>
+
+<style scoped>
+.artisan-card-enter-active,
+.artisan-card-leave-active,
+.artisan-card-move {
+    transition:
+        opacity 180ms ease,
+        transform 180ms ease;
+}
+
+.artisan-card-enter-from,
+.artisan-card-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .artisan-card-enter-active,
+    .artisan-card-leave-active,
+    .artisan-card-move {
+        transition: none;
+    }
+
+    .artisan-card-enter-from,
+    .artisan-card-leave-to {
+        opacity: 1;
+        transform: none;
+    }
+}
+</style>

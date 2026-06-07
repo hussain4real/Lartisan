@@ -240,6 +240,46 @@ test('search finds only verified subscribed public artisans and ranks by categor
     expect($unfiltered)->toHaveCount(2);
 });
 
+test('marketplace index paginates artisan cards for infinite scroll', function () {
+    $category = ServiceCategory::factory()->create([
+        'name' => 'Infinite Scroll Services',
+        'slug' => 'infinite-scroll-services',
+    ]);
+
+    foreach (range(1, 13) as $number) {
+        phaseSixArtisanContext(sprintf('Infinite Scroll Artisan %02d', $number), $category);
+    }
+
+    $firstPageResponse = $this->get(route('marketplace.index', [
+        'service_category_id' => $category->id,
+    ]));
+
+    $firstPageResponse
+        ->assertOk()
+        ->assertInertia(fn (Assert $page): Assert => $page
+            ->component('marketplace/Index')
+            ->where('artisans.current_page', 1)
+            ->where('artisans.per_page', 12)
+            ->where('artisans.total', 13)
+            ->has('artisans.data', 12)
+            ->where('artisans.data.0.businessName', 'Infinite Scroll Artisan 01')
+            ->where('artisans.data.11.businessName', 'Infinite Scroll Artisan 12'));
+
+    $secondPageResponse = $this->get(route('marketplace.index', [
+        'service_category_id' => $category->id,
+        'page' => 2,
+    ]));
+
+    $secondPageResponse
+        ->assertOk()
+        ->assertInertia(fn (Assert $page): Assert => $page
+            ->component('marketplace/Index')
+            ->where('artisans.current_page', 2)
+            ->where('artisans.total', 13)
+            ->has('artisans.data', 1)
+            ->where('artisans.data.0.businessName', 'Infinite Scroll Artisan 13'));
+});
+
 test('marketplace geography filters are scoped and stale child selections are normalized', function () {
     $context = phaseSixArtisanContext();
     $otherLocalGovernment = LocalGovernment::factory()->create([
@@ -268,7 +308,7 @@ test('marketplace geography filters are scoped and stale child selections are no
             ->component('marketplace/Index')
             ->where('filters.stateId', $context['state']->id)
             ->where('filters.localGovernmentId', $otherLocalGovernment->id)
-            ->has('artisans', 0));
+            ->has('artisans.data', 0));
 
     $this->get(route('marketplace.index', [
         'state_id' => $context['state']->id,
@@ -279,7 +319,7 @@ test('marketplace geography filters are scoped and stale child selections are no
             ->component('marketplace/Index')
             ->where('filters.stateId', $context['state']->id)
             ->where('filters.localGovernmentId', null)
-            ->where('artisans.0.businessName', 'Phase Six Electrical'));
+            ->where('artisans.data.0.businessName', 'Phase Six Electrical'));
 
     $this->get(route('marketplace.index', [
         'state_id' => $context['state']->id,
@@ -290,7 +330,7 @@ test('marketplace geography filters are scoped and stale child selections are no
             ->component('marketplace/Index')
             ->where('filters.stateId', $context['state']->id)
             ->where('filters.territoryId', $context['territory']->id)
-            ->where('artisans.0.businessName', 'Phase Six Electrical'));
+            ->where('artisans.data.0.businessName', 'Phase Six Electrical'));
 
     $this->get(route('marketplace.index', [
         'state_id' => $context['state']->id,
@@ -301,7 +341,7 @@ test('marketplace geography filters are scoped and stale child selections are no
             ->component('marketplace/Index')
             ->where('filters.stateId', $context['state']->id)
             ->where('filters.territoryId', null)
-            ->where('artisans.0.businessName', 'Phase Six Electrical'));
+            ->where('artisans.data.0.businessName', 'Phase Six Electrical'));
 });
 
 test('guest and registered customers can create bookings and use secure tracker screens', function () {
@@ -480,7 +520,7 @@ test('phase six inertia contracts and artisan booking routes are wired', functio
         ->assertOk()
         ->assertInertia(fn (Assert $page): Assert => $page
             ->component('marketplace/Index')
-            ->where('artisans.0.businessName', 'Phase Six Electrical')
+            ->where('artisans.data.0.businessName', 'Phase Six Electrical')
             ->where('categories.0.id', $context['category']->id));
 
     $this->get(route('marketplace.artisans.show', ['artisanProfile' => $context['profile']]))
