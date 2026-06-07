@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\BookingStatus;
+use App\Support\MediaDisk;
 use Database\Factories\BookingFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -81,7 +82,7 @@ class Booking extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection(self::MEDIA_COLLECTION)
-            ->useDisk('local')
+            ->useDisk(MediaDisk::private())
             ->acceptsFile(fn (File $file): bool => in_array($file->mimeType, [
                 'application/pdf',
                 'image/jpeg',

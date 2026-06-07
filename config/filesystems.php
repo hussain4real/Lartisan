@@ -15,6 +15,11 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+    'media' => [
+        'portfolio_disk' => env('MEDIA_PORTFOLIO_DISK', 'public'),
+        'private_disk' => env('MEDIA_PRIVATE_DISK', 'local'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
@@ -56,6 +61,34 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'throw' => false,
+            'report' => false,
+        ],
+
+        'media_public' => [
+            'driver' => 's3',
+            'key' => env('MEDIA_PUBLIC_ACCESS_KEY_ID'),
+            'secret' => env('MEDIA_PUBLIC_SECRET_ACCESS_KEY'),
+            'region' => env('MEDIA_PUBLIC_DEFAULT_REGION', 'us-east-1'),
+            'bucket' => env('MEDIA_PUBLIC_BUCKET'),
+            'url' => env('MEDIA_PUBLIC_URL'),
+            'endpoint' => env('MEDIA_PUBLIC_ENDPOINT'),
+            'use_path_style_endpoint' => env('MEDIA_PUBLIC_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        'media_private' => [
+            'driver' => 's3',
+            'key' => env('MEDIA_PRIVATE_ACCESS_KEY_ID'),
+            'secret' => env('MEDIA_PRIVATE_SECRET_ACCESS_KEY'),
+            'region' => env('MEDIA_PRIVATE_DEFAULT_REGION', 'us-east-1'),
+            'bucket' => env('MEDIA_PRIVATE_BUCKET'),
+            'url' => env('MEDIA_PRIVATE_URL'),
+            'endpoint' => env('MEDIA_PRIVATE_ENDPOINT'),
+            'use_path_style_endpoint' => env('MEDIA_PRIVATE_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'private',
             'throw' => false,
             'report' => false,
         ],

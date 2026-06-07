@@ -9,6 +9,7 @@ use App\Enums\ArtisanVerificationStatus;
 use App\Enums\PlatformPermission;
 use App\Enums\PlatformRole;
 use App\Enums\SubscriptionStatus;
+use App\Support\MediaDisk;
 use Database\Factories\ArtisanProfileFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -83,7 +84,7 @@ class ArtisanProfile extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection(self::PORTFOLIO_COLLECTION)
-            ->useDisk('public')
+            ->useDisk(MediaDisk::portfolio())
             ->acceptsFile(fn (File $file): bool => in_array($file->mimeType, [
                 'image/jpeg',
                 'image/png',

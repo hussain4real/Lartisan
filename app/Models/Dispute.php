@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\DisputeSeverity;
 use App\Enums\DisputeStatus;
+use App\Support\MediaDisk;
 use Database\Factories\DisputeFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -66,7 +67,7 @@ class Dispute extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection(self::EVIDENCE_COLLECTION)
-            ->useDisk('local')
+            ->useDisk(MediaDisk::private())
             ->acceptsFile(fn (File $file): bool => in_array($file->mimeType, [
                 'application/pdf',
                 'image/jpeg',

@@ -3,6 +3,11 @@
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+use function Pest\Laravel\withoutVite;
+use function Pest\Laravel\withUnencryptedCookie;
+
 test('style guide page can be rendered by authenticated users', function () {
     $user = User::factory()->create();
 
@@ -23,20 +28,22 @@ test('style guide page redirects guests to login', function () {
         ->assertRedirect(route('login'));
 });
 
-test('appearance cookie values are normalized before rendering the style guide shell', function (string $cookieValue, string $expectedAppearance) {
+test('appearance cookie values are normalized before rendering the style guide shell', function () {
     $user = User::factory()->create();
 
-    $this->withoutVite();
+    withoutVite();
+    actingAs($user);
 
-    $this
-        ->actingAs($user)
-        ->withUnencryptedCookie('appearance', $cookieValue)
-        ->get(route('style-guide.edit'))
-        ->assertOk()
-        ->assertSee("const cookieAppearance = \"{$expectedAppearance}\";", false);
-})->with([
-    'light' => ['light', 'light'],
-    'dark' => ['dark', 'dark'],
-    'system' => ['system', 'system'],
-    'invalid' => ['neon', 'system'],
-]);
+    foreach ([
+        'light' => ['light', 'light'],
+        'dark' => ['dark', 'dark'],
+        'system' => ['system', 'system'],
+        'invalid' => ['neon', 'system'],
+    ] as [$cookieValue, $expectedAppearance]) {
+        withUnencryptedCookie('appearance', $cookieValue);
+
+        get(route('style-guide.edit'))
+            ->assertOk()
+            ->assertSee("const cookieAppearance = \"{$expectedAppearance}\";", false);
+    }
+});
