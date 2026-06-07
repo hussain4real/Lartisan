@@ -29,8 +29,17 @@
     --color-primary: var(--primary);
     --color-primary-foreground: var(--primary-foreground);
 
+    --color-brand: var(--brand);
+    --color-brand-foreground: var(--brand-foreground);
+
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
 
     --color-muted: var(--muted);
     --color-muted-foreground: var(--muted-foreground);
@@ -98,8 +107,14 @@
     --popover-foreground: hsl(0 0% 11.4%);
     --primary: hsl(225 100% 22.4%);
     --primary-foreground: hsl(0 0% 100%);
+    --brand: hsl(225 100% 22.4%);
+    --brand-foreground: hsl(0 0% 100%);
     --secondary: hsl(38 92.1% 50.2%);
     --secondary-foreground: hsl(0 0% 11.4%);
+    --success: hsl(160 84% 31%);
+    --success-foreground: hsl(0 0% 100%);
+    --warning: hsl(38 92.1% 50.2%);
+    --warning-foreground: hsl(0 0% 11.4%);
     --muted: hsl(214 32% 93%);
     --muted-foreground: hsl(210 7.3% 37%);
     --accent: hsl(214 32% 93%);
@@ -135,8 +150,14 @@
     --popover-foreground: hsl(210 24% 96%);
     --primary: hsl(225 100% 66%);
     --primary-foreground: hsl(225 65% 9%);
+    --brand: hsl(225 72% 18%);
+    --brand-foreground: hsl(210 24% 96%);
     --secondary: hsl(38 92.1% 62%);
     --secondary-foreground: hsl(225 65% 9%);
+    --success: hsl(152 76% 48%);
+    --success-foreground: hsl(225 65% 9%);
+    --warning: hsl(38 92.1% 62%);
+    --warning-foreground: hsl(225 65% 9%);
     --muted: hsl(225 26% 17%);
     --muted-foreground: hsl(214 20% 70%);
     --accent: hsl(225 24% 22%);

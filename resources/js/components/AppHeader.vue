@@ -32,6 +32,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import UserMenuContent from '@/components/UserMenuContent.vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { getInitials } from '@/composables/useInitials';
@@ -56,8 +57,7 @@ const dashboardUrl = computed(() =>
     page.props.currentTeam ? dashboard(page.props.currentTeam.slug).url : '/',
 );
 
-const activeItemStyles =
-    'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
+const activeItemStyles = 'bg-accent text-accent-foreground';
 
 const mainNavItems = computed<NavItem[]>(() => [
     {
@@ -244,6 +244,8 @@ const rightNavItems: NavItem[] = [
                         </div>
                     </div>
 
+                    <ThemeSwitcher />
+
                     <DropdownMenu v-if="authenticatedUser">
                         <DropdownMenuTrigger :as-child="true">
                             <Button
@@ -260,7 +262,7 @@ const rightNavItems: NavItem[] = [
                                         :alt="authenticatedUser.name"
                                     />
                                     <AvatarFallback
-                                        class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white"
+                                        class="rounded-lg bg-muted font-semibold text-foreground"
                                     >
                                         {{
                                             getInitials(authenticatedUser.name)
@@ -284,7 +286,7 @@ const rightNavItems: NavItem[] = [
             class="flex w-full border-b border-sidebar-border/70"
         >
             <div
-                class="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl"
+                class="mx-auto flex h-12 w-full items-center justify-start px-4 text-muted-foreground md:max-w-7xl"
             >
                 <Breadcrumbs :breadcrumbs="breadcrumbs" />
             </div>

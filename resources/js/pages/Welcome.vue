@@ -16,6 +16,7 @@ import {
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import { Button } from '@/components/ui/button';
 import { dashboard, login, register } from '@/routes';
 import { index as marketplaceIndex } from '@/routes/marketplace';
@@ -163,7 +164,7 @@ const mobileProcessFlow = [
                                     </p>
                                 </div>
                                 <span
-                                    class="rounded-full bg-[#001c72] px-3 py-1 text-xs font-medium text-white"
+                                    class="rounded-full bg-brand px-3 py-1 text-xs font-medium text-brand-foreground"
                                 >
                                     verified
                                 </span>
@@ -179,7 +180,7 @@ const mobileProcessFlow = [
                                     </p>
                                 </div>
                                 <div
-                                    class="grid size-14 place-items-center rounded-lg bg-[#001c72] text-white"
+                                    class="grid size-14 place-items-center rounded-lg bg-brand text-brand-foreground"
                                 >
                                     <BriefcaseBusiness class="size-6" />
                                 </div>
@@ -261,38 +262,43 @@ const mobileProcessFlow = [
                     prefetch
                 >
                     <span
-                        class="grid size-10 place-items-center rounded-lg bg-[#001c72] text-white shadow-lg shadow-black/20"
+                        class="grid size-10 place-items-center rounded-lg bg-brand text-brand-foreground shadow-lg shadow-black/20"
                     >
                         <AppLogoIcon class="size-5 fill-current" />
                     </span>
                     <span class="text-lg font-semibold">Lartisan</span>
                 </Link>
 
-                <nav class="flex items-center gap-2 text-sm">
+                <nav
+                    class="flex items-center gap-1 rounded-full border border-border bg-card/90 p-1 text-sm text-card-foreground shadow-sm shadow-black/10 backdrop-blur-xl dark:border-border/70 dark:bg-card/80"
+                >
                     <Link
                         :href="marketplaceIndex().url"
-                        class="hidden rounded-full px-4 py-2 text-muted-foreground transition hover:bg-accent hover:text-foreground sm:inline-flex"
+                        class="hidden rounded-full px-4 py-2 text-card-foreground/75 transition hover:bg-accent hover:text-accent-foreground sm:inline-flex"
                         prefetch
                     >
                         Marketplace
                     </Link>
+                    <ThemeSwitcher
+                        class="text-card-foreground/75 hover:bg-accent hover:text-accent-foreground"
+                    />
                     <Link
                         v-if="$page.props.auth.user"
                         :href="dashboardUrl"
-                        class="rounded-full border border-border px-4 py-2 text-foreground transition hover:bg-accent"
+                        class="rounded-full border border-border/80 bg-background/60 px-4 py-2 text-card-foreground transition hover:bg-accent hover:text-accent-foreground"
                     >
                         Dashboard
                     </Link>
                     <template v-else>
                         <Link
                             :href="login().url"
-                            class="rounded-full px-4 py-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
+                            class="rounded-full px-4 py-2 text-card-foreground/75 transition hover:bg-accent hover:text-accent-foreground"
                         >
                             Log in
                         </Link>
                         <Link
                             :href="artisanRegisterUrl"
-                            class="rounded-full bg-[#001c72] px-4 py-2 font-medium text-white shadow-lg shadow-black/15 transition hover:-translate-y-0.5 hover:bg-[#00258f] motion-reduce:hover:translate-y-0"
+                            class="rounded-full bg-primary px-4 py-2 font-medium text-primary-foreground shadow-lg shadow-black/15 transition hover:-translate-y-0.5 hover:bg-primary/90 motion-reduce:hover:translate-y-0"
                         >
                             Join
                         </Link>
@@ -329,7 +335,7 @@ const mobileProcessFlow = [
                         <Button
                             as-child
                             size="lg"
-                            class="h-12 rounded-full bg-[#001c72] px-6 text-white hover:bg-[#00258f]"
+                            class="h-12 rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90"
                         >
                             <Link :href="marketplaceIndex().url" prefetch>
                                 Find artisans
@@ -416,7 +422,8 @@ const mobileProcessFlow = [
                         class="rounded-full bg-muted px-3 py-1 text-muted-foreground"
                         >Customers</span
                     >
-                    <span class="rounded-full bg-[#001c72] px-3 py-1 text-white"
+                    <span
+                        class="rounded-full bg-primary px-3 py-1 text-primary-foreground"
                         >Artisans</span
                     >
                     <span
@@ -454,7 +461,7 @@ const mobileProcessFlow = [
                     class="group rounded-lg border bg-card p-5 text-card-foreground shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:hover:translate-y-0"
                 >
                     <div
-                        class="grid size-11 place-items-center rounded-lg bg-primary/10 text-primary transition group-hover:bg-[#001c72] group-hover:text-white"
+                        class="grid size-11 place-items-center rounded-lg bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground"
                     >
                         <component :is="signal.icon" class="size-5" />
                     </div>
@@ -466,12 +473,12 @@ const mobileProcessFlow = [
             </div>
         </section>
 
-        <section class="bg-[#001c72] py-16 text-white lg:py-20">
+        <section class="bg-brand py-16 text-brand-foreground lg:py-20">
             <div
                 class="mx-auto grid max-w-[92rem] gap-10 px-5 sm:px-8 lg:grid-cols-[0.86fr_1.14fr] lg:items-center xl:px-10"
             >
                 <div>
-                    <p class="text-sm font-medium text-white/70">
+                    <p class="text-sm font-medium text-brand-foreground/70">
                         Booking lifecycle
                     </p>
                     <h2
@@ -479,7 +486,7 @@ const mobileProcessFlow = [
                     >
                         From search to completion, every handoff has a state.
                     </h2>
-                    <p class="mt-5 leading-7 text-white/70">
+                    <p class="mt-5 leading-7 text-brand-foreground/70">
                         Guests can book, customers can track, artisans can act,
                         and the back office can review the trail when something
                         needs attention.
@@ -490,20 +497,22 @@ const mobileProcessFlow = [
                     <article
                         v-for="(step, index) in steps"
                         :key="step.title"
-                        class="relative rounded-lg border border-white/15 bg-white/10 p-5 transition duration-300 hover:bg-white/15"
+                        class="relative rounded-lg border border-brand-foreground/15 bg-brand-foreground/10 p-5 transition duration-300 hover:bg-brand-foreground/15"
                     >
-                        <span class="text-sm text-white/50"
+                        <span class="text-sm text-brand-foreground/50"
                             >0{{ index + 1 }}</span
                         >
                         <div
-                            class="mt-4 grid size-11 place-items-center rounded-lg bg-white text-[#001c72]"
+                            class="mt-4 grid size-11 place-items-center rounded-lg bg-brand-foreground text-brand"
                         >
                             <component :is="step.icon" class="size-5" />
                         </div>
                         <h3 class="mt-5 text-lg font-semibold">
                             {{ step.title }}
                         </h3>
-                        <p class="mt-3 text-sm leading-6 text-white/70">
+                        <p
+                            class="mt-3 text-sm leading-6 text-brand-foreground/70"
+                        >
                             {{ step.text }}
                         </p>
                     </article>
@@ -586,7 +595,7 @@ const mobileProcessFlow = [
                         <Button
                             as-child
                             size="lg"
-                            class="h-12 rounded-full bg-[#001c72] px-6 text-white hover:bg-[#00258f]"
+                            class="h-12 rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90"
                         >
                             <Link :href="marketplaceIndex().url" prefetch>
                                 Find service
@@ -631,10 +640,10 @@ const mobileProcessFlow = [
         linear-gradient(
             90deg,
             color-mix(in srgb, var(--background) 96%, transparent) 0%,
-            rgba(0, 28, 114, 0.78) 48%,
-            color-mix(in srgb, var(--background) 92%, #001c72) 100%
+            color-mix(in srgb, var(--brand) 78%, transparent) 48%,
+            color-mix(in srgb, var(--background) 92%, var(--brand)) 100%
         ),
-        #001c72;
+        var(--brand);
 }
 
 .scene-grid {
@@ -685,8 +694,8 @@ const mobileProcessFlow = [
 }
 
 .process-node-active {
-    border-color: color-mix(in srgb, #527dff 58%, transparent);
-    background: color-mix(in srgb, #001c72 36%, transparent);
+    border-color: color-mix(in srgb, var(--primary) 58%, transparent);
+    background: color-mix(in srgb, var(--brand) 36%, transparent);
 }
 
 .process-icon {
@@ -700,8 +709,8 @@ const mobileProcessFlow = [
 }
 
 .process-node-active .process-icon {
-    background: #001c72;
-    color: #fff;
+    background: var(--brand);
+    color: var(--brand-foreground);
 }
 
 .process-index {
@@ -738,9 +747,10 @@ const mobileProcessFlow = [
     display: flex;
     align-items: stretch;
     gap: 0.35rem;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--border));
     border-radius: 0.5rem;
-    background: rgba(255, 255, 255, 0.08);
+    background: color-mix(in srgb, var(--card) 92%, var(--primary));
+    box-shadow: 0 16px 40px color-mix(in srgb, var(--primary) 12%, transparent);
     padding: 0.7rem;
     backdrop-filter: blur(16px);
 }
@@ -766,20 +776,20 @@ const mobileProcessFlow = [
     height: 2rem;
     place-items: center;
     border-radius: 0.5rem;
-    background: color-mix(in srgb, var(--primary) 18%, transparent);
+    background: color-mix(in srgb, var(--primary) 16%, var(--card));
     color: var(--primary);
 }
 
 .mobile-process-title {
     margin-top: 0.45rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--foreground);
     font-size: 0.75rem;
     font-weight: 600;
 }
 
 .mobile-process-text {
     margin-top: 0.15rem;
-    color: rgba(255, 255, 255, 0.54);
+    color: var(--muted-foreground);
     font-size: 0.68rem;
     line-height: 1.25;
 }
@@ -791,7 +801,7 @@ const mobileProcessFlow = [
     height: 2px;
     overflow: hidden;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.16);
+    background: color-mix(in srgb, var(--primary) 18%, var(--border));
 }
 
 .mobile-process-link span {

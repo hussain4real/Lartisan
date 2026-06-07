@@ -30,49 +30,84 @@ defineOptions({
     },
 });
 
-const palette = [
+const colorRoles = [
     {
-        name: 'Leadprenuer blue',
-        tier: 'Primary',
-        role: 'Primary action, navigation, trust anchor',
-        value: '#001c72',
-        class: 'bg-[#001c72]',
+        name: 'Brand surface',
+        token: 'brand',
+        role: 'Logo blocks, brand bands, trust-heavy hero surfaces.',
+        light: 'hsl(225 100% 22.4%)',
+        dark: 'hsl(225 72% 18%)',
     },
     {
-        name: 'Lartisan orange',
-        tier: 'Secondary',
-        role: 'Secondary actions, review states, attention',
-        value: '#f59e0b',
-        class: 'bg-[#f59e0b]',
+        name: 'Primary action',
+        token: 'primary',
+        role: 'Main commitments, links, focus rings, active navigation.',
+        light: 'hsl(225 100% 22.4%)',
+        dark: 'hsl(225 100% 66%)',
     },
     {
-        name: 'Operational gray',
-        tier: 'Tertiary',
-        role: 'Tertiary actions, subdued labels',
-        value: '#6c757d',
-        class: 'bg-[#6c757d]',
+        name: 'Secondary / warning',
+        token: 'secondary, warning',
+        role: 'Attention, review, pending, retry, and secondary actions.',
+        light: 'hsl(38 92.1% 50.2%)',
+        dark: 'hsl(38 92.1% 62%)',
     },
     {
-        name: 'Ink',
-        tier: 'Tertiary',
-        role: 'Text emphasis and dense data',
-        value: '#1d1d1d',
-        class: 'bg-[#1d1d1d]',
+        name: 'Success',
+        token: 'success',
+        role: 'Confirmed saves, copied codes, verified completions.',
+        light: 'hsl(160 84% 31%)',
+        dark: 'hsl(152 76% 48%)',
     },
     {
-        name: 'Risk red',
-        tier: 'Tertiary',
-        role: 'Disputes, failed payments, destructive actions',
-        value: '#dc2626',
-        class: 'bg-[#dc2626]',
+        name: 'Destructive',
+        token: 'destructive',
+        role: 'Failed payments, rejected KYC, deletion, suspension.',
+        light: 'hsl(0 84.2% 60.2%)',
+        dark: 'hsl(0 84% 60%)',
     },
     {
-        name: 'Surface',
-        tier: 'Tertiary',
-        role: 'Quiet app background and work surfaces',
-        value: '#f8fafc',
-        class: 'bg-[#f8fafc]',
+        name: 'App surface',
+        token: 'background',
+        role: 'Default page background across public and app shells.',
+        light: 'hsl(210 24% 98%)',
+        dark: 'hsl(225 48% 7%)',
     },
+    {
+        name: 'Card surface',
+        token: 'card',
+        role: 'Cards, panels, forms, popovers, and repeated records.',
+        light: 'hsl(0 0% 100%)',
+        dark: 'hsl(225 42% 10%)',
+    },
+    {
+        name: 'Text',
+        token: 'foreground',
+        role: 'Primary body copy, headings, dense operational values.',
+        light: 'hsl(0 0% 11.4%)',
+        dark: 'hsl(210 24% 96%)',
+    },
+    {
+        name: 'Muted text',
+        token: 'muted-foreground',
+        role: 'Descriptions, metadata, helper copy, secondary labels.',
+        light: 'hsl(210 7.3% 37%)',
+        dark: 'hsl(214 20% 70%)',
+    },
+    {
+        name: 'Border',
+        token: 'border',
+        role: 'Dividers, cards, tables, input boundaries.',
+        light: 'hsl(214 28% 88%)',
+        dark: 'hsl(225 24% 20%)',
+    },
+];
+
+const usageRules = [
+    'Use deep brand blue for light-mode brand panels and primary CTAs.',
+    'Use lighter primary in dark mode for links, actions, rings, and active states.',
+    'Use brand in dark mode for larger surfaces, not dense text or small icons.',
+    'Use warning for pending/review/retry, success for confirmation, and destructive only for risk.',
 ];
 
 const journeyCards = [
@@ -102,22 +137,22 @@ const statusPatterns = [
     {
         label: 'Approved',
         icon: CheckCircle2,
-        class: 'border-[#001c72]/40 bg-[#001c72]/10 text-[#001c72] dark:border-blue-300/50 dark:bg-blue-300/15 dark:text-blue-100',
+        class: 'border-primary/30 bg-primary/10 text-primary',
     },
     {
         label: 'Pending',
         icon: Clock3,
-        class: 'border-[#f59e0b]/50 bg-[#f59e0b]/15 text-[#7c3f00] dark:border-orange-300/50 dark:bg-orange-300/15 dark:text-orange-100',
+        class: 'border-warning/40 bg-warning/15 text-warning',
     },
     {
         label: 'Escalated',
         icon: AlertTriangle,
-        class: 'border-orange-300 bg-orange-50 text-orange-800 dark:border-orange-700 dark:bg-orange-950/40 dark:text-orange-200',
+        class: 'border-warning/40 bg-warning/10 text-warning',
     },
     {
         label: 'Rejected',
         icon: XCircle,
-        class: 'border-red-300 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-950/40 dark:text-red-200',
+        class: 'border-destructive/30 bg-destructive/10 text-destructive',
     },
 ];
 </script>
@@ -129,9 +164,9 @@ const statusPatterns = [
         <h1 class="sr-only">Lartisan style guide</h1>
 
         <section class="space-y-3">
-            <Badge variant="outline" class="w-fit"
-                >Lartisan design system</Badge
-            >
+            <Badge variant="outline" class="w-fit">
+                Lartisan design system
+            </Badge>
             <Heading
                 variant="small"
                 title="Premium local-service operations"
@@ -139,38 +174,60 @@ const statusPatterns = [
             />
         </section>
 
-        <section class="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+        <section class="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
             <div
                 class="rounded-lg border bg-card p-5 text-card-foreground shadow-xs"
             >
                 <div class="mb-4 flex items-center gap-2">
                     <Palette class="size-5 text-primary" />
-                    <h2 class="text-base font-semibold">Color roles</h2>
+                    <h2 class="text-base font-semibold">
+                        Light and dark color roles
+                    </h2>
                 </div>
 
-                <div class="grid gap-3 sm:grid-cols-2">
+                <div class="grid gap-3 md:grid-cols-2">
                     <div
-                        v-for="color in palette"
+                        v-for="color in colorRoles"
                         :key="color.name"
-                        class="overflow-hidden rounded-lg border bg-background"
+                        class="rounded-lg border bg-background p-3"
                     >
-                        <div :class="['h-16', color.class]" />
-                        <div class="space-y-1 p-3">
-                            <div
-                                class="flex items-center justify-between gap-3"
-                            >
-                                <div>
-                                    <p class="text-sm font-medium">
-                                        {{ color.name }}
-                                    </p>
-                                    <p
-                                        class="text-[0.6875rem] font-medium text-muted-foreground uppercase"
-                                    >
-                                        {{ color.tier }}
-                                    </p>
-                                </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <div
+                                    class="h-12 rounded-md border"
+                                    :style="{ backgroundColor: color.light }"
+                                />
+                                <p
+                                    class="mt-1 text-[0.6875rem] font-medium text-muted-foreground uppercase"
+                                >
+                                    Light
+                                </p>
                                 <code class="text-xs text-muted-foreground">
-                                    {{ color.value }}
+                                    {{ color.light }}
+                                </code>
+                            </div>
+                            <div>
+                                <div
+                                    class="h-12 rounded-md border"
+                                    :style="{ backgroundColor: color.dark }"
+                                />
+                                <p
+                                    class="mt-1 text-[0.6875rem] font-medium text-muted-foreground uppercase"
+                                >
+                                    Dark
+                                </p>
+                                <code class="text-xs text-muted-foreground">
+                                    {{ color.dark }}
+                                </code>
+                            </div>
+                        </div>
+                        <div class="mt-3 space-y-1">
+                            <div class="flex items-start justify-between gap-3">
+                                <p class="text-sm font-medium">
+                                    {{ color.name }}
+                                </p>
+                                <code class="text-xs text-muted-foreground">
+                                    {{ color.token }}
                                 </code>
                             </div>
                             <p class="text-xs text-muted-foreground">
@@ -182,26 +239,38 @@ const statusPatterns = [
             </div>
 
             <div
-                class="rounded-lg border bg-primary p-5 text-primary-foreground shadow-xs"
+                class="rounded-lg border bg-brand p-5 text-brand-foreground shadow-xs"
             >
                 <div class="mb-5 flex items-center gap-2">
                     <Type class="size-5" />
-                    <h2 class="text-base font-semibold">Voice and type</h2>
+                    <h2 class="text-base font-semibold">Theme rules</h2>
                 </div>
 
                 <div class="space-y-4">
                     <p class="text-3xl leading-tight font-semibold">
                         Built for trust at the point of service.
                     </p>
-                    <p class="text-sm/6 text-primary-foreground/80">
-                        Labels stay direct, actions use active verbs, and dense
-                        operations screens prioritize scannable status, owner,
-                        location, and next-step information.
-                    </p>
+                    <ul class="space-y-3 text-sm/6 text-brand-foreground/80">
+                        <li v-for="rule in usageRules" :key="rule">
+                            {{ rule }}
+                        </li>
+                    </ul>
                     <div class="flex flex-wrap gap-2">
-                        <Badge class="bg-white/15 text-white">Verified</Badge>
-                        <Badge class="bg-white/15 text-white">Local</Badge>
-                        <Badge class="bg-white/15 text-white">Auditable</Badge>
+                        <Badge
+                            class="bg-brand-foreground/15 text-brand-foreground"
+                        >
+                            Verified
+                        </Badge>
+                        <Badge
+                            class="bg-brand-foreground/15 text-brand-foreground"
+                        >
+                            Local
+                        </Badge>
+                        <Badge
+                            class="bg-brand-foreground/15 text-brand-foreground"
+                        >
+                            Auditable
+                        </Badge>
                     </div>
                 </div>
             </div>
