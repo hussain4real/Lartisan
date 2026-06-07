@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import AppLogo from '@/components/AppLogo.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import {
     Card,
@@ -27,12 +27,9 @@ defineProps<{
             <Link
                 :href="home()"
                 class="flex items-center gap-2 self-center font-medium"
+                aria-label="Lartisan"
             >
-                <div class="flex h-9 w-9 items-center justify-center">
-                    <AppLogoIcon
-                        class="size-9 fill-current text-black dark:text-white"
-                    />
-                </div>
+                <AppLogo class="h-12" />
             </Link>
 
             <div class="flex flex-col gap-6">

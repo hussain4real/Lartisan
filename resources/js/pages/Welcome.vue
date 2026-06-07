@@ -15,7 +15,7 @@ import {
     WalletCards,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import AppLogo from '@/components/AppLogo.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import { Button } from '@/components/ui/button';
 import { dashboard, login, register } from '@/routes';
@@ -259,14 +259,14 @@ const mobileProcessFlow = [
                 <Link
                     :href="marketplaceIndex().url"
                     class="flex items-center gap-3"
+                    aria-label="Lartisan"
                     prefetch
                 >
                     <span
-                        class="grid size-10 place-items-center rounded-lg bg-brand text-brand-foreground shadow-lg shadow-black/20"
+                        class="rounded-lg bg-white/95 px-3 py-2 shadow-lg shadow-black/20"
                     >
-                        <AppLogoIcon class="size-5 fill-current" />
+                        <AppLogo class="h-8" />
                     </span>
-                    <span class="text-lg font-semibold">Lartisan</span>
                 </Link>
 
                 <nav

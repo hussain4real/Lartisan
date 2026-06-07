@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { Link, usePage } from '@inertiajs/vue3';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import { Link } from '@inertiajs/vue3';
+import AppLogo from '@/components/AppLogo.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import { home } from '@/routes';
-
-const page = usePage();
-const name = page.props.name;
 
 defineProps<{
     title?: string;
@@ -25,10 +22,10 @@ defineProps<{
             <div class="absolute inset-0 bg-brand" />
             <Link
                 :href="home()"
-                class="relative z-20 flex items-center text-lg font-medium"
+                class="relative z-20 inline-flex items-center self-start rounded-lg bg-white/95 px-3 py-2 shadow-sm"
+                aria-label="Lartisan"
             >
-                <AppLogoIcon class="mr-2 size-8 fill-current text-white" />
-                {{ name }}
+                <AppLogo class="h-8" />
             </Link>
         </div>
         <div class="lg:p-8">

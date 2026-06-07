@@ -2,6 +2,7 @@
 import { Head, InfiniteScroll, Link, router } from '@inertiajs/vue3';
 import { Search, ShieldCheck, SlidersHorizontal } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
+import AppLogo from '@/components/AppLogo.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -142,8 +143,8 @@ const submitSearch = (): void => {
             <div
                 class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6"
             >
-                <Link :href="marketplaceIndex().url" class="font-semibold">
-                    Lartisan
+                <Link :href="marketplaceIndex().url" aria-label="Lartisan">
+                    <AppLogo class="h-9" />
                 </Link>
                 <Badge variant="secondary" class="gap-1.5">
                     <ShieldCheck class="size-3.5" />
