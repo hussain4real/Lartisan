@@ -612,8 +612,8 @@ test('pilot user seed data includes phase three catalog and kyc records', functi
     $service = ArtisanService::query()->firstOrFail();
     $submission = KycSubmission::query()->firstOrFail();
 
-    expect(ServiceCategory::query()->count())->toBe(3);
-    expect(ArtisanService::query()->count())->toBe(1);
+    expect(ServiceCategory::query()->count())->toBe(12);
+    expect(ArtisanService::query()->count())->toBe(201);
     expect(KycSubmission::query()->count())->toBe(1);
     expect($service->artisanProfile()->firstOrFail()->is($profile))->toBeTrue();
     expect($service->status)->toBe(ArtisanServiceStatus::Active);

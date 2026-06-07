@@ -18,18 +18,25 @@ test('geography seeder creates idempotent nigeria pilot data', function () {
 
     $country = Country::query()->where('iso_code', 'NG')->firstOrFail();
     $fct = State::query()->where('slug', 'federal-capital-territory')->firstOrFail();
+    $lagos = State::query()->where('slug', 'lagos')->firstOrFail();
     $amac = LocalGovernment::query()->where('slug', 'abuja-municipal-area-council')->firstOrFail();
+    $ikeja = LocalGovernment::query()->where('slug', 'ikeja')->firstOrFail();
     $wuseMarket = Territory::query()->where('slug', 'wuse-market')->firstOrFail();
+    $computerVillage = Territory::query()->where('slug', 'computer-village-cluster')->firstOrFail();
 
     expect(Country::query()->count())->toBe(1);
     expect($country->states()->count())->toBe(37);
     expect($fct->country()->firstOrFail()->is($country))->toBeTrue();
     expect($fct->localGovernments()->count())->toBe(6);
+    expect($lagos->localGovernments()->count())->toBe(2);
     expect($amac->state()->firstOrFail()->is($fct))->toBeTrue();
+    expect($ikeja->state()->firstOrFail()->is($lagos))->toBeTrue();
     expect($amac->territories()->count())->toBe(4);
-    expect(Territory::query()->count())->toBe(15);
+    expect(Territory::query()->count())->toBe(31);
     expect($wuseMarket->localGovernment()->firstOrFail()->is($amac))->toBeTrue();
+    expect($computerVillage->localGovernment()->firstOrFail()->is($ikeja))->toBeTrue();
     expect($wuseMarket->type)->toBe(TerritoryType::Market);
+    expect($computerVillage->type)->toBe(TerritoryType::Cluster);
     expect($wuseMarket->active)->toBeTrue();
 });
 

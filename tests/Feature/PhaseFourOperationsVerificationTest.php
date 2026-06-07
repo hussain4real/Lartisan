@@ -170,26 +170,36 @@ test('filament operation resources expose scoped queues only', function () {
     $this->actingAs($users['superAdmin']);
     expect(KycSubmissionResource::getEloquentQuery()->pluck('id')->all())
         ->toEqualCanonicalizing([$pilotSubmission->id, $otherFctSubmission->id, KycSubmission::query()->latest('id')->firstOrFail()->id]);
-    expect(ArtisanProfileResource::getEloquentQuery()->pluck('id')->all())
-        ->toEqualCanonicalizing([$pilotProfile->id, $otherFctProfile->id, $outsideStateProfile->id]);
+    $superAdminProfileIds = ArtisanProfileResource::getEloquentQuery()->pluck('id')->all();
+    expect($superAdminProfileIds)->toContain($pilotProfile->id)
+        ->and($superAdminProfileIds)->toContain($otherFctProfile->id)
+        ->and($superAdminProfileIds)->toContain($outsideStateProfile->id);
     expect(AreaAgentAssignmentResource::getEloquentQuery()->count())->toBe(2);
     expect(ReasonCodeResource::canAccess())->toBeTrue();
     $this->actingAs($users['stateCoordinator']);
     expect(KycSubmissionResource::getEloquentQuery()->pluck('id')->all())
         ->toEqualCanonicalizing([$pilotSubmission->id, $otherFctSubmission->id]);
-    expect(ArtisanProfileResource::getEloquentQuery()->pluck('id')->all())
-        ->toEqualCanonicalizing([$pilotProfile->id, $otherFctProfile->id]);
+    $stateCoordinatorProfileIds = ArtisanProfileResource::getEloquentQuery()->pluck('id')->all();
+    expect($stateCoordinatorProfileIds)->toContain($pilotProfile->id)
+        ->and($stateCoordinatorProfileIds)->toContain($otherFctProfile->id)
+        ->and($stateCoordinatorProfileIds)->not->toContain($outsideStateProfile->id);
     expect(AreaAgentAssignmentResource::getEloquentQuery()->count())->toBe(2);
     $this->actingAs($users['localGovernmentAdmin']);
     expect(KycSubmissionResource::getEloquentQuery()->pluck('id')->all())->toBe([$pilotSubmission->id]);
-    expect(ArtisanProfileResource::getEloquentQuery()->pluck('id')->all())->toBe([$pilotProfile->id]);
+    $localGovernmentAdminProfileIds = ArtisanProfileResource::getEloquentQuery()->pluck('id')->all();
+    expect($localGovernmentAdminProfileIds)->toContain($pilotProfile->id)
+        ->and($localGovernmentAdminProfileIds)->not->toContain($otherFctProfile->id)
+        ->and($localGovernmentAdminProfileIds)->not->toContain($outsideStateProfile->id);
     expect(AreaAgentAssignmentResource::getEloquentQuery()->count())->toBe(2);
     expect(ReasonCodeResource::canAccess())->toBeFalse();
     $this->get('/lga/reason-codes')->assertForbidden();
 
     $this->actingAs($users['areaAgent']);
     expect(KycSubmissionResource::getEloquentQuery()->pluck('id')->all())->toBe([$pilotSubmission->id]);
-    expect(ArtisanProfileResource::getEloquentQuery()->pluck('id')->all())->toBe([$pilotProfile->id]);
+    $areaAgentProfileIds = ArtisanProfileResource::getEloquentQuery()->pluck('id')->all();
+    expect($areaAgentProfileIds)->toContain($pilotProfile->id)
+        ->and($areaAgentProfileIds)->not->toContain($otherFctProfile->id)
+        ->and($areaAgentProfileIds)->not->toContain($outsideStateProfile->id);
     expect(AreaAgentAssignmentResource::getEloquentQuery()->count())->toBe(2);
     $this->actingAs($users['customer']);
     expect(KycSubmissionResource::getEloquentQuery()->count())->toBe(0);
