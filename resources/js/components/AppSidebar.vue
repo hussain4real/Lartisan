@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
 import {
-    BookOpen,
     BriefcaseBusiness,
     CalendarCheck,
     ClipboardCheck,
     CreditCard,
-    FolderGit2,
+    FileText,
     IdCard,
     LayoutGrid,
     LogIn,
@@ -33,7 +32,13 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, login, register } from '@/routes';
+import {
+    dashboard,
+    login,
+    privacyPolicy,
+    register,
+    termsOfService,
+} from '@/routes';
 import { dashboard as artisanDashboard } from '@/routes/artisan';
 import { index as artisanBookings } from '@/routes/artisan/bookings';
 import { show as artisanKyc } from '@/routes/artisan/kyc';
@@ -229,14 +234,14 @@ const mainNavItems = computed<NavItem[]>(() => {
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
+        title: 'Privacy Policy',
+        href: privacyPolicy().url,
+        icon: ShieldCheck,
     },
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
+        title: 'Terms of Service',
+        href: termsOfService().url,
+        icon: FileText,
     },
 ];
 </script>

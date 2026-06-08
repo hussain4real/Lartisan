@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-vue-next';
+import {
+    FileText,
+    LayoutGrid,
+    Menu,
+    Search,
+    ShieldCheck,
+} from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
@@ -36,7 +42,7 @@ import UserMenuContent from '@/components/UserMenuContent.vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { getInitials } from '@/composables/useInitials';
 import { toUrl } from '@/lib/utils';
-import { dashboard } from '@/routes';
+import { dashboard, privacyPolicy, termsOfService } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -68,14 +74,14 @@ const mainNavItems = computed<NavItem[]>(() => [
 
 const rightNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
+        title: 'Privacy Policy',
+        href: privacyPolicy().url,
+        icon: ShieldCheck,
     },
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
+        title: 'Terms of Service',
+        href: termsOfService().url,
+        icon: FileText,
     },
 ];
 </script>

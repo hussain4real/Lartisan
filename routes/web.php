@@ -25,6 +25,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
+Route::get('privacy-policy', fn () => Inertia::render('Legal/PrivacyPolicy'))->name('privacy-policy');
+Route::get('terms-of-service', fn () => Inertia::render('Legal/TermsOfService'))->name('terms-of-service');
 
 Route::post('webhooks/paystack', PaystackWebhookController::class)->name('webhooks.paystack');
 
