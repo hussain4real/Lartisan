@@ -24,6 +24,7 @@
         "tailwindcss-development",
         "medialibrary-development",
         "laravel-pdf",
-        "laravel-permission-development"
+        "laravel-permission-development",
+        "starter-kit-upgrade"
     ]
 }
