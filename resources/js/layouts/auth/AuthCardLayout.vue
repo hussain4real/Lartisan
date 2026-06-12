@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import AppLogo from '@/components/AppLogo.vue';
+import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import {
     Card,
     CardContent,
@@ -18,18 +19,17 @@ defineProps<{
 
 <template>
     <div
-        class="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10"
+        class="relative flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10"
     >
+        <ThemeSwitcher class="absolute top-4 right-4" />
+
         <div class="flex w-full max-w-md flex-col gap-6">
             <Link
                 :href="home()"
                 class="flex items-center gap-2 self-center font-medium"
+                aria-label="Lartisan"
             >
-                <div class="flex h-9 w-9 items-center justify-center">
-                    <AppLogoIcon
-                        class="size-9 fill-current text-black dark:text-white"
-                    />
-                </div>
+                <AppLogo class="h-12" />
             </Link>
 
             <div class="flex flex-col gap-6">

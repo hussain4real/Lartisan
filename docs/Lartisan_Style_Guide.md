@@ -18,26 +18,31 @@ The design language should communicate:
 
 ## 2. Color System
 
-The base palette is derived from Leadprenuer colors found on `leadprenuer.com.ng`.
+The base palette is derived from Leadprenuer colors found on `leadprenuer.com.ng`, then mapped into semantic Tailwind tokens in `resources/css/app.css`. Vue templates should use semantic classes such as `bg-primary`, `text-muted-foreground`, `bg-warning/10`, and `text-destructive` instead of raw brand hex utilities.
 
-| Token            | Hex       | Usage                                                                                  |
-| ---------------- | --------- | -------------------------------------------------------------------------------------- |
-| Leadprenuer Blue | `#001c72` | Primary actions, navigation, key dashboard anchors, trust-heavy headers.               |
-| Lartisan Orange  | `#f59e0b` | Secondary actions, pending KYC, payout review, retries, attention states.              |
-| Operational Gray | `#6c757d` | Tertiary actions, muted labels, helper text, metadata.                                 |
-| Ink              | `#1d1d1d` | Tertiary text emphasis and dense operational data.                                     |
-| Risk Red         | `#dc2626` | Tertiary risk states: failed payments, rejected KYC, suspensions, destructive actions. |
-| Surface          | `#f8fafc` | Tertiary app background and quiet work surfaces.                                       |
-| Border           | `#d8dee8` | Tertiary dividers, cards, tables, input boundaries.                                    |
+| Role                | Token                         | Light mode             | Dark mode             | Usage                                                        |
+| ------------------- | ----------------------------- | ---------------------- | --------------------- | ------------------------------------------------------------ |
+| Brand surface       | `brand`                       | `hsl(225 100% 22.4%)`  | `hsl(225 72% 18%)`    | Logo blocks, large brand bands, trust-heavy hero surfaces.   |
+| Primary action      | `primary`                     | `hsl(225 100% 22.4%)`  | `hsl(225 100% 66%)`   | Main commitments, links, focus rings, active navigation.     |
+| Secondary / warning | `secondary`, `warning`        | `hsl(38 92.1% 50.2%)` | `hsl(38 92.1% 62%)`  | Attention, review, pending, retry, and secondary actions.    |
+| Success             | `success`                     | `hsl(160 84% 31%)`     | `hsl(152 76% 48%)`    | Confirmed saves, copied codes, verified completions.         |
+| Destructive         | `destructive`                 | `hsl(0 84.2% 60.2%)`   | `hsl(0 84% 60%)`      | Failed payments, rejected KYC, deletion, suspension.         |
+| App surface         | `background`                  | `hsl(210 24% 98%)`     | `hsl(225 48% 7%)`     | Default page background across public and app shells.        |
+| Card surface        | `card`                        | `hsl(0 0% 100%)`       | `hsl(225 42% 10%)`    | Cards, panels, forms, popovers, and repeated records.        |
+| Text                | `foreground`                  | `hsl(0 0% 11.4%)`      | `hsl(210 24% 96%)`    | Primary body copy, headings, dense operational values.       |
+| Muted text          | `muted-foreground`            | `hsl(210 7.3% 37%)`    | `hsl(214 20% 70%)`    | Descriptions, metadata, helper copy, secondary labels.       |
+| Border              | `border`, `input`, `sidebar-*` | `hsl(214 28% 88%)`     | `hsl(225 24% 20%)`    | Dividers, cards, tables, input boundaries, sidebar chrome.   |
 
 ### Usage Rules
 
-- Use blue for primary commitments: create booking, approve profile, save policy, process payout.
-- Use orange for secondary actions and states that need attention: assign agent, review payout, pending KYC, retry upload.
-- Use red only for destructive, failed, rejected, or high-risk states.
-- Treat gray, ink, red, surface, and border as tertiary/support colors.
-- Avoid pages dominated by blue. Pair blue with white, orange, gray, and restrained red.
-- Keep dark mode readable: blue remains primary, while orange remains secondary for attention and review states.
+- Light mode can use deep brand blue for primary CTAs, logo blocks, navigation anchors, and brand panels.
+- Dark mode should use the lighter `primary` token for links, actions, rings, and active states. Use `brand` in dark mode for larger surfaces only, not dense text or small icons.
+- Use orange/warning for secondary actions and states that need attention: assign agent, review payout, pending KYC, retry upload.
+- Use success only for confirmation states, not decorative emphasis.
+- Use destructive only for failed, rejected, destructive, suspended, or high-risk states.
+- Treat surface, card, text, muted text, and border as system roles. Do not replace them with one-off gray or neutral utilities.
+- Avoid pages dominated by blue. Pair brand and primary with card surfaces, muted text, warning, success, and restrained destructive states.
+- Raw brand hex values are acceptable inside this style guide's documentation swatches, but production Vue templates should use semantic theme tokens.
 
 ## 3. Typography
 

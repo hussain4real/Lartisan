@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
-import { Landmark, WalletCards } from 'lucide-vue-next';
+import { Form, Head } from '@inertiajs/vue3';
+import { Landmark, Send, WalletCards } from 'lucide-vue-next';
 import Heading from '@/components/Heading.vue';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { dashboard as artisanDashboard } from '@/routes/artisan';
+import { store as requestPayout } from '@/routes/artisan/wallet/payouts';
 import type {
     ArtisanWalletSummary,
     PayoutAccountItem,
+    PayoutItem,
     Team,
     WalletLedgerEntryItem,
 } from '@/types';
@@ -20,6 +23,7 @@ type Props = {
     wallet: ArtisanWalletSummary;
     ledgerEntries: WalletLedgerEntryItem[];
     payoutAccounts: PayoutAccountItem[];
+    payouts: PayoutItem[];
 };
 
 defineProps<Props>();
@@ -112,6 +116,122 @@ defineOptions({
                 class="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground"
             >
                 No ledger entries yet.
+            </p>
+        </section>
+
+        <section class="space-y-4">
+            <Heading variant="small" title="Request payout" />
+
+            <Form
+                v-if="
+                    payoutAccounts.some(
+                        (account) => account.status === 'verified',
+                    )
+                "
+                v-bind="requestPayout.form(currentTeam.slug)"
+                class="grid gap-4 rounded-lg border p-5"
+                #default="{ errors, processing }"
+            >
+                <div class="grid gap-4 md:grid-cols-2">
+                    <label class="grid gap-2 text-sm">
+                        Account
+                        <select
+                            name="payout_account_id"
+                            class="h-10 rounded-md border bg-background px-3"
+                            required
+                        >
+                            <option
+                                v-for="account in payoutAccounts.filter(
+                                    (item) => item.status === 'verified',
+                                )"
+                                :key="account.id"
+                                :value="account.id"
+                            >
+                                {{ account.bankName }} -
+                                {{ account.accountName }}
+                            </option>
+                        </select>
+                        <span
+                            v-if="errors.payout_account_id"
+                            class="text-destructive"
+                        >
+                            {{ errors.payout_account_id }}
+                        </span>
+                    </label>
+                    <label class="grid gap-2 text-sm">
+                        Amount
+                        <input
+                            name="amount"
+                            type="number"
+                            min="1"
+                            step="0.01"
+                            class="h-10 rounded-md border bg-background px-3"
+                            required
+                        />
+                        <span v-if="errors.amount" class="text-destructive">
+                            {{ errors.amount }}
+                        </span>
+                    </label>
+                </div>
+                <label class="grid gap-2 text-sm">
+                    Notes
+                    <textarea
+                        name="notes"
+                        rows="3"
+                        class="rounded-md border bg-background p-3"
+                    />
+                </label>
+                <div class="flex justify-end">
+                    <Button type="submit" :disabled="processing">
+                        <Send />
+                        Request payout
+                    </Button>
+                </div>
+            </Form>
+
+            <p
+                v-else
+                class="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground"
+            >
+                Add a verified payout account before requesting a payout.
+            </p>
+        </section>
+
+        <section class="space-y-4">
+            <Heading variant="small" title="Recent payouts" />
+
+            <div v-if="payouts.length > 0" class="grid gap-3">
+                <div
+                    v-for="payout in payouts"
+                    :key="payout.id"
+                    class="grid gap-3 rounded-lg border p-4 sm:grid-cols-[1fr_auto] sm:items-center"
+                >
+                    <div class="min-w-0 space-y-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="font-medium">
+                                {{ payout.currencyCode }}
+                                {{ payout.amountDisplay }}
+                            </h2>
+                            <Badge variant="outline">{{ payout.status }}</Badge>
+                        </div>
+                        <p
+                            v-if="payout.failureReason"
+                            class="text-sm text-muted-foreground"
+                        >
+                            {{ payout.failureReason }}
+                        </p>
+                    </div>
+                    <div class="text-sm text-muted-foreground">
+                        {{ payout.requestedAt ?? 'Pending' }}
+                    </div>
+                </div>
+            </div>
+
+            <p
+                v-else
+                class="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground"
+            >
+                No payout requests yet.
             </p>
         </section>
 

@@ -1,5 +1,11 @@
 <?php
 
+use App\Enums\TeamRole;
+use App\Models\ArtisanProfile;
+use App\Models\Subscription;
+use App\Models\SubscriptionPlan;
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -47,4 +53,40 @@ expect()->extend('toBeOne', function () {
 function something(): void
 {
     // ..
+}
+
+/**
+ * @param  array<string, mixed>  $planAttributes
+ * @param  array<string, mixed>  $subscriptionAttributes
+ * @return array{owner: User, team: Team, profile: ArtisanProfile, plan: SubscriptionPlan, subscription: Subscription}
+ */
+function createTeamManagementContext(array $planAttributes = [], array $subscriptionAttributes = []): array
+{
+    $owner = User::factory()->create();
+    $team = Team::factory()->artisanBusiness()->create();
+    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+    $owner->switchTeam($team);
+
+    $profile = ArtisanProfile::factory()->create([
+        'team_id' => $team->id,
+        'user_id' => $owner->id,
+    ]);
+    $plan = SubscriptionPlan::factory()->create([
+        'active' => true,
+        'includes_team_management' => true,
+        ...$planAttributes,
+    ]);
+    $subscription = Subscription::factory()->active()->create([
+        'artisan_profile_id' => $profile->id,
+        'subscription_plan_id' => $plan->id,
+        ...$subscriptionAttributes,
+    ]);
+
+    return [
+        'owner' => $owner->refresh(),
+        'team' => $team->refresh(),
+        'profile' => $profile->refresh(),
+        'plan' => $plan->refresh(),
+        'subscription' => $subscription->refresh(),
+    ];
 }

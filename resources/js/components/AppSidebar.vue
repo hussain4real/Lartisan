@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
 import {
-    BookOpen,
     BriefcaseBusiness,
     CalendarCheck,
     ClipboardCheck,
     CreditCard,
-    FolderGit2,
+    FileText,
     IdCard,
     LayoutGrid,
+    LogIn,
+    Search,
+    ShieldCheck,
     Smartphone,
+    UserPlus,
     WalletCards,
     Wrench,
 } from 'lucide-vue-next';
@@ -29,7 +32,14 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import {
+    dashboard,
+    login,
+    pricing,
+    privacyPolicy,
+    register,
+    termsOfService,
+} from '@/routes';
 import { dashboard as artisanDashboard } from '@/routes/artisan';
 import { index as artisanBookings } from '@/routes/artisan/bookings';
 import { show as artisanKyc } from '@/routes/artisan/kyc';
@@ -38,20 +48,122 @@ import { edit as artisanProfile } from '@/routes/artisan/profile';
 import { index as artisanServices } from '@/routes/artisan/services';
 import { show as artisanSubscription } from '@/routes/artisan/subscription';
 import { show as artisanWallet } from '@/routes/artisan/wallet';
+import { index as customerBookings } from '@/routes/customer/bookings';
+import { dashboard as adminPanelDashboard } from '@/routes/filament/admin/pages';
+import { dashboard as agentPanelDashboard } from '@/routes/filament/agent/pages';
+import { dashboard as lgaPanelDashboard } from '@/routes/filament/lga/pages';
+import { dashboard as statePanelDashboard } from '@/routes/filament/state/pages';
+import { index as marketplace } from '@/routes/marketplace';
 import type { NavItem } from '@/types';
 
 const page = usePage();
+const isAuthenticated = computed(() => page.props.auth.user !== null);
 
 const dashboardUrl = computed(() =>
     page.props.currentTeam ? dashboard(page.props.currentTeam.slug).url : '/',
 );
 
-const mainNavItems = computed<NavItem[]>(() => [
+const dashboardNavItem = computed<NavItem>(() => ({
+    title: 'Dashboard',
+    href: dashboardUrl.value,
+    icon: LayoutGrid,
+}));
+
+const customerNavItems = computed<NavItem[]>(() => [
+    dashboardNavItem.value,
     {
-        title: 'Dashboard',
-        href: dashboardUrl.value,
-        icon: LayoutGrid,
+        title: 'Marketplace',
+        href: marketplace().url,
+        icon: Search,
     },
+    {
+        title: 'Pricing',
+        href: pricing().url,
+        icon: CreditCard,
+    },
+    {
+        title: 'My bookings',
+        href: customerBookings().url,
+        icon: CalendarCheck,
+    },
+    {
+        title: 'Become an artisan',
+        href: page.props.currentTeam
+            ? artisanOnboarding(page.props.currentTeam.slug).url
+            : '/',
+        icon: BriefcaseBusiness,
+    },
+    {
+        title: 'Phone verification',
+        href: phoneVerification().url,
+        icon: Smartphone,
+    },
+]);
+
+const guestNavItems = computed<NavItem[]>(() => [
+    {
+        title: 'Marketplace',
+        href: marketplace().url,
+        icon: Search,
+    },
+    {
+        title: 'Pricing',
+        href: pricing().url,
+        icon: CreditCard,
+    },
+    {
+        title: 'Become an artisan',
+        href: register({ query: { intent: 'artisan' } }).url,
+        icon: BriefcaseBusiness,
+    },
+    {
+        title: 'Log in',
+        href: login().url,
+        icon: LogIn,
+    },
+    {
+        title: 'Register',
+        href: register().url,
+        icon: UserPlus,
+    },
+]);
+
+const operationPanelUrl = computed(() => {
+    switch (page.props.auth.operationPanel?.id) {
+        case 'admin':
+            return adminPanelDashboard().url;
+        case 'state':
+            return statePanelDashboard().url;
+        case 'lga':
+            return lgaPanelDashboard().url;
+        case 'agent':
+            return agentPanelDashboard().url;
+        default:
+            return dashboardUrl.value;
+    }
+});
+
+const operationNavItems = computed<NavItem[]>(() => [
+    dashboardNavItem.value,
+    ...(page.props.auth.operationPanel
+        ? [
+              {
+                  title: page.props.auth.operationPanel.title,
+                  href: operationPanelUrl.value,
+                  icon: ShieldCheck,
+                  external: true,
+              },
+          ]
+        : []),
+    {
+        title: 'Phone verification',
+        href: phoneVerification().url,
+        icon: Smartphone,
+    },
+]);
+
+const artisanNavItems = computed<NavItem[]>(() => [
+    dashboardNavItem.value,
     {
         title: 'Artisan',
         href: page.props.currentTeam
@@ -115,16 +227,32 @@ const mainNavItems = computed<NavItem[]>(() => [
     },
 ]);
 
+const mainNavItems = computed<NavItem[]>(() => {
+    if (!isAuthenticated.value) {
+        return guestNavItems.value;
+    }
+
+    if (page.props.currentTeam?.kind === 'artisan-business') {
+        return artisanNavItems.value;
+    }
+
+    if (page.props.auth.operationPanel) {
+        return operationNavItems.value;
+    }
+
+    return customerNavItems.value;
+});
+
 const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
+        title: 'Privacy Policy',
+        href: privacyPolicy().url,
+        icon: ShieldCheck,
     },
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
+        title: 'Terms of Service',
+        href: termsOfService().url,
+        icon: FileText,
     },
 ];
 </script>
@@ -142,7 +270,7 @@ const footerNavItems: NavItem[] = [
                 </SidebarMenuItem>
             </SidebarMenu>
             <SidebarMenu>
-                <SidebarMenuItem>
+                <SidebarMenuItem v-if="isAuthenticated">
                     <TeamSwitcher />
                 </SidebarMenuItem>
             </SidebarMenu>
@@ -154,7 +282,7 @@ const footerNavItems: NavItem[] = [
 
         <SidebarFooter>
             <NavFooter :items="footerNavItems" />
-            <NavUser />
+            <NavUser v-if="isAuthenticated" />
         </SidebarFooter>
     </Sidebar>
     <slot />

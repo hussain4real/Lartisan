@@ -1,11 +1,19 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
-import { CalendarCheck, Check, CirclePlay, Flag, X } from 'lucide-vue-next';
+import { Form, Head, Link } from '@inertiajs/vue3';
+import {
+    AlertTriangle,
+    CalendarCheck,
+    Check,
+    CirclePlay,
+    Flag,
+    X,
+} from 'lucide-vue-next';
 import Heading from '@/components/Heading.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { dashboard as artisanDashboard } from '@/routes/artisan';
 import { accept, finish, reject, start } from '@/routes/artisan/bookings';
+import { create as createDispute } from '@/routes/artisan/bookings/disputes';
 import type { ArtisanBookingItem, Team } from '@/types';
 
 type Props = {
@@ -139,6 +147,19 @@ defineOptions({
                                 Finish
                             </Button>
                         </Form>
+                        <Button as-child variant="outline" size="sm">
+                            <Link
+                                :href="
+                                    createDispute({
+                                        current_team: props.currentTeam.slug,
+                                        booking: booking.id,
+                                    }).url
+                                "
+                            >
+                                <AlertTriangle />
+                                Dispute
+                            </Link>
+                        </Button>
                     </div>
                 </div>
             </article>

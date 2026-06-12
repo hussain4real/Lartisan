@@ -1,6 +1,6 @@
 # Lartisan Actor Guides
 
-Status: current through Phase 6 implementation
+Status: current through Phase 7 implementation
 
 These guides explain how each Lartisan actor should use the platform, what they own, what they can see, and where work should be escalated. They are operational guides, not implementation specs.
 
@@ -28,10 +28,14 @@ The platform currently includes:
 - Marketplace discovery for verified, approved, active subscribed artisans.
 - Guest and registered booking request creation with address snapshots and optional booking attachments.
 - Secure booking tracker links, customer booking screens, artisan booking queues, booking status history, and completion wallet release.
+- Verified customer reviews for confirmed paid bookings.
+- Customer and artisan dispute intake against bookings and linked reviews, private dispute evidence, audit logs, and automatically created support cases.
+- Artisan payout requests from verified payout accounts, operations payout approval, manual processing, failed-attempt retries, and immutable wallet payout debits.
+- Scoped report snapshots, report PDF rendering, and Filament dispute, payout, and report resources.
 
-Booking payments, chat, disputes, reviews, payout processing queues, notification templates, finance operations panels, and operations booking queues are planned later phases. The customer guides describe current booking behavior and label not-yet-built flows clearly.
+Booking checkout/escrow, chat, guest review submission, notification templates, dedicated support inboxes, and operations booking exception queues are planned later phases. The customer guides describe current booking behavior and label not-yet-built flows clearly.
 
-## Phase 6 Booking Surfaces
+## Phase 6-7 Booking And Trust Surfaces
 
 | Surface | Purpose |
 | --- | --- |
@@ -41,7 +45,13 @@ Booking payments, chat, disputes, reviews, payout processing queues, notificatio
 | `/booking-tracker/{trackerCode}?token=...` | Secure tracker for a single booking context. |
 | `/customer/bookings` | Registered customer booking list. |
 | `/customer/bookings/{booking}` | Registered customer booking detail and completion confirmation when eligible. |
+| `POST /customer/bookings/{booking}/reviews` | Submit a verified review for an eligible confirmed paid booking. |
+| `/customer/bookings/{booking}/disputes/create` | Open a customer dispute for an owned booking. |
 | `/{team}/artisan/bookings` | Artisan booking queue for accept, reject, start, and finish actions. |
+| `/{team}/artisan/bookings/{booking}/disputes/create` | Open an artisan dispute for a booking in the artisan workspace. |
+| `/{team}/artisan/wallet` | View wallet balances, ledger entries, payout accounts, and payout requests. |
+| `POST /{team}/artisan/wallet/payouts` | Request a payout from available wallet balance using a verified payout account. |
+| `/admin`, `/state`, `/lga`, `/agent` | Scoped Filament operations panels for disputes, payouts where permitted, and reports. |
 
 ## Role Hierarchy
 

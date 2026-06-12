@@ -1,15 +1,14 @@
 <?php
 
 use App\Enums\TeamRole;
-use App\Models\Team;
 use App\Models\User;
 
 test('team member roles can be updated by owners', function () {
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
+    $team = $context['team'];
     $member = User::factory()->create();
-    $team = Team::factory()->create();
 
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($member, ['role' => TeamRole::Member->value]);
 
     $response = $this
@@ -24,12 +23,11 @@ test('team member roles can be updated by owners', function () {
 });
 
 test('team member roles cannot be updated by non owners', function () {
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
     $admin = User::factory()->create();
     $member = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = $context['team'];
 
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($admin, ['role' => TeamRole::Admin->value]);
     $team->members()->attach($member, ['role' => TeamRole::Member->value]);
 
@@ -43,11 +41,11 @@ test('team member roles cannot be updated by non owners', function () {
 });
 
 test('team members can be removed by owners', function () {
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
+    $team = $context['team'];
     $member = User::factory()->create();
-    $team = Team::factory()->create();
 
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($member, ['role' => TeamRole::Member->value]);
 
     $response = $this
@@ -60,12 +58,11 @@ test('team members can be removed by owners', function () {
 });
 
 test('team members cannot be removed by non owners', function () {
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
     $admin = User::factory()->create();
     $member = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = $context['team'];
 
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($admin, ['role' => TeamRole::Admin->value]);
     $team->members()->attach($member, ['role' => TeamRole::Member->value]);
 
@@ -77,10 +74,9 @@ test('team members cannot be removed by non owners', function () {
 });
 
 test('team owner cannot be removed', function () {
-    $owner = User::factory()->create();
-    $team = Team::factory()->create();
-
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
+    $team = $context['team'];
 
     $response = $this
         ->actingAs($owner)
@@ -92,11 +88,11 @@ test('team owner cannot be removed', function () {
 });
 
 test('team member role cannot be set to owner', function () {
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
+    $team = $context['team'];
     $member = User::factory()->create();
-    $team = Team::factory()->create();
 
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($member, ['role' => TeamRole::Member->value]);
 
     $response = $this
@@ -111,12 +107,12 @@ test('team member role cannot be set to owner', function () {
 });
 
 test('removed member current team is set to personal team', function () {
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
+    $team = $context['team'];
     $member = User::factory()->create();
     $personalTeam = $member->teams()->where('is_personal', true)->firstOrFail();
-    $team = Team::factory()->create();
 
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($member, ['role' => TeamRole::Member->value]);
 
     $member->update(['current_team_id' => $team->id]);

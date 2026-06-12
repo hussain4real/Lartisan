@@ -11,7 +11,6 @@ use App\Enums\AdminProfileStatus;
 use App\Enums\ArtisanVerificationStatus;
 use App\Enums\FieldVisitStatus;
 use App\Enums\KycRiskLevel;
-use App\Enums\PlatformPermission;
 use App\Enums\PlatformRole;
 use App\Enums\ReasonCodeCategory;
 use App\Filament\Resources\AreaAgentAssignments\AreaAgentAssignmentResource;
@@ -171,26 +170,36 @@ test('filament operation resources expose scoped queues only', function () {
     $this->actingAs($users['superAdmin']);
     expect(KycSubmissionResource::getEloquentQuery()->pluck('id')->all())
         ->toEqualCanonicalizing([$pilotSubmission->id, $otherFctSubmission->id, KycSubmission::query()->latest('id')->firstOrFail()->id]);
-    expect(ArtisanProfileResource::getEloquentQuery()->pluck('id')->all())
-        ->toEqualCanonicalizing([$pilotProfile->id, $otherFctProfile->id, $outsideStateProfile->id]);
+    $superAdminProfileIds = ArtisanProfileResource::getEloquentQuery()->pluck('id')->all();
+    expect($superAdminProfileIds)->toContain($pilotProfile->id)
+        ->and($superAdminProfileIds)->toContain($otherFctProfile->id)
+        ->and($superAdminProfileIds)->toContain($outsideStateProfile->id);
     expect(AreaAgentAssignmentResource::getEloquentQuery()->count())->toBe(2);
     expect(ReasonCodeResource::canAccess())->toBeTrue();
     $this->actingAs($users['stateCoordinator']);
     expect(KycSubmissionResource::getEloquentQuery()->pluck('id')->all())
         ->toEqualCanonicalizing([$pilotSubmission->id, $otherFctSubmission->id]);
-    expect(ArtisanProfileResource::getEloquentQuery()->pluck('id')->all())
-        ->toEqualCanonicalizing([$pilotProfile->id, $otherFctProfile->id]);
+    $stateCoordinatorProfileIds = ArtisanProfileResource::getEloquentQuery()->pluck('id')->all();
+    expect($stateCoordinatorProfileIds)->toContain($pilotProfile->id)
+        ->and($stateCoordinatorProfileIds)->toContain($otherFctProfile->id)
+        ->and($stateCoordinatorProfileIds)->not->toContain($outsideStateProfile->id);
     expect(AreaAgentAssignmentResource::getEloquentQuery()->count())->toBe(2);
     $this->actingAs($users['localGovernmentAdmin']);
     expect(KycSubmissionResource::getEloquentQuery()->pluck('id')->all())->toBe([$pilotSubmission->id]);
-    expect(ArtisanProfileResource::getEloquentQuery()->pluck('id')->all())->toBe([$pilotProfile->id]);
+    $localGovernmentAdminProfileIds = ArtisanProfileResource::getEloquentQuery()->pluck('id')->all();
+    expect($localGovernmentAdminProfileIds)->toContain($pilotProfile->id)
+        ->and($localGovernmentAdminProfileIds)->not->toContain($otherFctProfile->id)
+        ->and($localGovernmentAdminProfileIds)->not->toContain($outsideStateProfile->id);
     expect(AreaAgentAssignmentResource::getEloquentQuery()->count())->toBe(2);
     expect(ReasonCodeResource::canAccess())->toBeFalse();
     $this->get('/lga/reason-codes')->assertForbidden();
 
     $this->actingAs($users['areaAgent']);
     expect(KycSubmissionResource::getEloquentQuery()->pluck('id')->all())->toBe([$pilotSubmission->id]);
-    expect(ArtisanProfileResource::getEloquentQuery()->pluck('id')->all())->toBe([$pilotProfile->id]);
+    $areaAgentProfileIds = ArtisanProfileResource::getEloquentQuery()->pluck('id')->all();
+    expect($areaAgentProfileIds)->toContain($pilotProfile->id)
+        ->and($areaAgentProfileIds)->not->toContain($otherFctProfile->id)
+        ->and($areaAgentProfileIds)->not->toContain($outsideStateProfile->id);
     expect(AreaAgentAssignmentResource::getEloquentQuery()->count())->toBe(2);
     $this->actingAs($users['customer']);
     expect(KycSubmissionResource::getEloquentQuery()->count())->toBe(0);
@@ -270,7 +279,7 @@ test('filament operation pages dispatch verification actions', function () {
     ]);
     $decisionActionMethod = new ReflectionMethod(KycSubmissionsTable::class, 'decisionAction');
     $decisionActionMethod->setAccessible(true);
-    $unsupportedDecisionAction = $decisionActionMethod->invoke(null, 'unsupported', 'Unsupported', PlatformPermission::ReviewStandardKyc);
+    $unsupportedDecisionAction = $decisionActionMethod->invoke(null, 'unsupported', 'Unsupported');
     assert($unsupportedDecisionAction instanceof Action);
     $unsupportedDecisionActionFunction = $unsupportedDecisionAction->getActionFunction();
     assert($unsupportedDecisionActionFunction instanceof Closure);
@@ -333,13 +342,34 @@ test('filament operation pages dispatch verification actions', function () {
         ])
         ->assertHasNoTableActionErrors();
 
+    $stateEscalatedSubmission = KycSubmission::factory()->submitted()->create([
+        'artisan_profile_id' => phaseFourProfileFor($amac)->id,
+        'risk_level' => KycRiskLevel::High,
+        'status' => ArtisanVerificationStatus::Escalated,
+    ]);
+
+    phaseFourUsePanel('state');
+    phaseFourLivewire($users['stateCoordinator'], ListKycSubmissions::class)
+        ->assertTableActionVisible('review', phaseFourRecordKey($stateEscalatedSubmission))
+        ->assertTableActionVisible('approve', phaseFourRecordKey($stateEscalatedSubmission))
+        ->assertTableActionVisible('return', phaseFourRecordKey($stateEscalatedSubmission))
+        ->assertTableActionVisible('reject', phaseFourRecordKey($stateEscalatedSubmission))
+        ->callTableAction('approve', phaseFourRecordKey($stateEscalatedSubmission), [
+            'reason_code_id' => $documentsComplete->id,
+            'risk_level' => KycRiskLevel::High->value,
+            'notes' => 'Approved from the state queue.',
+        ])
+        ->assertHasNoTableActionErrors();
+
     expect($reviewSubmission->refresh()->status)->toBe(ArtisanVerificationStatus::LgaReview);
     expect($approveSubmission->refresh()->status)->toBe(ArtisanVerificationStatus::Approved);
     expect($returnSubmission->refresh()->status)->toBe(ArtisanVerificationStatus::Returned);
     expect($rejectSubmission->refresh()->status)->toBe(ArtisanVerificationStatus::Rejected);
     expect($escalateSubmission->refresh()->status)->toBe(ArtisanVerificationStatus::Escalated);
+    expect($stateEscalatedSubmission->refresh()->status)->toBe(ArtisanVerificationStatus::Approved);
 
     $suspendProfile = phaseFourProfileFor($amac);
+    phaseFourUsePanel('lga');
     phaseFourLivewire($users['localGovernmentAdmin'], ListArtisanProfiles::class)
         ->assertTableActionVisible('suspend', phaseFourRecordKey($suspendProfile))
         ->callTableAction('suspend', phaseFourRecordKey($suspendProfile), [

@@ -2,25 +2,55 @@
 
 use App\Http\Controllers\Artisan\BookingController as ArtisanBookingController;
 use App\Http\Controllers\Artisan\DashboardController as ArtisanDashboardController;
+use App\Http\Controllers\Artisan\DisputeController as ArtisanDisputeController;
 use App\Http\Controllers\Artisan\FieldVisitController;
 use App\Http\Controllers\Artisan\KycController;
 use App\Http\Controllers\Artisan\OnboardingController;
+use App\Http\Controllers\Artisan\PayoutController as ArtisanPayoutController;
 use App\Http\Controllers\Artisan\ProfileController as ArtisanProfileController;
 use App\Http\Controllers\Artisan\ServiceController as ArtisanServiceController;
 use App\Http\Controllers\Artisan\SubscriptionController as ArtisanSubscriptionController;
 use App\Http\Controllers\Artisan\WalletController as ArtisanWalletController;
 use App\Http\Controllers\BookingTrackerController;
 use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
+use App\Http\Controllers\Customer\DisputeController as CustomerDisputeController;
+use App\Http\Controllers\Customer\ReviewController as CustomerReviewController;
 use App\Http\Controllers\Identity\AccountClaimController;
 use App\Http\Controllers\Identity\PhoneVerificationController;
 use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\PricingController;
 use App\Http\Controllers\Teams\TeamInvitationController;
+use App\Http\Controllers\WaitlistController;
+use App\Http\Controllers\WaitlistHostRedirectController;
 use App\Http\Controllers\Webhooks\PaystackWebhookController;
 use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+$waitlistHosts = [];
+
+foreach (config()->array('lartisan.waitlist_hosts') as $waitlistHost) {
+    if (! is_string($waitlistHost) || $waitlistHost === '') {
+        continue;
+    }
+
+    $waitlistHosts[] = trim($waitlistHost);
+}
+
+foreach ($waitlistHosts as $waitlistHost) {
+    Route::domain($waitlistHost)->group(function (): void {
+        Route::any('/', WaitlistHostRedirectController::class);
+        Route::any('{path}', WaitlistHostRedirectController::class)
+            ->where('path', '^(?!waitlist$).*$');
+    });
+}
+
 Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
+Route::get('waitlist', [WaitlistController::class, 'show'])->name('waitlist.show');
+Route::post('waitlist', [WaitlistController::class, 'store'])->name('waitlist.store');
+Route::get('pricing', [PricingController::class, 'index'])->name('pricing');
+Route::get('privacy-policy', fn () => Inertia::render('Legal/PrivacyPolicy'))->name('privacy-policy');
+Route::get('terms-of-service', fn () => Inertia::render('Legal/TermsOfService'))->name('terms-of-service');
 
 Route::post('webhooks/paystack', PaystackWebhookController::class)->name('webhooks.paystack');
 
@@ -51,11 +81,14 @@ Route::prefix('{current_team}')
             Route::get('subscription', [ArtisanSubscriptionController::class, 'show'])->name('subscription.show');
             Route::post('subscription', [ArtisanSubscriptionController::class, 'store'])->name('subscription.store');
             Route::get('wallet', [ArtisanWalletController::class, 'show'])->name('wallet.show');
+            Route::post('wallet/payouts', [ArtisanPayoutController::class, 'store'])->name('wallet.payouts.store');
             Route::get('bookings', [ArtisanBookingController::class, 'index'])->name('bookings.index');
             Route::post('bookings/{booking}/accept', [ArtisanBookingController::class, 'accept'])->name('bookings.accept');
             Route::post('bookings/{booking}/reject', [ArtisanBookingController::class, 'reject'])->name('bookings.reject');
             Route::post('bookings/{booking}/start', [ArtisanBookingController::class, 'start'])->name('bookings.start');
             Route::post('bookings/{booking}/finish', [ArtisanBookingController::class, 'finish'])->name('bookings.finish');
+            Route::get('bookings/{booking}/disputes/create', [ArtisanDisputeController::class, 'create'])->name('bookings.disputes.create');
+            Route::post('bookings/{booking}/disputes', [ArtisanDisputeController::class, 'store'])->name('bookings.disputes.store');
         });
     });
 
@@ -65,6 +98,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('customer/bookings', [CustomerBookingController::class, 'index'])->name('customer.bookings.index');
     Route::get('customer/bookings/{booking}', [CustomerBookingController::class, 'show'])->name('customer.bookings.show');
     Route::post('customer/bookings/{booking}/confirm', [CustomerBookingController::class, 'confirm'])->name('customer.bookings.confirm');
+    Route::post('customer/bookings/{booking}/reviews', [CustomerReviewController::class, 'store'])->name('customer.bookings.reviews.store');
+    Route::get('customer/bookings/{booking}/disputes/create', [CustomerDisputeController::class, 'create'])->name('customer.bookings.disputes.create');
+    Route::post('customer/bookings/{booking}/disputes', [CustomerDisputeController::class, 'store'])->name('customer.bookings.disputes.store');
 
     Route::prefix('identity')->name('identity.')->group(function () {
         Route::get('phone', [PhoneVerificationController::class, 'edit'])->name('phone.edit');

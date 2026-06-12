@@ -39,6 +39,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read Collection<int, ArtisanProfile> $artisanProfiles
  * @property-read Collection<int, Booking> $customerBookings
  * @property-read CustomerProfile|null $customerProfile
+ * @property-read Collection<int, Review> $reviews
+ * @property-read Collection<int, Dispute> $openedDisputes
  */
 #[Fillable([
     'name',
@@ -100,6 +102,46 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
     public function customerBookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'customer_id');
+    }
+
+    /**
+     * @return HasMany<Review, $this>
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'customer_id');
+    }
+
+    /**
+     * @return HasMany<Dispute, $this>
+     */
+    public function openedDisputes(): HasMany
+    {
+        return $this->hasMany(Dispute::class, 'opened_by_id');
+    }
+
+    /**
+     * @return HasMany<Dispute, $this>
+     */
+    public function assignedDisputes(): HasMany
+    {
+        return $this->hasMany(Dispute::class, 'assigned_to_id');
+    }
+
+    /**
+     * @return HasMany<Payout, $this>
+     */
+    public function requestedPayouts(): HasMany
+    {
+        return $this->hasMany(Payout::class, 'requested_by');
+    }
+
+    /**
+     * @return HasMany<ReportSnapshot, $this>
+     */
+    public function reportSnapshots(): HasMany
+    {
+        return $this->hasMany(ReportSnapshot::class, 'generated_by');
     }
 
     /**

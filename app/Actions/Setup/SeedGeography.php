@@ -71,6 +71,41 @@ class SeedGeography
                 );
             }
         }
+
+        foreach ($this->regionalLocalGovernments() as $stateSlug => $localGovernments) {
+            $state = State::query()
+                ->where('country_id', $country->id)
+                ->where('slug', $stateSlug)
+                ->firstOrFail();
+
+            foreach ($localGovernments as $localGovernmentName => $territories) {
+                $localGovernment = LocalGovernment::query()->updateOrCreate(
+                    [
+                        'state_id' => $state->id,
+                        'slug' => Str::slug($localGovernmentName),
+                    ],
+                    [
+                        'name' => $localGovernmentName,
+                        'active' => true,
+                    ],
+                );
+
+                foreach ($territories as $territory) {
+                    Territory::query()->updateOrCreate(
+                        [
+                            'local_government_id' => $localGovernment->id,
+                            'type' => $territory['type']->value,
+                            'slug' => Str::slug($territory['name']),
+                        ],
+                        [
+                            'name' => $territory['name'],
+                            'boundaries' => null,
+                            'active' => true,
+                        ],
+                    );
+                }
+            }
+        }
     }
 
     /**
@@ -151,6 +186,55 @@ class SeedGeography
             'Kwali' => [
                 ['name' => 'Dafa Community', 'type' => TerritoryType::Community],
                 ['name' => 'Kwali Market', 'type' => TerritoryType::Market],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, array<string, array<int, array{name: string, type: TerritoryType}>>>
+     */
+    private function regionalLocalGovernments(): array
+    {
+        return [
+            'lagos' => [
+                'Ikeja' => [
+                    ['name' => 'Alausa Secretariat', 'type' => TerritoryType::Zone],
+                    ['name' => 'Computer Village Cluster', 'type' => TerritoryType::Cluster],
+                ],
+                'Lagos Mainland' => [
+                    ['name' => 'Ebute Metta Community', 'type' => TerritoryType::Community],
+                    ['name' => 'Yaba Market', 'type' => TerritoryType::Market],
+                ],
+            ],
+            'kano' => [
+                'Kano Municipal' => [
+                    ['name' => 'Kofar Wambai Cluster', 'type' => TerritoryType::Cluster],
+                    ['name' => 'Sabon Gari Market', 'type' => TerritoryType::Market],
+                ],
+                'Nassarawa' => [
+                    ['name' => 'Farm Centre Market', 'type' => TerritoryType::Market],
+                    ['name' => 'Hotoro Community', 'type' => TerritoryType::Community],
+                ],
+            ],
+            'rivers' => [
+                'Obio-Akpor' => [
+                    ['name' => 'Rumuokoro Market', 'type' => TerritoryType::Market],
+                    ['name' => 'Trans Amadi Cluster', 'type' => TerritoryType::Cluster],
+                ],
+                'Port Harcourt' => [
+                    ['name' => 'Mile One Market', 'type' => TerritoryType::Market],
+                    ['name' => 'Old GRA Estate', 'type' => TerritoryType::Estate],
+                ],
+            ],
+            'kaduna' => [
+                'Chikun' => [
+                    ['name' => 'Gonin Gora Ward', 'type' => TerritoryType::Ward],
+                    ['name' => 'Narayi Community', 'type' => TerritoryType::Community],
+                ],
+                'Kaduna North' => [
+                    ['name' => 'Kawo Market', 'type' => TerritoryType::Market],
+                    ['name' => 'Mando Community', 'type' => TerritoryType::Community],
+                ],
             ],
         ];
     }

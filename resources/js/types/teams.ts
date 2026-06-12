@@ -1,9 +1,11 @@
 export type TeamRole = 'owner' | 'admin' | 'member';
+export type TeamKind = 'personal' | 'workspace' | 'artisan-business';
 
 export type Team = {
     id: number;
     name: string;
     slug: string;
+    kind: TeamKind;
     isPersonal: boolean;
     role?: TeamRole;
     roleLabel?: string;

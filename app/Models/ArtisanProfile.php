@@ -9,6 +9,7 @@ use App\Enums\ArtisanVerificationStatus;
 use App\Enums\PlatformPermission;
 use App\Enums\PlatformRole;
 use App\Enums\SubscriptionStatus;
+use App\Support\MediaDisk;
 use Database\Factories\ArtisanProfileFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -83,7 +84,7 @@ class ArtisanProfile extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection(self::PORTFOLIO_COLLECTION)
-            ->useDisk('public')
+            ->useDisk(MediaDisk::portfolio())
             ->acceptsFile(fn (File $file): bool => in_array($file->mimeType, [
                 'image/jpeg',
                 'image/png',
@@ -205,6 +206,30 @@ class ArtisanProfile extends Model implements HasMedia
             ->latestOfMany('ends_at');
     }
 
+    public function hasActiveTeamManagementSubscription(): bool
+    {
+        $now = now();
+
+        return $this->subscriptions()
+            ->where('status', SubscriptionStatus::Active->value)
+            ->where(function (Builder $query) use ($now): void {
+                $query
+                    ->whereNull('starts_at')
+                    ->orWhere('starts_at', '<=', $now);
+            })
+            ->where(function (Builder $query) use ($now): void {
+                $query
+                    ->whereNull('ends_at')
+                    ->orWhere('ends_at', '>', $now);
+            })
+            ->whereHas('plan', function (Builder $query): void {
+                $query
+                    ->where('active', true)
+                    ->where('includes_team_management', true);
+            })
+            ->exists();
+    }
+
     /**
      * @return HasMany<Payment, $this>
      */
@@ -227,6 +252,30 @@ class ArtisanProfile extends Model implements HasMedia
     public function payoutAccounts(): HasMany
     {
         return $this->hasMany(PayoutAccount::class);
+    }
+
+    /**
+     * @return HasMany<Payout, $this>
+     */
+    public function payouts(): HasMany
+    {
+        return $this->hasMany(Payout::class);
+    }
+
+    /**
+     * @return HasMany<Review, $this>
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * @return HasMany<Dispute, $this>
+     */
+    public function disputes(): HasMany
+    {
+        return $this->hasMany(Dispute::class);
     }
 
     /**

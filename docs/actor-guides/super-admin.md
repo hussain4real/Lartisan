@@ -14,7 +14,10 @@ Super Admins govern the whole Lartisan platform. They own global access, risk po
 - View all KYC queues and high-risk or escalated verification records.
 - View all area agent assignments and territory coverage.
 - Review audit logs for sensitive operational actions.
-- Oversee payment, subscription, wallet, payout, and ledger data as finance features mature.
+- Oversee payment, subscription, wallet, payout, and ledger data.
+- Review and resolve dispute queues across all states, LGAs, and territories.
+- Approve and process payout requests, including failed-attempt recovery.
+- Generate global report snapshots and render report documents.
 
 ## Standard Workflow
 
@@ -25,6 +28,8 @@ Super Admins govern the whole Lartisan platform. They own global access, risk po
 5. Audit escalated or unusual verification decisions.
 6. Review territory coverage gaps or repeated reassignment patterns.
 7. Coordinate finance follow-up for payment, wallet, payout, or subscription anomalies.
+8. Review dispute, payout, and report resources in the operations panel.
+9. Approve, record failed payout attempts, or mark manual payouts as paid where policy allows.
 
 ## Decision Rules
 
@@ -32,6 +37,8 @@ Super Admins govern the whole Lartisan platform. They own global access, risk po
 - Use reason codes that match the operation category.
 - Do not edit wallet ledger entries. Require adjustment entries for corrections.
 - Treat payment webhook data as provider evidence, not as a user-editable transaction source.
+- Process payouts only from verified payout accounts and sufficient available wallet balance.
+- Use dispute resolution notes for auditability, especially when hiding a linked review.
 
 ## Escalations Owned
 
@@ -44,5 +51,5 @@ Super Admins govern the whole Lartisan platform. They own global access, risk po
 ## Current Limitations
 
 - Subscription plan management is seeded in code; a Super Admin plan-management UI is not implemented yet.
-- Payout processing and finance operation panels are planned later.
-- Operations booking exception, dispute, and review panels are planned later.
+- Automated provider transfer dispatch, payout webhooks for transfers, and scheduled payout batches are planned later.
+- Operations booking exception queues and dedicated review moderation panels are planned later.

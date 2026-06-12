@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -47,6 +48,14 @@ class PayoutAccount extends Model
     public function artisanProfile(): BelongsTo
     {
         return $this->belongsTo(ArtisanProfile::class);
+    }
+
+    /**
+     * @return HasMany<Payout, $this>
+     */
+    public function payouts(): HasMany
+    {
+        return $this->hasMany(Payout::class);
     }
 
     /**

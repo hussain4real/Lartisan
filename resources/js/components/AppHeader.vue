@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-vue-next';
+import {
+    FileText,
+    LayoutGrid,
+    Menu,
+    Search,
+    ShieldCheck,
+} from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import TeamSwitcher from '@/components/TeamSwitcher.vue';
+import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,7 +42,7 @@ import UserMenuContent from '@/components/UserMenuContent.vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { getInitials } from '@/composables/useInitials';
 import { toUrl } from '@/lib/utils';
-import { dashboard } from '@/routes';
+import { dashboard, privacyPolicy, termsOfService } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -49,14 +55,14 @@ const props = withDefaults(defineProps<Props>(), {
 
 const page = usePage();
 const auth = computed(() => page.props.auth);
+const authenticatedUser = computed(() => auth.value.user);
 const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
 
 const dashboardUrl = computed(() =>
     page.props.currentTeam ? dashboard(page.props.currentTeam.slug).url : '/',
 );
 
-const activeItemStyles =
-    'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
+const activeItemStyles = 'bg-accent text-accent-foreground';
 
 const mainNavItems = computed<NavItem[]>(() => [
     {
@@ -68,14 +74,14 @@ const mainNavItems = computed<NavItem[]>(() => [
 
 const rightNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
+        title: 'Privacy Policy',
+        href: privacyPolicy().url,
+        icon: ShieldCheck,
     },
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
+        title: 'Terms of Service',
+        href: termsOfService().url,
+        icon: FileText,
     },
 ];
 </script>
@@ -101,9 +107,7 @@ const rightNavItems: NavItem[] = [
                                 >Navigation menu</SheetTitle
                             >
                             <SheetHeader class="flex justify-start text-left">
-                                <AppLogoIcon
-                                    class="size-6 fill-current text-black dark:text-white"
-                                />
+                                <AppLogo class="h-8" />
                             </SheetHeader>
                             <div
                                 class="flex h-full flex-1 flex-col justify-between space-y-4 py-6"
@@ -243,7 +247,9 @@ const rightNavItems: NavItem[] = [
                         </div>
                     </div>
 
-                    <DropdownMenu>
+                    <ThemeSwitcher />
+
+                    <DropdownMenu v-if="authenticatedUser">
                         <DropdownMenuTrigger :as-child="true">
                             <Button
                                 variant="ghost"
@@ -254,24 +260,26 @@ const rightNavItems: NavItem[] = [
                                     class="size-8 overflow-hidden rounded-full"
                                 >
                                     <AvatarImage
-                                        v-if="auth.user.avatar"
-                                        :src="auth.user.avatar"
-                                        :alt="auth.user.name"
+                                        v-if="authenticatedUser.avatar"
+                                        :src="authenticatedUser.avatar"
+                                        :alt="authenticatedUser.name"
                                     />
                                     <AvatarFallback
-                                        class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white"
+                                        class="rounded-lg bg-muted font-semibold text-foreground"
                                     >
-                                        {{ getInitials(auth.user?.name) }}
+                                        {{
+                                            getInitials(authenticatedUser.name)
+                                        }}
                                     </AvatarFallback>
                                 </Avatar>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" class="w-56">
-                            <UserMenuContent :user="auth.user" />
+                            <UserMenuContent :user="authenticatedUser" />
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <TeamSwitcher :in-header="true" />
+                    <TeamSwitcher v-if="authenticatedUser" :in-header="true" />
                 </div>
             </div>
         </div>
@@ -281,7 +289,7 @@ const rightNavItems: NavItem[] = [
             class="flex w-full border-b border-sidebar-border/70"
         >
             <div
-                class="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl"
+                class="mx-auto flex h-12 w-full items-center justify-start px-4 text-muted-foreground md:max-w-7xl"
             >
                 <Breadcrumbs :breadcrumbs="breadcrumbs" />
             </div>

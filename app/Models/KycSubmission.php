@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ArtisanVerificationStatus;
 use App\Enums\KycRiskLevel;
+use App\Support\MediaDisk;
 use Carbon\CarbonInterface;
 use Database\Factories\KycSubmissionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -69,7 +70,7 @@ class KycSubmission extends Model implements HasMedia
     {
         foreach (self::mediaCollectionNames() as $collectionName) {
             $this->addMediaCollection($collectionName)
-                ->useDisk('local')
+                ->useDisk(MediaDisk::private())
                 ->singleFile()
                 ->acceptsFile(fn (File $file): bool => in_array($file->mimeType, [
                     'application/pdf',

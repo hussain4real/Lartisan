@@ -102,8 +102,8 @@ test('pilot seeder creates the customer profile and team kinds required by phase
         'preferred_channel' => 'whatsapp',
         'service_area' => 'Wuse',
     ]);
-    expect(Team::query()->where('kind', TeamKind::Personal)->count())->toBe(6);
-    expect(Team::query()->where('kind', TeamKind::ArtisanBusiness)->count())->toBe(1);
+    expect(Team::query()->where('kind', TeamKind::Personal)->count())->toBe(26);
+    expect(Team::query()->where('kind', TeamKind::ArtisanBusiness)->count())->toBe(21);
     expect($artisan->artisanProfiles()->firstOrFail()->team()->firstOrFail()->kind)->toBe(TeamKind::ArtisanBusiness);
 });
 

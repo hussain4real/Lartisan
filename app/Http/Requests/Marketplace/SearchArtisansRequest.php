@@ -49,6 +49,7 @@ class SearchArtisansRequest extends FormRequest
                 'integer',
                 Rule::exists((new Territory)->getTable(), 'id')->where('active', true),
             ],
+            'page' => ['nullable', 'integer', 'min:1'],
         ];
     }
 
@@ -75,15 +76,46 @@ class SearchArtisansRequest extends FormRequest
 
     public function localGovernment(): ?LocalGovernment
     {
-        return $this->filled('local_government_id')
-            ? LocalGovernment::query()->findOrFail($this->integer('local_government_id'))
-            : null;
+        if (! $this->filled('local_government_id')) {
+            return null;
+        }
+
+        $localGovernment = LocalGovernment::query()->findOrFail($this->integer('local_government_id'));
+        $state = $this->state();
+
+        if ($state instanceof State && $localGovernment->state_id !== $state->id) {
+            return null;
+        }
+
+        return $localGovernment;
     }
 
     public function territory(): ?Territory
     {
-        return $this->filled('territory_id')
-            ? Territory::query()->findOrFail($this->integer('territory_id'))
-            : null;
+        if (! $this->filled('territory_id')) {
+            return null;
+        }
+
+        $territory = Territory::query()
+            ->with('localGovernment')
+            ->findOrFail($this->integer('territory_id'));
+        $localGovernment = $this->localGovernment();
+
+        if ($localGovernment instanceof LocalGovernment) {
+            return $territory->local_government_id === $localGovernment->id ? $territory : null;
+        }
+
+        $state = $this->state();
+
+        if ($state instanceof State && $territory->localGovernment?->state_id !== $state->id) {
+            return null;
+        }
+
+        return $territory;
+    }
+
+    public function page(): int
+    {
+        return max(1, $this->integer('page', 1));
     }
 }

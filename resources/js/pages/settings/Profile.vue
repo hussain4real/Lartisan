@@ -24,7 +24,15 @@ defineOptions({
 });
 
 const page = usePage();
-const user = computed(() => page.props.auth.user);
+const user = computed(() => {
+    const currentUser = page.props.auth.user;
+
+    if (currentUser === null) {
+        throw new Error('Profile settings require an authenticated user.');
+    }
+
+    return currentUser;
+});
 </script>
 
 <template>
@@ -87,7 +95,7 @@ const user = computed(() => page.props.auth.user);
 
                 <div
                     v-if="page.props.status === 'verification-link-sent'"
-                    class="mt-2 text-sm font-medium text-green-600"
+                    class="mt-2 text-sm font-medium text-success"
                 >
                     A new verification link has been sent to your email address.
                 </div>

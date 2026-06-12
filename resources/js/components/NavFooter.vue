@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
 import {
     SidebarGroup,
     SidebarGroupContent,
@@ -25,10 +26,11 @@ defineProps<Props>();
             <SidebarMenu>
                 <SidebarMenuItem v-for="item in items" :key="item.title">
                     <SidebarMenuButton
-                        class="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100"
+                        class="text-muted-foreground hover:text-foreground"
                         as-child
                     >
                         <a
+                            v-if="item.external"
                             :href="toUrl(item.href)"
                             target="_blank"
                             rel="noopener noreferrer"
@@ -36,6 +38,10 @@ defineProps<Props>();
                             <component :is="item.icon" />
                             <span>{{ item.title }}</span>
                         </a>
+                        <Link v-else :href="item.href">
+                            <component :is="item.icon" />
+                            <span>{{ item.title }}</span>
+                        </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarMenu>

@@ -46,6 +46,7 @@ class SeedPilotUsers
         private readonly SeedPlatformAccess $seedPlatformAccess,
         private readonly SeedReasonCodes $seedReasonCodes,
         private readonly SeedSubscriptionPlans $seedSubscriptionPlans,
+        private readonly SeedMarketplaceCatalog $seedMarketplaceCatalog,
         private readonly CreateArtisanBusinessProfile $createArtisanBusinessProfile,
         private readonly UpdateArtisanBusinessLocation $updateArtisanBusinessLocation,
         private readonly CreateCustomerProfile $createCustomerProfile,
@@ -122,6 +123,7 @@ class SeedPilotUsers
             $categories = $this->upsertServiceCategories();
             $artisanService = $this->upsertPilotService($artisanProfile, $categories['electrical']);
             $kycSubmission = $this->upsertPilotKyc($artisanProfile, $artisan);
+            $this->seedMarketplaceCatalog->handle($areaAgent, $categories);
 
             return [
                 'super_admin' => $superAdmin->refresh(),
@@ -298,39 +300,43 @@ class SeedPilotUsers
     }
 
     /**
-     * @return array{electrical: ServiceCategory, plumbing: ServiceCategory, carpentry: ServiceCategory}
+     * @return array<string, ServiceCategory>
      */
     private function upsertServiceCategories(): array
     {
-        return [
-            'electrical' => ServiceCategory::query()->updateOrCreate(
-                ['slug' => 'electrical'],
-                [
-                    'name' => 'Electrical',
-                    'description' => 'Electrical installation, diagnostics, and repairs.',
-                    'active' => true,
-                    'sort_order' => 10,
-                ],
-            ),
-            'plumbing' => ServiceCategory::query()->updateOrCreate(
-                ['slug' => 'plumbing'],
-                [
-                    'name' => 'Plumbing',
-                    'description' => 'Plumbing maintenance and water system repairs.',
-                    'active' => true,
-                    'sort_order' => 20,
-                ],
-            ),
-            'carpentry' => ServiceCategory::query()->updateOrCreate(
-                ['slug' => 'carpentry'],
-                [
-                    'name' => 'Carpentry',
-                    'description' => 'Furniture, fittings, and woodwork services.',
-                    'active' => true,
-                    'sort_order' => 30,
-                ],
-            ),
+        $categories = [
+            'electrical' => ['Electrical', 'Electrical installation, diagnostics, and repairs.'],
+            'plumbing' => ['Plumbing', 'Plumbing maintenance and water system repairs.'],
+            'carpentry' => ['Carpentry', 'Furniture, fittings, and woodwork services.'],
+            'fashion-tailoring' => ['Fashion & Tailoring', 'Clothing, alterations, uniforms, and textile products.'],
+            'beauty-grooming' => ['Beauty & Grooming', 'Hair, makeup, grooming, and beauty product services.'],
+            'food-catering' => ['Food & Catering', 'Prepared food, event trays, and household meal support.'],
+            'metalwork' => ['Metalwork', 'Welding, fabrication, gates, shelves, and metal repairs.'],
+            'auto-repairs' => ['Auto Repairs', 'Vehicle diagnostics, maintenance, parts, and light repairs.'],
+            'phone-electronics' => ['Phone & Electronics', 'Phone, laptop, accessory, and electronics support.'],
+            'cleaning' => ['Cleaning', 'Home, fabric, post-renovation, and facility cleaning services.'],
+            'painting-decor' => ['Painting & Decor', 'Painting, wallpaper, decorative finishes, and room refreshes.'],
+            'leatherwork' => ['Leatherwork', 'Leather goods, bag repairs, footwear, belts, and accessories.'],
         ];
+
+        $sortOrder = 10;
+        $seededCategories = [];
+
+        foreach ($categories as $slug => $category) {
+            $seededCategories[$slug] = ServiceCategory::query()->updateOrCreate(
+                ['slug' => $slug],
+                [
+                    'name' => $category[0],
+                    'description' => $category[1],
+                    'active' => true,
+                    'sort_order' => $sortOrder,
+                ],
+            );
+
+            $sortOrder += 10;
+        }
+
+        return $seededCategories;
     }
 
     private function upsertPilotService(ArtisanProfile $artisanProfile, ServiceCategory $category): ArtisanService
