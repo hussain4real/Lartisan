@@ -3,8 +3,10 @@
 namespace App\Http\Middleware;
 
 use App\Enums\PlatformPermission;
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -45,6 +47,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user,
                 'operationPanel' => $this->operationPanelFor($user),
+                'teamManagement' => [
+                    'canView' => $this->canViewTeamManagement($user),
+                ],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'currentTeam' => fn () => $user?->currentTeam ? $user->toUserTeam($user->currentTeam) : null,
@@ -78,5 +83,14 @@ class HandleInertiaRequests extends Middleware
         }
 
         return null;
+    }
+
+    private function canViewTeamManagement(?User $user): bool
+    {
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        return Gate::forUser($user)->allows('viewAny', Team::class);
     }
 }

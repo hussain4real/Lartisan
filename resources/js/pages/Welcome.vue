@@ -18,7 +18,7 @@ import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import { Button } from '@/components/ui/button';
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login, pricing, register } from '@/routes';
 import { index as marketplaceIndex } from '@/routes/marketplace';
 
 const page = usePage();
@@ -278,6 +278,13 @@ const mobileProcessFlow = [
                         prefetch
                     >
                         Marketplace
+                    </Link>
+                    <Link
+                        :href="pricing().url"
+                        class="hidden rounded-full px-4 py-2 text-card-foreground/75 transition hover:bg-accent hover:text-accent-foreground md:inline-flex"
+                        prefetch
+                    >
+                        Pricing
                     </Link>
                     <ThemeSwitcher
                         class="text-card-foreground/75 hover:bg-accent hover:text-accent-foreground"

@@ -23,13 +23,13 @@ class TeamInvitationController extends Controller
      */
     public function store(CreateTeamInvitationRequest $request, Team $team): RedirectResponse
     {
-        Gate::authorize('inviteMember', $team);
-
         $user = $request->user();
 
         if (! $user instanceof User) {
             abort(403);
         }
+
+        Gate::authorize('inviteMember', $team);
 
         $invitation = $team->invitations()->create([
             'email' => $request->string('email')->toString(),

@@ -31,8 +31,16 @@ class SubscriptionPlanFactory extends Factory
             'duration_days' => 30,
             'sort_order' => fake()->numberBetween(1, 50),
             'active' => true,
+            'includes_team_management' => false,
             'feature_summary' => ['Public listing', 'Lead access'],
         ];
+    }
+
+    public function withTeamManagement(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'includes_team_management' => true,
+        ]);
     }
 
     public function inactive(): static

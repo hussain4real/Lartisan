@@ -19,11 +19,16 @@ export type User = {
 export type Auth = {
     user: User | null;
     operationPanel: OperationPanel | null;
+    teamManagement: TeamManagementAccess;
 };
 
 export type OperationPanel = {
     id: 'admin' | 'state' | 'lga' | 'agent';
     title: string;
+};
+
+export type TeamManagementAccess = {
+    canView: boolean;
 };
 
 /* @chisel-passkeys */

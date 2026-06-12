@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { router, usePage } from '@inertiajs/vue3';
-import { Check, ChevronsUpDown, Plus, Users } from 'lucide-vue-next';
+import { Check, ChevronsUpDown, Users } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import CreateTeamModal from '@/components/CreateTeamModal.vue';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { switchMethod } from '@/routes/teams';
@@ -46,7 +44,6 @@ const teamItemClass = computed(() =>
 const checkIconClass = computed(() =>
     props.inHeader ? 'ml-auto size-4' : 'ml-auto h-4 w-4',
 );
-const plusIconClass = computed(() => (props.inHeader ? 'size-4' : 'h-4 w-4'));
 
 const switchTeam = (team: Team) => {
     const previousTeamSlug = currentTeam.value?.slug;
@@ -154,17 +151,6 @@ onUnmounted(() => {
                     :class="checkIconClass"
                 />
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <CreateTeamModal>
-                <DropdownMenuItem
-                    data-test="team-switcher-new-team"
-                    :class="teamItemClass"
-                    @select.prevent
-                >
-                    <Plus :class="plusIconClass" />
-                    <span class="text-muted-foreground">New team</span>
-                </DropdownMenuItem>
-            </CreateTeamModal>
         </DropdownMenuContent>
     </DropdownMenu>
 </template>

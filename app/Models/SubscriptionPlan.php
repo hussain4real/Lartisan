@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $duration_days
  * @property int $sort_order
  * @property bool $active
+ * @property bool $includes_team_management
  * @property array<int, string>|null $feature_summary
  */
 #[Fillable([
@@ -32,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'duration_days',
     'sort_order',
     'active',
+    'includes_team_management',
     'feature_summary',
 ])]
 class SubscriptionPlan extends Model
@@ -64,6 +66,7 @@ class SubscriptionPlan extends Model
             'active' => 'boolean',
             'duration_days' => 'integer',
             'feature_summary' => 'array',
+            'includes_team_management' => 'boolean',
             'interval' => SubscriptionInterval::class,
             'price_amount' => 'integer',
             'sort_order' => 'integer',

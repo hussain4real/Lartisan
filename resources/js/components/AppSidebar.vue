@@ -35,6 +35,7 @@ import {
 import {
     dashboard,
     login,
+    pricing,
     privacyPolicy,
     register,
     termsOfService,
@@ -76,6 +77,11 @@ const customerNavItems = computed<NavItem[]>(() => [
         icon: Search,
     },
     {
+        title: 'Pricing',
+        href: pricing().url,
+        icon: CreditCard,
+    },
+    {
         title: 'My bookings',
         href: customerBookings().url,
         icon: CalendarCheck,
@@ -99,6 +105,11 @@ const guestNavItems = computed<NavItem[]>(() => [
         title: 'Marketplace',
         href: marketplace().url,
         icon: Search,
+    },
+    {
+        title: 'Pricing',
+        href: pricing().url,
+        icon: CreditCard,
     },
     {
         title: 'Become an artisan',

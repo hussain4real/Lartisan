@@ -16,30 +16,32 @@ class SeedSubscriptionPlans
     {
         return [
             $this->upsertPlan(
-                name: 'Starter Listing',
+                name: 'Basic',
                 slug: 'starter-listing',
                 priceAmount: 500000,
                 durationDays: 30,
                 sortOrder: 10,
-                features: ['Public listing', 'Customer lead access', 'Basic portfolio'],
+                features: ['Public listing', 'Customer lead access', 'Basic portfolio', 'Standard marketplace placement'],
             ),
             $this->upsertPlan(
-                name: 'Growth Listing',
+                name: 'Pro',
                 slug: 'growth-listing',
                 priceAmount: 1250000,
                 durationDays: 90,
                 sortOrder: 20,
-                features: ['Public listing', 'Priority lead access', 'Expanded portfolio'],
+                features: ['Public listing', 'Priority lead access', 'Expanded portfolio', 'Team management', 'Quarterly visibility boost'],
                 interval: SubscriptionInterval::Quarterly,
+                includesTeamManagement: true,
             ),
             $this->upsertPlan(
-                name: 'Annual Partner',
+                name: 'Premium',
                 slug: 'annual-partner',
                 priceAmount: 4500000,
                 durationDays: 365,
                 sortOrder: 30,
-                features: ['Public listing', 'Priority lead access', 'Annual verification badge'],
+                features: ['Public listing', 'Priority lead access', 'Annual verification badge', 'Team management', 'Premium marketplace placement'],
                 interval: SubscriptionInterval::Annual,
+                includesTeamManagement: true,
             ),
         ];
     }
@@ -55,6 +57,7 @@ class SeedSubscriptionPlans
         int $sortOrder,
         array $features,
         SubscriptionInterval $interval = SubscriptionInterval::Monthly,
+        bool $includesTeamManagement = false,
     ): SubscriptionPlan {
         return SubscriptionPlan::query()->updateOrCreate(
             ['slug' => $slug],
@@ -64,6 +67,7 @@ class SeedSubscriptionPlans
                 'description' => 'Paid artisan listing activation for Lartisan marketplace visibility.',
                 'duration_days' => $durationDays,
                 'feature_summary' => $features,
+                'includes_team_management' => $includesTeamManagement,
                 'interval' => $interval,
                 'name' => $name,
                 'price_amount' => $priceAmount,
