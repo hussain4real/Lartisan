@@ -227,7 +227,7 @@ test('team policy exposes base permissions and delegated team abilities', functi
     expect($policy->removeMember($owner, $team))->toBeTrue();
     expect($policy->inviteMember($admin, $team))->toBeTrue();
     expect($policy->cancelInvitation($admin, $team))->toBeTrue();
-    expect($policy->delete($owner, $team))->toBeFalse();
+    expect($policy->delete($owner, $team))->toBeTrue();
 });
 
 test('team membership middleware enforces minimum role and switches current team from slug routes', function () {

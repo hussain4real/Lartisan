@@ -218,7 +218,7 @@ test('teams cannot be updated by members', function () {
         ->assertForbidden();
 });
 
-test('artisan business teams cannot be deleted through team management', function () {
+test('artisan business team owners can delete teams through team management', function () {
     $context = createTeamManagementContext();
     $team = $context['team'];
 
@@ -227,11 +227,10 @@ test('artisan business teams cannot be deleted through team management', functio
         ->delete(route('teams.destroy', $team), [
             'name' => $team->name,
         ])
-        ->assertForbidden();
+        ->assertRedirect(route('teams.index'));
 
-    $this->assertDatabaseHas('teams', [
+    $this->assertSoftDeleted('teams', [
         'id' => $team->id,
-        'deleted_at' => null,
     ]);
 });
 
@@ -245,15 +244,23 @@ test('team deletion stays forbidden even with wrong confirmation', function () {
             'name' => 'Wrong Name',
         ]);
 
-    $response->assertForbidden();
+    $response->assertSessionHasErrors('name');
+
+    $this->assertDatabaseHas('teams', [
+        'id' => $team->id,
+        'deleted_at' => null,
+    ]);
 });
 
 test('delete team request exposes authorization rules and confirmation errors', function () {
     $context = createTeamManagementContext();
     $team = $context['team'];
+
+    $this->actingAs($context['owner']);
+
     $request = teamDeletionRequest($context['owner'], $team);
 
-    expect($request->authorize())->toBeFalse();
+    expect($request->authorize())->toBeTrue();
     expect($request->rules())->toHaveKey('name');
 
     $request->merge(['name' => 'Wrong Name']);
@@ -270,6 +277,9 @@ test('deleting current team switches to alphabetically first remaining team inte
     $context = createTeamManagementContext();
     $user = $context['owner'];
     $zuluTeam = $context['team'];
+    $personalTeam = $user->teams()->where('is_personal', true)->firstOrFail();
+
+    $personalTeam->forceFill(['name' => 'Zulu Personal Team'])->save();
 
     $alphaTeam = Team::factory()->create(['name' => 'Alpha Team']);
     $alphaTeam->members()->attach($user, ['role' => TeamRole::Owner->value]);

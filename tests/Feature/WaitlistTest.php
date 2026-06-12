@@ -144,11 +144,11 @@ test('waitlist entries expose casts and relationships', function (): void {
 
     expect($entry->audience_type)->toBe(WaitlistAudienceType::Operations)
         ->and($entry->contact_consent)->toBeTrue()
-        ->and($entry->serviceCategory->is($context['category']))->toBeTrue()
-        ->and($entry->country->is($context['country']))->toBeTrue()
-        ->and($entry->state->is($context['state']))->toBeTrue()
-        ->and($entry->localGovernment->is($context['localGovernment']))->toBeTrue()
-        ->and($entry->territory->is($context['territory']))->toBeTrue();
+        ->and($entry->serviceCategory()->is($context['category']))->toBeTrue()
+        ->and($entry->country()->is($context['country']))->toBeTrue()
+        ->and($entry->state()->is($context['state']))->toBeTrue()
+        ->and($entry->localGovernment()->is($context['localGovernment']))->toBeTrue()
+        ->and($entry->territory()->is($context['territory']))->toBeTrue();
 });
 
 test('waitlist submission validates required fields', function (): void {

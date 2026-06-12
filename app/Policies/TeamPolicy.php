@@ -118,7 +118,9 @@ class TeamPolicy
      */
     public function delete(User $user, Team $team): bool
     {
-        return false;
+        return ! $team->is_personal
+            && $this->canAccessTeamManagement($user, $team)
+            && $user->hasTeamPermission($team, TeamPermission::DeleteTeam);
     }
 
     private function canAccessTeamManagement(User $user, Team $team): bool
