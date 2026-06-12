@@ -206,6 +206,30 @@ class ArtisanProfile extends Model implements HasMedia
             ->latestOfMany('ends_at');
     }
 
+    public function hasActiveTeamManagementSubscription(): bool
+    {
+        $now = now();
+
+        return $this->subscriptions()
+            ->where('status', SubscriptionStatus::Active->value)
+            ->where(function (Builder $query) use ($now): void {
+                $query
+                    ->whereNull('starts_at')
+                    ->orWhere('starts_at', '<=', $now);
+            })
+            ->where(function (Builder $query) use ($now): void {
+                $query
+                    ->whereNull('ends_at')
+                    ->orWhere('ends_at', '>', $now);
+            })
+            ->whereHas('plan', function (Builder $query): void {
+                $query
+                    ->where('active', true)
+                    ->where('includes_team_management', true);
+            })
+            ->exists();
+    }
+
     /**
      * @return HasMany<Payment, $this>
      */

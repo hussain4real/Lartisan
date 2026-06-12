@@ -207,18 +207,18 @@ test('team invitation notification renders mail and array payloads', function ()
 
 test('team policy exposes base permissions and delegated team abilities', function () {
     $policy = new TeamPolicy;
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
     $admin = User::factory()->create();
     $member = User::factory()->create();
     $outsider = User::factory()->create();
-    $team = Team::factory()->create(['is_personal' => false]);
+    $team = $context['team'];
 
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($admin, ['role' => TeamRole::Admin->value]);
     $team->members()->attach($member, ['role' => TeamRole::Member->value]);
 
     expect($policy->viewAny($owner))->toBeTrue();
-    expect($policy->create($owner))->toBeTrue();
+    expect($policy->create($owner))->toBeFalse();
     expect($policy->view($owner, $team))->toBeTrue();
     expect($policy->view($outsider, $team))->toBeFalse();
     expect($policy->addMember($owner, $team))->toBeTrue();

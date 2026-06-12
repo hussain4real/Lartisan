@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teams;
 
 use App\Actions\Teams\CreateTeam;
+use App\Enums\TeamKind;
 use App\Enums\TeamRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Teams\DeleteTeamRequest;
@@ -31,8 +32,15 @@ class TeamController extends Controller
             abort(403);
         }
 
+        Gate::authorize('viewAny', Team::class);
+
         return Inertia::render('teams/Index', [
-            'teams' => $user->toUserTeams(includeCurrent: true),
+            'teams' => $user->teams()
+                ->where('kind', TeamKind::ArtisanBusiness)
+                ->get()
+                ->filter(fn (Team $team): bool => Gate::forUser($user)->allows('view', $team))
+                ->map(fn (Team $team) => $user->toUserTeam($team))
+                ->values(),
         ]);
     }
 
@@ -46,6 +54,8 @@ class TeamController extends Controller
         if (! $user instanceof User) {
             abort(403);
         }
+
+        Gate::authorize('create', Team::class);
 
         $team = $createTeam->handle($user, $request->string('name')->toString());
 
@@ -64,6 +74,8 @@ class TeamController extends Controller
         if (! $user instanceof User) {
             abort(403);
         }
+
+        Gate::authorize('view', $team);
 
         return Inertia::render('teams/Edit', [
             'team' => [

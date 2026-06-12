@@ -18,13 +18,37 @@ use App\Http\Controllers\Customer\ReviewController as CustomerReviewController;
 use App\Http\Controllers\Identity\AccountClaimController;
 use App\Http\Controllers\Identity\PhoneVerificationController;
 use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\PricingController;
 use App\Http\Controllers\Teams\TeamInvitationController;
+use App\Http\Controllers\WaitlistController;
+use App\Http\Controllers\WaitlistHostRedirectController;
 use App\Http\Controllers\Webhooks\PaystackWebhookController;
 use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+$waitlistHosts = [];
+
+foreach (config()->array('lartisan.waitlist_hosts') as $waitlistHost) {
+    if (! is_string($waitlistHost) || $waitlistHost === '') {
+        continue;
+    }
+
+    $waitlistHosts[] = trim($waitlistHost);
+}
+
+foreach ($waitlistHosts as $waitlistHost) {
+    Route::domain($waitlistHost)->group(function (): void {
+        Route::any('/', WaitlistHostRedirectController::class);
+        Route::any('{path}', WaitlistHostRedirectController::class)
+            ->where('path', '^(?!waitlist$).*$');
+    });
+}
+
 Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
+Route::get('waitlist', [WaitlistController::class, 'show'])->name('waitlist.show');
+Route::post('waitlist', [WaitlistController::class, 'store'])->name('waitlist.store');
+Route::get('pricing', [PricingController::class, 'index'])->name('pricing');
 Route::get('privacy-policy', fn () => Inertia::render('Legal/PrivacyPolicy'))->name('privacy-policy');
 Route::get('terms-of-service', fn () => Inertia::render('Legal/TermsOfService'))->name('terms-of-service');
 

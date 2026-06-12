@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\TeamRole;
-use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
@@ -9,10 +8,9 @@ use Illuminate\Support\Facades\Notification;
 test('team invitations can be created', function () {
     Notification::fake();
 
-    $owner = User::factory()->create();
-    $team = Team::factory()->create();
-
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
+    $team = $context['team'];
 
     $response = $this
         ->actingAs($owner)
@@ -33,11 +31,10 @@ test('team invitations can be created', function () {
 test('team invitations can be created by admins', function () {
     Notification::fake();
 
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
     $admin = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = $context['team'];
 
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($admin, ['role' => TeamRole::Admin->value]);
 
     $response = $this
@@ -53,11 +50,11 @@ test('team invitations can be created by admins', function () {
 test('existing team members cannot be invited', function () {
     Notification::fake();
 
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
     $member = User::factory()->create(['email' => 'member@example.com']);
-    $team = Team::factory()->create();
+    $team = $context['team'];
 
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($member, ['role' => TeamRole::Member->value]);
 
     $response = $this
@@ -73,9 +70,9 @@ test('existing team members cannot be invited', function () {
 test('duplicate invitations cannot be created', function () {
     Notification::fake();
 
-    $owner = User::factory()->create();
-    $team = Team::factory()->create();
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
+    $team = $context['team'];
 
     TeamInvitation::factory()->create([
         'team_id' => $team->id,
@@ -94,11 +91,10 @@ test('duplicate invitations cannot be created', function () {
 });
 
 test('team invitations cannot be created by members', function () {
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
     $member = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = $context['team'];
 
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($member, ['role' => TeamRole::Member->value]);
 
     $response = $this
@@ -112,10 +108,9 @@ test('team invitations cannot be created by members', function () {
 });
 
 test('team invitations can be cancelled by owners', function () {
-    $owner = User::factory()->create();
-    $team = Team::factory()->create();
-
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
+    $team = $context['team'];
 
     $invitation = TeamInvitation::factory()->create([
         'team_id' => $team->id,
@@ -134,11 +129,10 @@ test('team invitations can be cancelled by owners', function () {
 });
 
 test('team invitations can be accepted', function () {
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
     $invitedUser = User::factory()->create(['email' => 'invited@example.com']);
-    $team = Team::factory()->create();
-
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+    $team = $context['team'];
 
     $invitation = TeamInvitation::factory()->create([
         'team_id' => $team->id,
@@ -158,11 +152,10 @@ test('team invitations can be accepted', function () {
 });
 
 test('team invitations cannot be accepted by uninvited user', function () {
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
     $uninvitedUser = User::factory()->create(['email' => 'uninvited@example.com']);
-    $team = Team::factory()->create();
-
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+    $team = $context['team'];
 
     $invitation = TeamInvitation::factory()->create([
         'team_id' => $team->id,
@@ -180,11 +173,10 @@ test('team invitations cannot be accepted by uninvited user', function () {
 });
 
 test('expired invitations cannot be accepted', function () {
-    $owner = User::factory()->create();
+    $context = createTeamManagementContext();
+    $owner = $context['owner'];
     $invitedUser = User::factory()->create(['email' => 'invited@example.com']);
-    $team = Team::factory()->create();
-
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+    $team = $context['team'];
 
     $invitation = TeamInvitation::factory()->expired()->create([
         'team_id' => $team->id,

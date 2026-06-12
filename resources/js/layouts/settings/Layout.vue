@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,9 @@ import { edit as editStyleGuide } from '@/routes/style-guide';
 import { index as teams } from '@/routes/teams';
 import type { NavItem } from '@/types';
 
-const sidebarNavItems: NavItem[] = [
+const page = usePage();
+
+const sidebarNavItems = computed<NavItem[]>(() => [
     {
         title: 'Profile',
         href: editProfile(),
@@ -22,10 +24,14 @@ const sidebarNavItems: NavItem[] = [
         title: 'Security',
         href: editSecurity(),
     },
-    {
-        title: 'Teams',
-        href: teams(),
-    },
+    ...(page.props.auth.teamManagement.canView
+        ? [
+              {
+                  title: 'Teams',
+                  href: teams(),
+              },
+          ]
+        : []),
     {
         title: 'Appearance',
         href: editAppearance(),
@@ -34,7 +40,7 @@ const sidebarNavItems: NavItem[] = [
         title: 'Style guide',
         href: editStyleGuide(),
     },
-];
+]);
 
 const { isCurrentOrParentUrl } = useCurrentUrl();
 const isStyleGuide = computed(() => isCurrentOrParentUrl(editStyleGuide()));

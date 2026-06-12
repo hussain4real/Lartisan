@@ -2,9 +2,13 @@
 
 namespace App\Policies;
 
+use App\Enums\SubscriptionStatus;
+use App\Enums\TeamKind;
 use App\Enums\TeamPermission;
+use App\Models\ArtisanProfile;
 use App\Models\Team;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
 class TeamPolicy
 {
@@ -13,7 +17,30 @@ class TeamPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        $now = now();
+
+        return $user->teams()
+            ->where('kind', TeamKind::ArtisanBusiness)
+            ->whereHas('artisanProfile.subscriptions', function (Builder $query) use ($now): void {
+                $query
+                    ->where('status', SubscriptionStatus::Active->value)
+                    ->where(function (Builder $query) use ($now): void {
+                        $query
+                            ->whereNull('starts_at')
+                            ->orWhere('starts_at', '<=', $now);
+                    })
+                    ->where(function (Builder $query) use ($now): void {
+                        $query
+                            ->whereNull('ends_at')
+                            ->orWhere('ends_at', '>', $now);
+                    })
+                    ->whereHas('plan', function (Builder $query): void {
+                        $query
+                            ->where('active', true)
+                            ->where('includes_team_management', true);
+                    });
+            })
+            ->exists();
     }
 
     /**
@@ -21,7 +48,7 @@ class TeamPolicy
      */
     public function view(User $user, Team $team): bool
     {
-        return $user->belongsToTeam($team);
+        return $this->canAccessTeamManagement($user, $team);
     }
 
     /**
@@ -29,7 +56,7 @@ class TeamPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -37,7 +64,8 @@ class TeamPolicy
      */
     public function update(User $user, Team $team): bool
     {
-        return $user->hasTeamPermission($team, TeamPermission::UpdateTeam);
+        return $this->canAccessTeamManagement($user, $team)
+            && $user->hasTeamPermission($team, TeamPermission::UpdateTeam);
     }
 
     /**
@@ -45,7 +73,8 @@ class TeamPolicy
      */
     public function addMember(User $user, Team $team): bool
     {
-        return $user->hasTeamPermission($team, TeamPermission::AddMember);
+        return $this->canAccessTeamManagement($user, $team)
+            && $user->hasTeamPermission($team, TeamPermission::AddMember);
     }
 
     /**
@@ -53,7 +82,8 @@ class TeamPolicy
      */
     public function updateMember(User $user, Team $team): bool
     {
-        return $user->hasTeamPermission($team, TeamPermission::UpdateMember);
+        return $this->canAccessTeamManagement($user, $team)
+            && $user->hasTeamPermission($team, TeamPermission::UpdateMember);
     }
 
     /**
@@ -61,7 +91,8 @@ class TeamPolicy
      */
     public function removeMember(User $user, Team $team): bool
     {
-        return $user->hasTeamPermission($team, TeamPermission::RemoveMember);
+        return $this->canAccessTeamManagement($user, $team)
+            && $user->hasTeamPermission($team, TeamPermission::RemoveMember);
     }
 
     /**
@@ -69,7 +100,8 @@ class TeamPolicy
      */
     public function inviteMember(User $user, Team $team): bool
     {
-        return $user->hasTeamPermission($team, TeamPermission::CreateInvitation);
+        return $this->canAccessTeamManagement($user, $team)
+            && $user->hasTeamPermission($team, TeamPermission::CreateInvitation);
     }
 
     /**
@@ -77,7 +109,8 @@ class TeamPolicy
      */
     public function cancelInvitation(User $user, Team $team): bool
     {
-        return $user->hasTeamPermission($team, TeamPermission::CancelInvitation);
+        return $this->canAccessTeamManagement($user, $team)
+            && $user->hasTeamPermission($team, TeamPermission::CancelInvitation);
     }
 
     /**
@@ -85,6 +118,20 @@ class TeamPolicy
      */
     public function delete(User $user, Team $team): bool
     {
-        return ! $team->is_personal && $user->hasTeamPermission($team, TeamPermission::DeleteTeam);
+        return ! $team->is_personal
+            && $this->canAccessTeamManagement($user, $team)
+            && $user->hasTeamPermission($team, TeamPermission::DeleteTeam);
+    }
+
+    private function canAccessTeamManagement(User $user, Team $team): bool
+    {
+        if ($team->kind !== TeamKind::ArtisanBusiness || ! $user->belongsToTeam($team)) {
+            return false;
+        }
+
+        $profile = $team->artisanProfile()->first();
+
+        return $profile instanceof ArtisanProfile
+            && $profile->hasActiveTeamManagementSubscription();
     }
 }
