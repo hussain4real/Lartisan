@@ -129,6 +129,28 @@ test('duplicate email submissions update the existing waitlist entry', function 
     ]);
 });
 
+test('waitlist entries expose casts and relationships', function (): void {
+    $context = createWaitlistContext();
+
+    $entry = WaitlistEntry::factory()->create([
+        'audience_type' => WaitlistAudienceType::Operations->value,
+        'contact_consent' => 1,
+        'service_category_id' => $context['category']->id,
+        'country_id' => $context['country']->id,
+        'state_id' => $context['state']->id,
+        'local_government_id' => $context['localGovernment']->id,
+        'territory_id' => $context['territory']->id,
+    ]);
+
+    expect($entry->audience_type)->toBe(WaitlistAudienceType::Operations)
+        ->and($entry->contact_consent)->toBeTrue()
+        ->and($entry->serviceCategory->is($context['category']))->toBeTrue()
+        ->and($entry->country->is($context['country']))->toBeTrue()
+        ->and($entry->state->is($context['state']))->toBeTrue()
+        ->and($entry->localGovernment->is($context['localGovernment']))->toBeTrue()
+        ->and($entry->territory->is($context['territory']))->toBeTrue();
+});
+
 test('waitlist submission validates required fields', function (): void {
     $this
         ->post('https://lartisan.app/waitlist', [])
