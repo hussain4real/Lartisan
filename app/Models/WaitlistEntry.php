@@ -19,8 +19,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $business_name
  * @property int|null $service_category_id
  * @property int $country_id
- * @property int $state_id
- * @property int $local_government_id
+ * @property int|null $state_id
+ * @property int|null $local_government_id
  * @property int|null $territory_id
  * @property string|null $note
  * @property bool $contact_consent
