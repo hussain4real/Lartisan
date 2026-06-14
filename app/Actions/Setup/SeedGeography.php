@@ -16,6 +16,16 @@ class SeedGeography
      */
     public function handle(): void
     {
+        Country::query()->updateOrCreate(
+            ['iso_code' => Country::OUTSIDE_NIGERIA_ISO_CODE],
+            [
+                'name' => 'Outside Nigeria',
+                'currency_code' => 'XXX',
+                'phone_country_code' => '+000',
+                'active' => true,
+            ],
+        );
+
         $country = Country::query()->updateOrCreate(
             ['iso_code' => 'NG'],
             [

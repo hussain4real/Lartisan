@@ -40,10 +40,18 @@ type Props = {
 
 const props = defineProps<Props>();
 
+const nigeriaIsoCode = 'NG';
+const outsideNigeriaIsoCode = 'ZZ';
+
 const optionValue = (option?: { id: number } | null) =>
     option ? String(option.id) : '';
 
-const firstCountry = () => props.geography.countries[0] ?? null;
+const firstCountry = () =>
+    props.geography.countries.find(
+        (country) => country.isoCode === nigeriaIsoCode,
+    ) ??
+    props.geography.countries[0] ??
+    null;
 const firstState = (country?: CountryOption | null) =>
     country?.states.find(
         (state) => state.slug === 'federal-capital-territory',
@@ -72,6 +80,10 @@ const selectedCountry = computed(
         props.geography.countries.find(
             (country) => String(country.id) === selectedCountryId.value,
         ) ?? null,
+);
+
+const outsideNigeriaSelected = computed(
+    () => selectedCountry.value?.isoCode === outsideNigeriaIsoCode,
 );
 
 const stateOptions = computed(() => selectedCountry.value?.states ?? []);
@@ -110,10 +122,24 @@ const serviceCategoryFormValue = computed(() =>
 );
 
 watch(selectedCountryId, () => {
+    if (outsideNigeriaSelected.value) {
+        selectedStateId.value = '';
+        selectedLocalGovernmentId.value = '';
+        selectedTerritoryId.value = 'none';
+
+        return;
+    }
+
     selectedStateId.value = optionValue(firstState(selectedCountry.value));
 });
 
 watch(selectedStateId, () => {
+    if (outsideNigeriaSelected.value) {
+        selectedLocalGovernmentId.value = '';
+
+        return;
+    }
+
     selectedLocalGovernmentId.value = optionValue(
         firstLocalGovernment(selectedState.value),
     );
@@ -403,7 +429,14 @@ watch(selectedLocalGovernmentId, () => {
                             </div>
                         </div>
 
-                        <div class="grid gap-4 sm:grid-cols-2">
+                        <div
+                            class="grid gap-4"
+                            :class="
+                                outsideNigeriaSelected
+                                    ? 'sm:grid-cols-1'
+                                    : 'sm:grid-cols-2'
+                            "
+                        >
                             <div class="grid gap-2">
                                 <Label for="country">Country</Label>
                                 <Select v-model="selectedCountryId">
@@ -425,7 +458,10 @@ watch(selectedLocalGovernmentId, () => {
                                 <InputError :message="errors.country_id" />
                             </div>
 
-                            <div class="grid gap-2">
+                            <div
+                                v-if="!outsideNigeriaSelected"
+                                class="grid gap-2"
+                            >
                                 <Label for="state">State</Label>
                                 <Select
                                     v-model="selectedStateId"
@@ -450,7 +486,10 @@ watch(selectedLocalGovernmentId, () => {
                             </div>
                         </div>
 
-                        <div class="grid gap-4 sm:grid-cols-2">
+                        <div
+                            v-if="!outsideNigeriaSelected"
+                            class="grid gap-4 sm:grid-cols-2"
+                        >
                             <div class="grid gap-2">
                                 <Label for="local_government">
                                     Local government
