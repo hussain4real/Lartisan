@@ -7,6 +7,8 @@ use App\Models\ServiceCategory;
 use App\Models\State;
 use App\Models\Territory;
 use App\Models\WaitlistEntry;
+use Database\Seeders\GeographySeeder;
+use Illuminate\Support\Facades\Artisan;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function (): void {
@@ -126,6 +128,39 @@ test('outside Nigeria waitlist submission creates an entry without local geograp
         'local_government_id' => null,
         'territory_id' => null,
     ]);
+});
+
+test('nullable waitlist geography migration backfills rows before rollback', function (): void {
+    $this->seed(GeographySeeder::class);
+
+    $outsideNigeria = Country::query()
+        ->where('iso_code', Country::OUTSIDE_NIGERIA_ISO_CODE)
+        ->firstOrFail();
+
+    $entry = WaitlistEntry::factory()->create([
+        'country_id' => $outsideNigeria->id,
+        'state_id' => null,
+        'local_government_id' => null,
+        'territory_id' => null,
+    ]);
+
+    try {
+        expect(Artisan::call('migrate:rollback', ['--step' => 1, '--no-interaction' => true]))->toBe(0);
+
+        $entry->refresh();
+        $country = Country::query()->where('iso_code', 'NG')->firstOrFail();
+        $state = State::query()->where('slug', 'federal-capital-territory')->firstOrFail();
+        $localGovernment = LocalGovernment::query()->where('slug', 'abuja-municipal-area-council')->firstOrFail();
+
+        expect($entry->country_id)->toBe($country->id)
+            ->and($entry->state_id)->toBe($state->id)
+            ->and($entry->local_government_id)->toBe($localGovernment->id);
+    } finally {
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2026_06_14_082715_allow_waitlist_entries_without_local_geography.php',
+            '--no-interaction' => true,
+        ]);
+    }
 });
 
 test('duplicate email submissions update the existing waitlist entry', function (): void {
