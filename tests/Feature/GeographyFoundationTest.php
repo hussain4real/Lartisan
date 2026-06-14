@@ -23,9 +23,12 @@ test('geography seeder creates idempotent nigeria pilot data', function () {
     $ikeja = LocalGovernment::query()->where('slug', 'ikeja')->firstOrFail();
     $wuseMarket = Territory::query()->where('slug', 'wuse-market')->firstOrFail();
     $computerVillage = Territory::query()->where('slug', 'computer-village-cluster')->firstOrFail();
+    $outsideNigeria = Country::query()->where('iso_code', Country::OUTSIDE_NIGERIA_ISO_CODE)->firstOrFail();
 
-    expect(Country::query()->count())->toBe(1);
+    expect(Country::query()->count())->toBe(2);
     expect($country->states()->count())->toBe(37);
+    expect($outsideNigeria->name)->toBe('Outside Nigeria');
+    expect($outsideNigeria->states()->count())->toBe(0);
     expect($fct->country()->firstOrFail()->is($country))->toBeTrue();
     expect($fct->localGovernments()->count())->toBe(6);
     expect($lagos->localGovernments()->count())->toBe(2);

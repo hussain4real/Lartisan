@@ -35,6 +35,9 @@ class WaitlistController extends Controller
 
     public function store(StoreWaitlistEntryRequest $request): RedirectResponse
     {
+        $country = $request->country();
+        $state = $request->state();
+        $localGovernment = $request->localGovernment();
         $serviceCategory = $request->serviceCategory();
         $territory = $request->territory();
 
@@ -46,9 +49,9 @@ class WaitlistController extends Controller
                 'audience_type' => $request->audienceType(),
                 'business_name' => $request->businessName(),
                 'service_category_id' => $serviceCategory?->id,
-                'country_id' => $request->country()->id,
-                'state_id' => $request->state()->id,
-                'local_government_id' => $request->localGovernment()->id,
+                'country_id' => $country->id,
+                'state_id' => $state?->id,
+                'local_government_id' => $localGovernment?->id,
                 'territory_id' => $territory?->id,
                 'note' => $request->note(),
                 'contact_consent' => true,
@@ -69,6 +72,10 @@ class WaitlistController extends Controller
             'countries' => Country::query()
                 ->where('active', true)
                 ->with(['states.localGovernments.territories'])
+                ->orderByRaw(
+                    'case when iso_code = ? then 0 when iso_code = ? then 2 else 1 end',
+                    ['NG', Country::OUTSIDE_NIGERIA_ISO_CODE],
+                )
                 ->orderBy('name')
                 ->get()
                 ->map(fn (Country $country): array => [

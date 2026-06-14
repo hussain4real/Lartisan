@@ -40,8 +40,18 @@ class StoreWaitlistEntryRequest extends FormRequest
             'business_name' => ['nullable', 'string', 'max:255'],
             'service_category_id' => ['nullable', 'integer', Rule::exists((new ServiceCategory)->getTable(), 'id')->where('active', true)],
             'country_id' => ['required', 'integer', Rule::exists((new Country)->getTable(), 'id')->where('active', true)],
-            'state_id' => ['required', 'integer', Rule::exists((new State)->getTable(), 'id')->where('active', true)],
-            'local_government_id' => ['required', 'integer', Rule::exists((new LocalGovernment)->getTable(), 'id')->where('active', true)],
+            'state_id' => [
+                'nullable',
+                Rule::requiredIf(fn (): bool => ! $this->outsideNigeriaSelected()),
+                'integer',
+                Rule::exists((new State)->getTable(), 'id')->where('active', true),
+            ],
+            'local_government_id' => [
+                'nullable',
+                Rule::requiredIf(fn (): bool => ! $this->outsideNigeriaSelected()),
+                'integer',
+                Rule::exists((new LocalGovernment)->getTable(), 'id')->where('active', true),
+            ],
             'territory_id' => ['nullable', 'integer', Rule::exists((new Territory)->getTable(), 'id')->where('active', true)],
             'note' => ['nullable', 'string', 'max:1000'],
             'contact_consent' => ['accepted'],
@@ -61,6 +71,22 @@ class StoreWaitlistEntryRequest extends FormRequest
                 $state = State::query()->find($this->integer('state_id'));
                 $localGovernment = LocalGovernment::query()->find($this->integer('local_government_id'));
                 $territory = Territory::query()->find($this->integer('territory_id'));
+
+                if ($country instanceof Country && $country->isOutsideNigeria()) {
+                    if ($this->filled('state_id')) {
+                        $validator->errors()->add('state_id', 'The state field is not needed outside Nigeria.');
+                    }
+
+                    if ($this->filled('local_government_id')) {
+                        $validator->errors()->add('local_government_id', 'The local government field is not needed outside Nigeria.');
+                    }
+
+                    if ($this->filled('territory_id')) {
+                        $validator->errors()->add('territory_id', 'The territory field is not needed outside Nigeria.');
+                    }
+
+                    return;
+                }
 
                 if ($country instanceof Country && $state instanceof State && $state->country_id !== $country->id) {
                     $validator->errors()->add('state_id', 'The selected state does not belong to the selected country.');
@@ -119,14 +145,18 @@ class StoreWaitlistEntryRequest extends FormRequest
         return Country::query()->findOrFail($this->integer('country_id'));
     }
 
-    public function state(): State
+    public function state(): ?State
     {
-        return State::query()->findOrFail($this->integer('state_id'));
+        $stateId = $this->integer('state_id');
+
+        return $stateId > 0 ? State::query()->findOrFail($stateId) : null;
     }
 
-    public function localGovernment(): LocalGovernment
+    public function localGovernment(): ?LocalGovernment
     {
-        return LocalGovernment::query()->findOrFail($this->integer('local_government_id'));
+        $localGovernmentId = $this->integer('local_government_id');
+
+        return $localGovernmentId > 0 ? LocalGovernment::query()->findOrFail($localGovernmentId) : null;
     }
 
     public function territory(): ?Territory
@@ -141,5 +171,19 @@ class StoreWaitlistEntryRequest extends FormRequest
         $value = $this->string($key)->trim()->toString();
 
         return $value !== '' ? $value : null;
+    }
+
+    private function outsideNigeriaSelected(): bool
+    {
+        $countryId = $this->integer('country_id');
+
+        if ($countryId <= 0) {
+            return false;
+        }
+
+        return Country::query()
+            ->whereKey($countryId)
+            ->where('iso_code', Country::OUTSIDE_NIGERIA_ISO_CODE)
+            ->exists();
     }
 }

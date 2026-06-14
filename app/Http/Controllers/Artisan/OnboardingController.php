@@ -107,6 +107,7 @@ class OnboardingController extends Controller
         return [
             'countries' => Country::query()
                 ->where('active', true)
+                ->where('iso_code', '!=', Country::OUTSIDE_NIGERIA_ISO_CODE)
                 ->with(['states.localGovernments.territories'])
                 ->orderBy('name')
                 ->get()

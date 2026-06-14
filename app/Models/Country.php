@@ -22,6 +22,8 @@ class Country extends Model
     /** @use HasFactory<CountryFactory> */
     use HasFactory;
 
+    public const OUTSIDE_NIGERIA_ISO_CODE = 'ZZ';
+
     /**
      * @return HasMany<State, $this>
      */
@@ -52,6 +54,11 @@ class Country extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function isOutsideNigeria(): bool
+    {
+        return $this->iso_code === self::OUTSIDE_NIGERIA_ISO_CODE;
     }
 
     /**
