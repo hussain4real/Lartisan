@@ -13,11 +13,21 @@ use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\TestCase;
+
+use function Pest\Laravel\post;
 
 beforeEach(function (): void {
-    config(['lartisan.waitlist_hosts' => ['lartisan.app', 'www.lartisan.app']]);
+    config([
+        'lartisan.waitlist_hosts' => ['lartisan.app', 'www.lartisan.app'],
+    ]);
 
     $this->withoutVite();
+});
+
+afterEach(function (): void {
+    putenv('LARTISAN_ADMIN_HOST');
+    unset($_ENV['LARTISAN_ADMIN_HOST'], $_SERVER['LARTISAN_ADMIN_HOST']);
 });
 
 test('main domain root redirects to the waitlist', function (): void {
@@ -31,9 +41,13 @@ test('main domain app routes redirect to the waitlist', function (string $path):
         ->get("https://lartisan.app{$path}")
         ->assertRedirect('/waitlist');
 })->with([
+    'admin panel' => '/admin',
+    'agent panel' => '/agent',
+    'lga panel' => '/lga',
     'marketplace' => '/marketplace',
     'login' => '/login',
     'pricing' => '/pricing',
+    'state panel' => '/state',
 ]);
 
 test('main domain unknown routes redirect to the waitlist', function (): void {
@@ -79,6 +93,47 @@ test('staging domain keeps the full welcome page', function (): void {
         ->assertOk()
         ->assertInertia(fn (Assert $page): Assert => $page->component('Welcome'));
 });
+
+test('admin host root redirects to the admin panel', function (): void {
+    bootWithAdminHost($this);
+
+    $this
+        ->get('https://admin.lartisan.app/')
+        ->assertRedirect('/admin');
+});
+
+test('admin host public routes redirect to the admin panel', function (string $path): void {
+    bootWithAdminHost($this);
+
+    $this
+        ->get("https://admin.lartisan.app{$path}")
+        ->assertRedirect('/admin');
+})->with([
+    'marketplace' => '/marketplace',
+    'pricing' => '/pricing',
+    'waitlist' => '/waitlist',
+    'login' => '/login',
+]);
+
+test('admin host non panel write requests are not found', function (): void {
+    bootWithAdminHost($this);
+
+    post('https://admin.lartisan.app/marketplace')
+        ->assertNotFound();
+});
+
+test('admin host panel paths are not intercepted by public redirects', function (string $path): void {
+    bootWithAdminHost($this);
+
+    $this
+        ->get("https://admin.lartisan.app{$path}")
+        ->assertRedirect();
+})->with([
+    'admin' => '/admin',
+    'state' => '/state',
+    'lga' => '/lga',
+    'agent' => '/agent',
+]);
 
 test('valid waitlist submission creates an entry and shows inline success', function (): void {
     $context = createWaitlistContext();
@@ -360,6 +415,24 @@ function createOutsideNigeriaCountry(): Country
         'currency_code' => 'XXX',
         'phone_country_code' => '+000',
     ]);
+}
+
+function bootWithAdminHost(object $testCase): void
+{
+    if (! $testCase instanceof TestCase) {
+        throw new InvalidArgumentException('Admin host tests must run inside the application test case.');
+    }
+
+    putenv('LARTISAN_ADMIN_HOST=admin.lartisan.app');
+    $_ENV['LARTISAN_ADMIN_HOST'] = 'admin.lartisan.app';
+    $_SERVER['LARTISAN_ADMIN_HOST'] = 'admin.lartisan.app';
+
+    $refresh = Closure::bind(function (): void {
+        $this->refreshApplication();
+        $this->withoutVite();
+    }, $testCase, $testCase);
+
+    $refresh();
 }
 
 /**
