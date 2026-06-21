@@ -7,14 +7,27 @@ use App\Models\ServiceCategory;
 use App\Models\State;
 use App\Models\Territory;
 use App\Models\WaitlistEntry;
+use App\Notifications\Waitlists\WaitlistJoined;
 use Database\Seeders\GeographySeeder;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\TestCase;
+
+use function Pest\Laravel\post;
 
 beforeEach(function (): void {
-    config(['lartisan.waitlist_hosts' => ['lartisan.app', 'www.lartisan.app']]);
+    config([
+        'lartisan.waitlist_hosts' => ['lartisan.app', 'www.lartisan.app'],
+    ]);
 
     $this->withoutVite();
+});
+
+afterEach(function (): void {
+    putenv('LARTISAN_ADMIN_HOST');
+    unset($_ENV['LARTISAN_ADMIN_HOST'], $_SERVER['LARTISAN_ADMIN_HOST']);
 });
 
 test('main domain root redirects to the waitlist', function (): void {
@@ -28,9 +41,13 @@ test('main domain app routes redirect to the waitlist', function (string $path):
         ->get("https://lartisan.app{$path}")
         ->assertRedirect('/waitlist');
 })->with([
+    'admin panel' => '/admin',
+    'agent panel' => '/agent',
+    'lga panel' => '/lga',
     'marketplace' => '/marketplace',
     'login' => '/login',
     'pricing' => '/pricing',
+    'state panel' => '/state',
 ]);
 
 test('main domain unknown routes redirect to the waitlist', function (): void {
@@ -77,8 +94,51 @@ test('staging domain keeps the full welcome page', function (): void {
         ->assertInertia(fn (Assert $page): Assert => $page->component('Welcome'));
 });
 
+test('admin host root redirects to the admin panel', function (): void {
+    bootWithAdminHost($this);
+
+    $this
+        ->get('https://admin.lartisan.app/')
+        ->assertRedirect('/admin');
+});
+
+test('admin host public routes redirect to the admin panel', function (string $path): void {
+    bootWithAdminHost($this);
+
+    $this
+        ->get("https://admin.lartisan.app{$path}")
+        ->assertRedirect('/admin');
+})->with([
+    'marketplace' => '/marketplace',
+    'pricing' => '/pricing',
+    'waitlist' => '/waitlist',
+    'login' => '/login',
+]);
+
+test('admin host non panel write requests are not found', function (): void {
+    bootWithAdminHost($this);
+
+    post('https://admin.lartisan.app/marketplace')
+        ->assertNotFound();
+});
+
+test('admin host panel paths are not intercepted by public redirects', function (string $path): void {
+    bootWithAdminHost($this);
+
+    $this
+        ->get("https://admin.lartisan.app{$path}")
+        ->assertRedirect();
+})->with([
+    'admin' => '/admin',
+    'state' => '/state',
+    'lga' => '/lga',
+    'agent' => '/agent',
+]);
+
 test('valid waitlist submission creates an entry and shows inline success', function (): void {
     $context = createWaitlistContext();
+
+    Notification::fake();
 
     $this
         ->post('https://lartisan.app/waitlist', waitlistPayload($context))
@@ -99,6 +159,13 @@ test('valid waitlist submission creates an entry and shows inline success', func
         'contact_consent' => true,
     ]);
 
+    Notification::assertSentOnDemand(
+        WaitlistJoined::class,
+        fn (WaitlistJoined $notification, array $channels, AnonymousNotifiable $notifiable): bool => $channels === ['mail']
+            && $notifiable->routes['mail'] === 'amina@example.com'
+            && $notification->entry->is(WaitlistEntry::query()->where('email', 'amina@example.com')->firstOrFail()),
+    );
+
     $this
         ->get('https://lartisan.app/waitlist')
         ->assertOk()
@@ -111,6 +178,8 @@ test('valid waitlist submission creates an entry and shows inline success', func
 test('outside Nigeria waitlist submission creates an entry without local geography', function (): void {
     $context = createWaitlistContext();
     $outsideNigeria = createOutsideNigeriaCountry();
+
+    Notification::fake();
 
     $this
         ->post('https://lartisan.app/waitlist', waitlistPayload($context, [
@@ -128,6 +197,8 @@ test('outside Nigeria waitlist submission creates an entry without local geograp
         'local_government_id' => null,
         'territory_id' => null,
     ]);
+
+    Notification::assertSentOnDemand(WaitlistJoined::class);
 });
 
 test('nullable waitlist geography migration backfills rows before rollback', function (): void {
@@ -166,6 +237,8 @@ test('nullable waitlist geography migration backfills rows before rollback', fun
 test('duplicate email submissions update the existing waitlist entry', function (): void {
     $context = createWaitlistContext();
 
+    Notification::fake();
+
     $this
         ->post('https://lartisan.app/waitlist', waitlistPayload($context, [
             'email' => 'AMINA@example.com',
@@ -200,6 +273,33 @@ test('duplicate email submissions update the existing waitlist entry', function 
         'territory_id' => null,
         'note' => 'Updated note.',
     ]);
+
+    Notification::assertCount(1);
+    Notification::assertSentOnDemand(
+        WaitlistJoined::class,
+        fn (WaitlistJoined $notification, array $channels, AnonymousNotifiable $notifiable): bool => $notifiable->routes['mail'] === 'amina@example.com'
+            && $notification->entry->name === 'Original Name',
+    );
+});
+
+test('waitlist joined notification exposes mail and array payloads', function (): void {
+    $entry = WaitlistEntry::factory()->create([
+        'name' => 'Amina Bello',
+        'email' => 'amina@example.com',
+        'audience_type' => WaitlistAudienceType::Operations,
+    ]);
+    $notification = new WaitlistJoined($entry);
+    $mail = $notification->toMail((object) []);
+
+    expect($notification->via((object) []))->toBe(['mail'])
+        ->and($mail->subject)->toBe('You are on the Lartisan waitlist')
+        ->and($mail->greeting)->toBe('Hi Amina Bello,')
+        ->and($mail->introLines)->toContain('You joined as: Operations.')
+        ->and($notification->toArray((object) []))->toBe([
+            'waitlist_entry_id' => $entry->id,
+            'email' => 'amina@example.com',
+            'audience_type' => WaitlistAudienceType::Operations->value,
+        ]);
 });
 
 test('waitlist entries expose casts and relationships', function (): void {
@@ -315,6 +415,23 @@ function createOutsideNigeriaCountry(): Country
         'currency_code' => 'XXX',
         'phone_country_code' => '+000',
     ]);
+}
+
+function bootWithAdminHost(object $testCase): void
+{
+    if (! $testCase instanceof TestCase) {
+        throw new InvalidArgumentException('Admin host tests must run inside the application test case.');
+    }
+
+    $setAdminHost = static function (): void {
+        putenv('LARTISAN_ADMIN_HOST=admin.lartisan.app');
+        $_ENV['LARTISAN_ADMIN_HOST'] = 'admin.lartisan.app';
+        $_SERVER['LARTISAN_ADMIN_HOST'] = 'admin.lartisan.app';
+
+        config(['lartisan.admin_host' => 'admin.lartisan.app']);
+    };
+
+    $setAdminHost();
 }
 
 /**

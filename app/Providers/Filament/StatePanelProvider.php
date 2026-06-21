@@ -23,9 +23,12 @@ class StatePanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $adminHost = config('lartisan.admin_host');
+
         return $panel
             ->id('state')
             ->path('state')
+            ->domain(is_string($adminHost) && $adminHost !== '' ? $adminHost : null)
             ->login()
             ->strictAuthorization()
             ->colors([
