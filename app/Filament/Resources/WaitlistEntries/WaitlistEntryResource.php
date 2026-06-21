@@ -60,7 +60,7 @@ class WaitlistEntryResource extends Resource
             return $query->whereRaw('1 = 0');
         }
 
-        return $query;
+        return $query->visibleTo($user);
     }
 
     public static function canAccess(): bool

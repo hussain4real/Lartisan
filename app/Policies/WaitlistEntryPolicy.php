@@ -21,7 +21,11 @@ class WaitlistEntryPolicy
      */
     public function view(User $user, WaitlistEntry $waitlistEntry): bool
     {
-        return $this->viewAny($user);
+        return $this->viewAny($user)
+            && WaitlistEntry::query()
+                ->whereKey($waitlistEntry)
+                ->visibleTo($user)
+                ->exists();
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Enums\WaitlistAudienceType;
 use App\Filament\Resources\WaitlistEntries\Pages\ListWaitlistEntries;
 use App\Filament\Resources\WaitlistEntries\Pages\ViewWaitlistEntry;
 use App\Filament\Resources\WaitlistEntries\WaitlistEntryResource;
+use App\Models\AdminProfile;
 use App\Models\Country;
 use App\Models\LocalGovernment;
 use App\Models\ServiceCategory;
@@ -90,9 +91,9 @@ test('waitlist resource access and query are permission gated', function (): voi
 
     $this->actingAs($users['stateCoordinator']);
     expect(WaitlistEntryResource::canAccess())->toBeTrue()
-        ->and(WaitlistEntryResource::getEloquentQuery()->pluck('id')->all())->toEqualCanonicalizing(WaitlistEntry::query()->pluck('id')->all())
+        ->and(WaitlistEntryResource::getEloquentQuery()->count())->toBe(0)
         ->and($policy->viewAny($users['stateCoordinator']))->toBeTrue()
-        ->and($policy->view($users['stateCoordinator'], $entry))->toBeTrue()
+        ->and($policy->view($users['stateCoordinator'], $entry))->toBeFalse()
         ->and($policy->create($users['stateCoordinator']))->toBeFalse()
         ->and($policy->update($users['stateCoordinator'], $entry))->toBeFalse()
         ->and($policy->delete($users['stateCoordinator'], $entry))->toBeFalse()
@@ -110,6 +111,86 @@ test('waitlist resource access and query are permission gated', function (): voi
         ->and(WaitlistEntryResource::getEloquentQuery()->count())->toBe(0);
 });
 
+test('waitlist resource query is scoped to the operations admin geography', function (): void {
+    $users = waitlistFilamentUsers();
+    $country = Country::factory()->create(['name' => 'Nigeria']);
+    $state = State::factory()->for($country)->create(['name' => 'FCT']);
+    $otherState = State::factory()->for($country)->create(['name' => 'Lagos']);
+    $localGovernment = LocalGovernment::factory()->for($state)->create(['name' => 'AMAC']);
+    $otherLocalGovernment = LocalGovernment::factory()->for($state)->create(['name' => 'Bwari']);
+    $outsideStateLocalGovernment = LocalGovernment::factory()->for($otherState)->create(['name' => 'Ikeja']);
+    $territory = Territory::factory()->for($localGovernment)->create(['name' => 'Wuse']);
+    $otherTerritory = Territory::factory()->for($otherLocalGovernment)->create(['name' => 'Kubwa']);
+    $outsideStateTerritory = Territory::factory()->for($outsideStateLocalGovernment)->create(['name' => 'Allen']);
+
+    AdminProfile::factory()->for($users['stateCoordinator'])->create([
+        'role' => PlatformRole::StateCoordinator,
+        'scope_type' => $state->getMorphClass(),
+        'scope_id' => $state->id,
+    ]);
+    AdminProfile::factory()->for($users['localGovernmentAdmin'])->create([
+        'role' => PlatformRole::LocalGovernmentAdmin,
+        'scope_type' => $localGovernment->getMorphClass(),
+        'scope_id' => $localGovernment->id,
+    ]);
+
+    $localEntry = WaitlistEntry::factory()->create([
+        'country_id' => $country->id,
+        'state_id' => $state->id,
+        'local_government_id' => $localGovernment->id,
+        'territory_id' => $territory->id,
+    ]);
+    $sameStateEntry = WaitlistEntry::factory()->create([
+        'country_id' => $country->id,
+        'state_id' => $state->id,
+        'local_government_id' => $otherLocalGovernment->id,
+        'territory_id' => $otherTerritory->id,
+    ]);
+    $outsideStateEntry = WaitlistEntry::factory()->create([
+        'country_id' => $country->id,
+        'state_id' => $otherState->id,
+        'local_government_id' => $outsideStateLocalGovernment->id,
+        'territory_id' => $outsideStateTerritory->id,
+    ]);
+
+    $this->actingAs($users['superAdmin']);
+    expect(WaitlistEntryResource::getEloquentQuery()->pluck('id')->all())
+        ->toEqualCanonicalizing([$localEntry->id, $sameStateEntry->id, $outsideStateEntry->id]);
+
+    $this->actingAs($users['stateCoordinator']);
+    expect(WaitlistEntryResource::getEloquentQuery()->pluck('id')->all())
+        ->toEqualCanonicalizing([$localEntry->id, $sameStateEntry->id])
+        ->and((new WaitlistEntryPolicy)->view($users['stateCoordinator'], $outsideStateEntry))->toBeFalse();
+
+    $this->actingAs($users['localGovernmentAdmin']);
+    expect(WaitlistEntryResource::getEloquentQuery()->pluck('id')->all())
+        ->toEqualCanonicalizing([$localEntry->id])
+        ->and((new WaitlistEntryPolicy)->view($users['localGovernmentAdmin'], $sameStateEntry))->toBeFalse();
+});
+
+test('waitlist visibility rejects unsupported and invalid admin scopes', function (): void {
+    $users = waitlistFilamentUsers();
+    WaitlistEntry::factory()->create();
+
+    AdminProfile::factory()->for($users['areaAgent'])->create([
+        'role' => PlatformRole::AreaAgent,
+    ]);
+    AdminProfile::factory()->for($users['stateCoordinator'])->create([
+        'role' => PlatformRole::StateCoordinator,
+        'scope_type' => null,
+        'scope_id' => null,
+    ]);
+    AdminProfile::factory()->for($users['localGovernmentAdmin'])->create([
+        'role' => PlatformRole::LocalGovernmentAdmin,
+        'scope_type' => null,
+        'scope_id' => null,
+    ]);
+
+    expect(WaitlistEntry::query()->visibleTo($users['areaAgent'])->count())->toBe(0)
+        ->and(WaitlistEntry::query()->visibleTo($users['stateCoordinator'])->count())->toBe(0)
+        ->and(WaitlistEntry::query()->visibleTo($users['localGovernmentAdmin'])->count())->toBe(0);
+});
+
 test('waitlist resource is read only and renders index and view pages', function (): void {
     $users = waitlistFilamentUsers();
     $country = Country::factory()->create(['name' => 'Nigeria']);
@@ -117,6 +198,16 @@ test('waitlist resource is read only and renders index and view pages', function
     $localGovernment = LocalGovernment::factory()->for($state)->create(['name' => 'AMAC']);
     $territory = Territory::factory()->for($localGovernment)->create(['name' => 'Wuse']);
     $category = ServiceCategory::factory()->create(['name' => 'Electrical']);
+    AdminProfile::factory()->for($users['stateCoordinator'])->create([
+        'role' => PlatformRole::StateCoordinator,
+        'scope_type' => $state->getMorphClass(),
+        'scope_id' => $state->id,
+    ]);
+    AdminProfile::factory()->for($users['localGovernmentAdmin'])->create([
+        'role' => PlatformRole::LocalGovernmentAdmin,
+        'scope_type' => $localGovernment->getMorphClass(),
+        'scope_id' => $localGovernment->id,
+    ]);
     $entry = WaitlistEntry::factory()->create([
         'name' => 'Amina Bello',
         'email' => 'amina@example.com',

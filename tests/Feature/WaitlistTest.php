@@ -423,12 +423,19 @@ function bootWithAdminHost(object $testCase): void
         throw new InvalidArgumentException('Admin host tests must run inside the application test case.');
     }
 
-    putenv('LARTISAN_ADMIN_HOST=admin.lartisan.app');
-    $_ENV['LARTISAN_ADMIN_HOST'] = 'admin.lartisan.app';
-    $_SERVER['LARTISAN_ADMIN_HOST'] = 'admin.lartisan.app';
+    $setAdminHost = static function (): void {
+        putenv('LARTISAN_ADMIN_HOST=admin.lartisan.app');
+        $_ENV['LARTISAN_ADMIN_HOST'] = 'admin.lartisan.app';
+        $_SERVER['LARTISAN_ADMIN_HOST'] = 'admin.lartisan.app';
 
-    $refresh = Closure::bind(function (): void {
+        config(['lartisan.admin_host' => 'admin.lartisan.app']);
+    };
+
+    $setAdminHost();
+
+    $refresh = Closure::bind(function () use ($setAdminHost): void {
         $this->refreshApplication();
+        $setAdminHost();
         $this->withoutVite();
     }, $testCase, $testCase);
 
