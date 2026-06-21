@@ -13,8 +13,10 @@ use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
+use Livewire\Mechanisms\HandleRequests\EndpointResolver;
 use Tests\TestCase;
 
+use function Pest\Laravel\get;
 use function Pest\Laravel\post;
 
 beforeEach(function (): void {
@@ -134,6 +136,30 @@ test('admin host panel paths are not intercepted by public redirects', function 
     'lga' => '/lga',
     'agent' => '/agent',
 ]);
+
+test('admin host static asset paths are not intercepted by public redirects', function (string $path): void {
+    bootWithAdminHost($this);
+
+    get("https://admin.lartisan.app{$path}")
+        ->assertNotFound();
+})->with([
+    'vite build asset' => '/build/assets/app.js',
+    'filament script' => '/js/filament/filament/app.js',
+    'filament stylesheet' => '/css/filament/filament/app.css',
+    'filament font' => '/fonts/filament/filament/inter/index.css',
+    'brand logo' => '/images/Lartisan.svg',
+    'favicon' => '/favicon.svg',
+]);
+
+test('admin host hashed livewire runtime is not intercepted by public redirects', function (): void {
+    bootWithAdminHost($this);
+
+    $livewireScriptPath = EndpointResolver::scriptPath(minified: ! config('app.debug'));
+
+    get("https://admin.lartisan.app{$livewireScriptPath}")
+        ->assertOk()
+        ->assertHeader('content-type', 'application/javascript; charset=UTF-8');
+});
 
 test('valid waitlist submission creates an entry and shows inline success', function (): void {
     $context = createWaitlistContext();
