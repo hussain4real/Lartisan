@@ -7,8 +7,11 @@ use App\Models\ServiceCategory;
 use App\Models\State;
 use App\Models\Territory;
 use App\Models\WaitlistEntry;
+use App\Notifications\Waitlists\WaitlistJoined;
 use Database\Seeders\GeographySeeder;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function (): void {
@@ -80,6 +83,8 @@ test('staging domain keeps the full welcome page', function (): void {
 test('valid waitlist submission creates an entry and shows inline success', function (): void {
     $context = createWaitlistContext();
 
+    Notification::fake();
+
     $this
         ->post('https://lartisan.app/waitlist', waitlistPayload($context))
         ->assertRedirect('/waitlist');
@@ -99,6 +104,13 @@ test('valid waitlist submission creates an entry and shows inline success', func
         'contact_consent' => true,
     ]);
 
+    Notification::assertSentOnDemand(
+        WaitlistJoined::class,
+        fn (WaitlistJoined $notification, array $channels, AnonymousNotifiable $notifiable): bool => $channels === ['mail']
+            && $notifiable->routes['mail'] === 'amina@example.com'
+            && $notification->entry->is(WaitlistEntry::query()->where('email', 'amina@example.com')->firstOrFail()),
+    );
+
     $this
         ->get('https://lartisan.app/waitlist')
         ->assertOk()
@@ -111,6 +123,8 @@ test('valid waitlist submission creates an entry and shows inline success', func
 test('outside Nigeria waitlist submission creates an entry without local geography', function (): void {
     $context = createWaitlistContext();
     $outsideNigeria = createOutsideNigeriaCountry();
+
+    Notification::fake();
 
     $this
         ->post('https://lartisan.app/waitlist', waitlistPayload($context, [
@@ -128,6 +142,8 @@ test('outside Nigeria waitlist submission creates an entry without local geograp
         'local_government_id' => null,
         'territory_id' => null,
     ]);
+
+    Notification::assertSentOnDemand(WaitlistJoined::class);
 });
 
 test('nullable waitlist geography migration backfills rows before rollback', function (): void {
@@ -166,6 +182,8 @@ test('nullable waitlist geography migration backfills rows before rollback', fun
 test('duplicate email submissions update the existing waitlist entry', function (): void {
     $context = createWaitlistContext();
 
+    Notification::fake();
+
     $this
         ->post('https://lartisan.app/waitlist', waitlistPayload($context, [
             'email' => 'AMINA@example.com',
@@ -200,6 +218,33 @@ test('duplicate email submissions update the existing waitlist entry', function 
         'territory_id' => null,
         'note' => 'Updated note.',
     ]);
+
+    Notification::assertCount(1);
+    Notification::assertSentOnDemand(
+        WaitlistJoined::class,
+        fn (WaitlistJoined $notification, array $channels, AnonymousNotifiable $notifiable): bool => $notifiable->routes['mail'] === 'amina@example.com'
+            && $notification->entry->name === 'Original Name',
+    );
+});
+
+test('waitlist joined notification exposes mail and array payloads', function (): void {
+    $entry = WaitlistEntry::factory()->create([
+        'name' => 'Amina Bello',
+        'email' => 'amina@example.com',
+        'audience_type' => WaitlistAudienceType::Operations,
+    ]);
+    $notification = new WaitlistJoined($entry);
+    $mail = $notification->toMail((object) []);
+
+    expect($notification->via((object) []))->toBe(['mail'])
+        ->and($mail->subject)->toBe('You are on the Lartisan waitlist')
+        ->and($mail->greeting)->toBe('Hi Amina Bello,')
+        ->and($mail->introLines)->toContain('You joined as: Operations.')
+        ->and($notification->toArray((object) []))->toBe([
+            'waitlist_entry_id' => $entry->id,
+            'email' => 'amina@example.com',
+            'audience_type' => WaitlistAudienceType::Operations->value,
+        ]);
 });
 
 test('waitlist entries expose casts and relationships', function (): void {
