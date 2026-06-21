@@ -28,6 +28,8 @@ enum PlatformPermission: string
 
     case ManageSupportCases = 'support.cases.manage';
 
+    case ViewWaitlistEntries = 'waitlist.entries.view';
+
     case ViewGlobalReports = 'reports.global.view';
     case ViewStateReports = 'reports.state.view';
     case ViewLocalGovernmentReports = 'reports.lga.view';

@@ -23,9 +23,12 @@ class LgaPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $adminHost = config('lartisan.admin_host');
+
         return $panel
             ->id('lga')
             ->path('lga')
+            ->domain(is_string($adminHost) && $adminHost !== '' ? $adminHost : null)
             ->login()
             ->strictAuthorization()
             ->colors([

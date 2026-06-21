@@ -23,10 +23,13 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $adminHost = config('lartisan.admin_host');
+
         return $panel
             ->default()
             ->id('admin')
             ->path('admin')
+            ->domain(is_string($adminHost) && $adminHost !== '' ? $adminHost : null)
             ->login()
             ->strictAuthorization()
             ->colors([

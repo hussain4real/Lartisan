@@ -23,9 +23,12 @@ class AgentPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $adminHost = config('lartisan.admin_host');
+
         return $panel
             ->id('agent')
             ->path('agent')
+            ->domain(is_string($adminHost) && $adminHost !== '' ? $adminHost : null)
             ->login()
             ->strictAuthorization()
             ->colors([

@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\AdminProfileStatus;
+use App\Enums\PlatformPermission;
+use App\Enums\PlatformRole;
 use App\Enums\WaitlistAudienceType;
 use Carbon\CarbonInterface;
 use Database\Factories\WaitlistEntryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -84,6 +88,66 @@ class WaitlistEntry extends Model
     public function territory(): BelongsTo
     {
         return $this->belongsTo(Territory::class);
+    }
+
+    /**
+     * @param  Builder<WaitlistEntry>  $query
+     */
+    public function scopeVisibleTo(Builder $query, User $user): void
+    {
+        if ($user->can(PlatformPermission::ViewGlobalReports->value)) {
+            return;
+        }
+
+        $adminProfile = $user->adminProfile()->first();
+
+        if (! $adminProfile instanceof AdminProfile || $adminProfile->status !== AdminProfileStatus::Active) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        if ($adminProfile->role === PlatformRole::StateCoordinator) {
+            $this->scopeStateVisibility($query, $adminProfile);
+
+            return;
+        }
+
+        if ($adminProfile->role === PlatformRole::LocalGovernmentAdmin) {
+            $this->scopeLocalGovernmentVisibility($query, $adminProfile);
+
+            return;
+        }
+
+        $query->whereRaw('1 = 0');
+    }
+
+    /**
+     * @param  Builder<WaitlistEntry>  $query
+     */
+    private function scopeStateVisibility(Builder $query, AdminProfile $adminProfile): void
+    {
+        if ($adminProfile->scope_type === (new State)->getMorphClass() && $adminProfile->scope_id !== null) {
+            $query->where('state_id', $adminProfile->scope_id);
+
+            return;
+        }
+
+        $query->whereRaw('1 = 0');
+    }
+
+    /**
+     * @param  Builder<WaitlistEntry>  $query
+     */
+    private function scopeLocalGovernmentVisibility(Builder $query, AdminProfile $adminProfile): void
+    {
+        if ($adminProfile->scope_type === (new LocalGovernment)->getMorphClass() && $adminProfile->scope_id !== null) {
+            $query->where('local_government_id', $adminProfile->scope_id);
+
+            return;
+        }
+
+        $query->whereRaw('1 = 0');
     }
 
     /**

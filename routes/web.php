@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminHostRedirectController;
 use App\Http\Controllers\Artisan\BookingController as ArtisanBookingController;
 use App\Http\Controllers\Artisan\DashboardController as ArtisanDashboardController;
 use App\Http\Controllers\Artisan\DisputeController as ArtisanDisputeController;
@@ -26,6 +27,20 @@ use App\Http\Controllers\Webhooks\PaystackWebhookController;
 use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+$adminHost = config('lartisan.admin_host');
+
+if ((! is_string($adminHost) || $adminHost === '') && app()->environment('testing')) {
+    $adminHost = 'admin.lartisan.app';
+}
+
+if (is_string($adminHost) && $adminHost !== '') {
+    Route::domain($adminHost)->group(function (): void {
+        Route::any('/', AdminHostRedirectController::class);
+        Route::any('{path}', AdminHostRedirectController::class)
+            ->where('path', '^(?!(admin|state|lga|agent|livewire|filament)(/|$)).*$');
+    });
+}
 
 $waitlistHosts = [];
 

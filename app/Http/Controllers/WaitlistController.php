@@ -10,8 +10,10 @@ use App\Models\ServiceCategory;
 use App\Models\State;
 use App\Models\Territory;
 use App\Models\WaitlistEntry;
+use App\Notifications\Waitlists\WaitlistJoined;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -41,7 +43,7 @@ class WaitlistController extends Controller
         $serviceCategory = $request->serviceCategory();
         $territory = $request->territory();
 
-        WaitlistEntry::query()->updateOrCreate(
+        $entry = WaitlistEntry::query()->updateOrCreate(
             ['email' => $request->email()],
             [
                 'name' => $request->entryName(),
@@ -57,6 +59,11 @@ class WaitlistController extends Controller
                 'contact_consent' => true,
             ],
         );
+
+        if ($entry->wasRecentlyCreated) {
+            Notification::route('mail', $entry->email)
+                ->notify(new WaitlistJoined($entry));
+        }
 
         return redirect('/waitlist')
             ->with('waitlist.joined', true)
