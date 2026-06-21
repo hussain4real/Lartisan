@@ -432,14 +432,6 @@ function bootWithAdminHost(object $testCase): void
     };
 
     $setAdminHost();
-
-    $refresh = Closure::bind(function () use ($setAdminHost): void {
-        $this->refreshApplication();
-        $setAdminHost();
-        $this->withoutVite();
-    }, $testCase, $testCase);
-
-    $refresh();
 }
 
 /**

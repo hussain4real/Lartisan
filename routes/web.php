@@ -30,6 +30,10 @@ use Inertia\Inertia;
 
 $adminHost = config('lartisan.admin_host');
 
+if ((! is_string($adminHost) || $adminHost === '') && app()->environment('testing')) {
+    $adminHost = 'admin.lartisan.app';
+}
+
 if (is_string($adminHost) && $adminHost !== '') {
     Route::domain($adminHost)->group(function (): void {
         Route::any('/', AdminHostRedirectController::class);
