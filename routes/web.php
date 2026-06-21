@@ -38,7 +38,7 @@ if (is_string($adminHost) && $adminHost !== '') {
     Route::domain($adminHost)->group(function (): void {
         Route::any('/', AdminHostRedirectController::class);
         Route::any('{path}', AdminHostRedirectController::class)
-            ->where('path', '^(?!(admin|state|lga|agent|livewire|filament)(/|$)).*$');
+            ->where('path', '^(?!(admin|state|lga|agent|livewire(?:-[^/]+)?|filament|build|js|css|fonts|images|storage|cdn-cgi|favicon\\.ico|favicon\\.svg|apple-touch-icon\\.png|robots\\.txt)(/|$)).*$');
     });
 }
 
