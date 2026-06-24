@@ -3,11 +3,13 @@
 namespace App\Filament\Resources\Territories\Tables;
 
 use App\Enums\TerritoryType;
+use App\Filament\Resources\LocalGovernments\LocalGovernmentResource;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TerritoriesTable
 {
@@ -46,7 +48,8 @@ class TerritoriesTable
                     ->options(TerritoryType::class),
                 SelectFilter::make('local_government_id')
                     ->label('LGA')
-                    ->relationship('localGovernment', 'name')
+                    ->relationship('localGovernment', 'name', fn (Builder $query): Builder => $query
+                        ->whereIn('id', LocalGovernmentResource::getEloquentQuery()->select('id')))
                     ->searchable()
                     ->preload(),
             ])

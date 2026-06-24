@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\LocalGovernments\Tables;
 
+use App\Filament\Resources\States\StateResource;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class LocalGovernmentsTable
 {
@@ -39,7 +41,8 @@ class LocalGovernmentsTable
             ])
             ->filters([
                 SelectFilter::make('state')
-                    ->relationship('state', 'name')
+                    ->relationship('state', 'name', fn (Builder $query): Builder => $query
+                        ->whereIn('id', StateResource::getEloquentQuery()->select('id')))
                     ->searchable()
                     ->preload(),
             ])

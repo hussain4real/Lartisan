@@ -32,6 +32,7 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -116,6 +117,36 @@ function invokeGeographyPrivateStatic(string $class, string $method, mixed ...$a
     $reflection->setAccessible(true);
 
     return $reflection->invoke(null, ...$arguments);
+}
+
+/**
+ * @return list<int>
+ */
+function geographyFilamentRelationshipFilterIds(SelectFilter $filter): array
+{
+    $query = $filter->getRelationshipQuery();
+
+    expect($query === null)->toBeFalse();
+
+    if ($query === null) {
+        return [];
+    }
+
+    $ids = [];
+
+    foreach ($query->pluck('id')->all() as $id) {
+        if (is_int($id)) {
+            $ids[] = $id;
+
+            continue;
+        }
+
+        if (is_string($id) && ctype_digit($id)) {
+            $ids[] = (int) $id;
+        }
+    }
+
+    return $ids;
 }
 
 test('geography resource access is permission gated and scoped', function (): void {
@@ -559,13 +590,24 @@ test('state and lga admins can manage only in-scope geography records', function
     $state = State::factory()->for($country)->create(['name' => 'FCT']);
     $otherState = State::factory()->for($country)->create(['name' => 'Lagos']);
     $localGovernment = LocalGovernment::factory()->for($state)->create(['name' => 'AMAC']);
+    $sameStateLocalGovernment = LocalGovernment::factory()->for($state)->create(['name' => 'Bwari']);
     $outsideLocalGovernment = LocalGovernment::factory()->for($otherState)->create(['name' => 'Ikeja']);
     $territory = Territory::factory()->for($localGovernment)->create(['name' => 'Wuse']);
     $users = geographyFilamentUsers($state, $localGovernment);
 
     geographyFilamentLivewire($users['stateCoordinator'], 'state', ListLocalGovernments::class)
-        ->assertCanSeeTableRecords([$localGovernment])
+        ->assertCanSeeTableRecords([$localGovernment, $sameStateLocalGovernment])
         ->assertCanNotSeeTableRecords([$outsideLocalGovernment]);
+
+    geographyFilamentLivewire($users['stateCoordinator'], 'state', ListLocalGovernments::class)
+        ->assertTableFilterExists('state', function (SelectFilter $filter) use ($state, $otherState): bool {
+            $filterStateIds = geographyFilamentRelationshipFilterIds($filter);
+
+            expect($filterStateIds)->toEqualCanonicalizing([$state->id])
+                ->and(in_array($otherState->id, $filterStateIds, true))->toBeFalse();
+
+            return true;
+        });
 
     geographyFilamentLivewire($users['stateCoordinator'], 'state', CreateLocalGovernment::class)
         ->fillForm([
@@ -577,7 +619,9 @@ test('state and lga admins can manage only in-scope geography records', function
         ->call('create')
         ->assertNotified();
 
-    expect(LocalGovernment::query()->where('slug', 'gwagwalada')->exists())->toBeTrue();
+    $createdScopedLocalGovernment = LocalGovernment::query()
+        ->where('slug', 'gwagwalada')
+        ->firstOrFail();
 
     expect(Gate::forUser($users['stateCoordinator'])->denies('createForState', [LocalGovernment::class, $otherState]))->toBeTrue();
 
@@ -593,9 +637,30 @@ test('state and lga admins can manage only in-scope geography records', function
 
     expect(LocalGovernment::query()->where('slug', 'surulere')->exists())->toBeFalse();
 
+    geographyFilamentLivewire($users['stateCoordinator'], 'state', ListTerritories::class)
+        ->assertTableFilterExists('local_government_id', function (SelectFilter $filter) use ($localGovernment, $sameStateLocalGovernment, $createdScopedLocalGovernment, $outsideLocalGovernment): bool {
+            $filterLocalGovernmentIds = geographyFilamentRelationshipFilterIds($filter);
+
+            expect($filterLocalGovernmentIds)->toEqualCanonicalizing([$localGovernment->id, $sameStateLocalGovernment->id, $createdScopedLocalGovernment->id])
+                ->and(in_array($outsideLocalGovernment->id, $filterLocalGovernmentIds, true))->toBeFalse();
+
+            return true;
+        });
+
     geographyFilamentLivewire($users['localGovernmentAdmin'], 'lga', ListTerritories::class)
         ->assertCanSeeTableRecords([$territory])
         ->assertCanNotSeeTableRecords([Territory::factory()->for($outsideLocalGovernment)->create(['name' => 'Maryland'])]);
+
+    geographyFilamentLivewire($users['localGovernmentAdmin'], 'lga', ListTerritories::class)
+        ->assertTableFilterExists('local_government_id', function (SelectFilter $filter) use ($localGovernment, $sameStateLocalGovernment, $outsideLocalGovernment): bool {
+            $filterLocalGovernmentIds = geographyFilamentRelationshipFilterIds($filter);
+
+            expect($filterLocalGovernmentIds)->toEqualCanonicalizing([$localGovernment->id])
+                ->and(in_array($sameStateLocalGovernment->id, $filterLocalGovernmentIds, true))->toBeFalse()
+                ->and(in_array($outsideLocalGovernment->id, $filterLocalGovernmentIds, true))->toBeFalse();
+
+            return true;
+        });
 
     geographyFilamentLivewire($users['localGovernmentAdmin'], 'lga', CreateTerritory::class)
         ->fillForm([
