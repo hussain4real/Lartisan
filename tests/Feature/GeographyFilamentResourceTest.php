@@ -8,9 +8,12 @@ use App\Filament\Resources\LocalGovernments\Pages\CreateLocalGovernment;
 use App\Filament\Resources\LocalGovernments\Pages\EditLocalGovernment;
 use App\Filament\Resources\LocalGovernments\Pages\ListLocalGovernments;
 use App\Filament\Resources\LocalGovernments\RelationManagers\TerritoriesRelationManager;
+use App\Filament\Resources\LocalGovernments\Schemas\LocalGovernmentForm;
 use App\Filament\Resources\States\Pages\CreateState;
 use App\Filament\Resources\States\Pages\EditState;
+use App\Filament\Resources\States\Pages\ListStates;
 use App\Filament\Resources\States\RelationManagers\LocalGovernmentsRelationManager;
+use App\Filament\Resources\States\Schemas\StateForm;
 use App\Filament\Resources\States\StateResource;
 use App\Filament\Resources\Territories\Pages\CreateTerritory;
 use App\Filament\Resources\Territories\Pages\EditTerritory;
@@ -27,6 +30,8 @@ use Filament\Actions\CreateAction as FilamentCreateAction;
 use Filament\Actions\EditAction as FilamentEditAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -89,6 +94,30 @@ function geographyFilamentLivewire(User $user, string $panel, string $component,
     return $testable;
 }
 
+function geographyFilamentGet(mixed $value): Get
+{
+    return new class($value) extends Get
+    {
+        public function __construct(private mixed $value) {}
+
+        public function __invoke(string|Component $path = '', bool $isAbsolute = false): mixed
+        {
+            return $this->value;
+        }
+    };
+}
+
+/**
+ * @param  class-string  $class
+ */
+function invokeGeographyPrivateStatic(string $class, string $method, mixed ...$arguments): mixed
+{
+    $reflection = new ReflectionMethod($class, $method);
+    $reflection->setAccessible(true);
+
+    return $reflection->invoke(null, ...$arguments);
+}
+
 test('geography resource access is permission gated and scoped', function (): void {
     $country = Country::factory()->create(['name' => 'Nigeria']);
     $state = State::factory()->for($country)->create(['name' => 'FCT']);
@@ -144,6 +173,88 @@ test('geography resource access is permission gated and scoped', function (): vo
         ->and($users['areaAgent']->can(PlatformPermission::ManageTerritories->value))->toBeFalse();
 });
 
+test('geography defensive scopes and policy branches are covered', function (): void {
+    $country = Country::factory()->create(['name' => 'Nigeria']);
+    $state = State::factory()->for($country)->create(['name' => 'FCT']);
+    $otherState = State::factory()->for($country)->create(['name' => 'Lagos']);
+    $localGovernment = LocalGovernment::factory()->for($state)->create(['name' => 'AMAC']);
+    $outsideLocalGovernment = LocalGovernment::factory()->for($otherState)->create(['name' => 'Ikeja']);
+    $territory = Territory::factory()->for($localGovernment)->create(['name' => 'Wuse']);
+    $users = geographyFilamentUsers($state, $localGovernment);
+
+    $stateCoordinatorWithoutProfile = User::factory()->create();
+    $stateCoordinatorWithoutProfile->assignRole(PlatformRole::StateCoordinator->value);
+
+    $misScopedStateCoordinator = User::factory()->create();
+    $misScopedStateCoordinator->assignRole(PlatformRole::StateCoordinator->value);
+    AdminProfile::factory()->for($misScopedStateCoordinator)->create([
+        'role' => PlatformRole::StateCoordinator,
+        'scope_type' => $localGovernment->getMorphClass(),
+        'scope_id' => $localGovernment->id,
+    ]);
+
+    $localGovernmentAdminWithoutProfile = User::factory()->create();
+    $localGovernmentAdminWithoutProfile->assignRole(PlatformRole::LocalGovernmentAdmin->value);
+
+    auth()->logout();
+
+    expect(StateResource::canAccess())->toBeFalse()
+        ->and(StateResource::getEloquentQuery()->exists())->toBeFalse()
+        ->and(LocalGovernmentResource::canAccess())->toBeFalse()
+        ->and(LocalGovernmentResource::getEloquentQuery()->exists())->toBeFalse()
+        ->and(TerritoryResource::canAccess())->toBeFalse()
+        ->and(TerritoryResource::getEloquentQuery()->exists())->toBeFalse()
+        ->and(TerritoryResource::getRelations())->toBe([]);
+
+    expect(State::query()->visibleTo($users['areaAgent'])->exists())->toBeFalse()
+        ->and(LocalGovernment::query()->visibleTo($users['areaAgent'])->exists())->toBeFalse()
+        ->and(Territory::query()->visibleTo($users['areaAgent'])->exists())->toBeFalse()
+        ->and(State::query()->visibleTo($stateCoordinatorWithoutProfile)->exists())->toBeFalse()
+        ->and(LocalGovernment::query()->visibleTo($stateCoordinatorWithoutProfile)->exists())->toBeFalse()
+        ->and(Territory::query()->visibleTo($stateCoordinatorWithoutProfile)->exists())->toBeFalse()
+        ->and(State::query()->visibleTo($misScopedStateCoordinator)->exists())->toBeFalse()
+        ->and(LocalGovernment::query()->visibleTo($misScopedStateCoordinator)->exists())->toBeFalse()
+        ->and(Territory::query()->visibleTo($misScopedStateCoordinator)->exists())->toBeFalse();
+
+    expect(Gate::forUser($users['superAdmin'])->allows('viewAny', State::class))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->allows('view', $state))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->allows('create', State::class))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->allows('update', $state))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->denies('delete', $state))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->denies('restore', $state))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->denies('forceDelete', $state))->toBeTrue()
+        ->and(Gate::forUser($users['areaAgent'])->denies('viewAny', State::class))->toBeTrue()
+        ->and(Gate::forUser($users['areaAgent'])->denies('create', State::class))->toBeTrue();
+
+    expect(Gate::forUser($users['superAdmin'])->allows('viewAny', LocalGovernment::class))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->allows('view', $localGovernment))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->allows('create', LocalGovernment::class))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->allows('createForState', [LocalGovernment::class, $state]))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->allows('update', $localGovernment))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->denies('delete', $localGovernment))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->denies('restore', $localGovernment))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->denies('forceDelete', $localGovernment))->toBeTrue()
+        ->and(Gate::forUser($users['areaAgent'])->denies('viewAny', LocalGovernment::class))->toBeTrue()
+        ->and(Gate::forUser($users['areaAgent'])->denies('createForState', [LocalGovernment::class, $state]))->toBeTrue()
+        ->and(Gate::forUser($stateCoordinatorWithoutProfile)->denies('create', LocalGovernment::class))->toBeTrue()
+        ->and(Gate::forUser($misScopedStateCoordinator)->denies('createForState', [LocalGovernment::class, $state]))->toBeTrue()
+        ->and(Gate::forUser($users['localGovernmentAdmin'])->denies('create', LocalGovernment::class))->toBeTrue();
+
+    expect(Gate::forUser($users['superAdmin'])->allows('viewAny', Territory::class))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->allows('view', $territory))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->allows('create', Territory::class))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->allows('createForLocalGovernment', [Territory::class, $localGovernment]))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->allows('update', $territory))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->denies('delete', $territory))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->denies('restore', $territory))->toBeTrue()
+        ->and(Gate::forUser($users['superAdmin'])->denies('forceDelete', $territory))->toBeTrue()
+        ->and(Gate::forUser($users['areaAgent'])->denies('viewAny', Territory::class))->toBeTrue()
+        ->and(Gate::forUser($users['areaAgent'])->denies('createForLocalGovernment', [Territory::class, $localGovernment]))->toBeTrue()
+        ->and(Gate::forUser($users['stateCoordinator'])->allows('createForLocalGovernment', [Territory::class, $localGovernment]))->toBeTrue()
+        ->and(Gate::forUser($users['stateCoordinator'])->denies('createForLocalGovernment', [Territory::class, $outsideLocalGovernment]))->toBeTrue()
+        ->and(Gate::forUser($localGovernmentAdminWithoutProfile)->denies('create', Territory::class))->toBeTrue();
+});
+
 test('state edit page manages local governments through a relation manager', function (): void {
     $country = Country::factory()->create(['name' => 'Nigeria']);
     $state = State::factory()->for($country)->create(['name' => 'FCT']);
@@ -197,6 +308,92 @@ test('state edit page manages local governments through a relation manager', fun
 
     Livewire::actingAs($users['localGovernmentAdmin']);
     expect(LocalGovernmentsRelationManager::canViewForRecord($state, EditState::class))->toBeFalse();
+});
+
+test('geography forms preserve manual slugs and cover defensive form helpers', function (): void {
+    $country = Country::factory()->create(['name' => 'Nigeria']);
+    $state = State::factory()->for($country)->create(['name' => 'FCT']);
+    $localGovernment = LocalGovernment::factory()->for($state)->create(['name' => 'AMAC']);
+    $users = geographyFilamentUsers($state, $localGovernment);
+
+    $listStates = geographyFilamentLivewire($users['superAdmin'], 'admin', ListStates::class);
+    $listStates->assertOk();
+    $listStates->assertCanSeeTableRecords([$state]);
+
+    geographyFilamentLivewire($users['superAdmin'], 'admin', CreateState::class)
+        ->fillForm([
+            'country_id' => $country->id,
+            'name' => 'Original State',
+            'slug' => 'manual-state',
+            'active' => true,
+        ])
+        ->fillForm(['name' => 'Renamed State'])
+        ->assertSchemaStateSet(['slug' => 'manual-state'])
+        ->fillForm(['country_id' => null])
+        ->call('create')
+        ->assertHasFormErrors(['country_id' => 'required']);
+
+    geographyFilamentLivewire($users['superAdmin'], 'admin', CreateLocalGovernment::class)
+        ->fillForm([
+            'state_id' => $state->id,
+            'name' => 'Original LGA',
+            'slug' => 'manual-lga',
+            'active' => true,
+        ])
+        ->fillForm(['name' => 'Renamed LGA'])
+        ->assertSchemaStateSet(['slug' => 'manual-lga'])
+        ->fillForm(['state_id' => null])
+        ->call('create')
+        ->assertHasFormErrors(['state_id' => 'required']);
+
+    geographyFilamentLivewire($users['superAdmin'], 'admin', LocalGovernmentsRelationManager::class, [
+        'ownerRecord' => $state,
+        'pageClass' => EditState::class,
+    ])
+        ->mountAction(TestAction::make(FilamentCreateAction::class)->table())
+        ->fillForm([
+            'name' => 'Original Relation LGA',
+            'slug' => 'manual-relation-lga',
+            'active' => true,
+        ])
+        ->fillForm(['name' => 'Renamed Relation LGA'])
+        ->assertSchemaStateSet(['slug' => 'manual-relation-lga']);
+
+    geographyFilamentLivewire($users['superAdmin'], 'admin', TerritoriesRelationManager::class, [
+        'ownerRecord' => $localGovernment,
+        'pageClass' => EditLocalGovernment::class,
+    ])
+        ->mountAction(TestAction::make(FilamentCreateAction::class)->table())
+        ->fillForm([
+            'type' => TerritoryType::Market->value,
+            'name' => 'Original Territory',
+            'slug' => 'manual-territory',
+            'boundaries' => '',
+            'active' => true,
+        ])
+        ->fillForm(['name' => 'Renamed Territory'])
+        ->assertSchemaStateSet(['slug' => 'manual-territory'])
+        ->callMountedAction()
+        ->assertNotified();
+
+    $stateRelationManager = new LocalGovernmentsRelationManager;
+    $stateRelationManager->ownerRecord = new Country;
+
+    $territoryRelationManager = new TerritoriesRelationManager;
+    $territoryRelationManager->ownerRecord = new State;
+
+    expect(invokeGeographyPrivateStatic(LocalGovernmentsRelationManager::class, 'ownerKey', $stateRelationManager))->toBeNull()
+        ->and(invokeGeographyPrivateStatic(StateForm::class, 'scalarFormValue', geographyFilamentGet([]), 'country_id'))->toBeNull()
+        ->and(invokeGeographyPrivateStatic(LocalGovernmentForm::class, 'scalarFormValue', geographyFilamentGet([]), 'state_id'))->toBeNull()
+        ->and(invokeGeographyPrivateStatic(TerritoriesRelationManager::class, 'ownerKey', $territoryRelationManager))->toBeNull()
+        ->and(invokeGeographyPrivateStatic(TerritoriesRelationManager::class, 'scalarFormValue', geographyFilamentGet(TerritoryType::Market->value), 'type'))->toBe(TerritoryType::Market->value)
+        ->and(invokeGeographyPrivateStatic(TerritoriesRelationManager::class, 'scalarFormValue', geographyFilamentGet([]), 'type'))->toBeNull();
+
+    $stateRelationManager->ownerRecord = new State;
+    $territoryRelationManager->ownerRecord = new LocalGovernment;
+
+    expect(invokeGeographyPrivateStatic(LocalGovernmentsRelationManager::class, 'ownerKey', $stateRelationManager))->toBeNull()
+        ->and(invokeGeographyPrivateStatic(TerritoriesRelationManager::class, 'ownerKey', $territoryRelationManager))->toBeNull();
 });
 
 test('lga edit page manages territories through a relation manager', function (): void {
