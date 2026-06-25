@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\Bookings\ConfirmBookingCompletion;
 use App\Models\Booking;
 use App\Models\BookingStatusHistory;
+use App\Models\Payment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -41,7 +42,7 @@ class BookingTrackerController extends Controller
     private function bookingFromTracker(Request $request, string $trackerCode): Booking
     {
         $booking = Booking::query()
-            ->with(['artisanProfile', 'artisanService.category', 'statusHistories.actor'])
+            ->with(['artisanProfile', 'artisanService.category', 'payments', 'statusHistories.actor'])
             ->where('tracker_code', $trackerCode)
             ->firstOrFail();
 
@@ -58,11 +59,12 @@ class BookingTrackerController extends Controller
     }
 
     /**
-     * @return array{id: int, trackerCode: string, status: string, customerName: string, customerPhone: string, customerEmail: string|null, scheduledAt: string|null, description: string|null, quotedAmount: int|null, quotedAmountDisplay: string|null, currencyCode: string, address: array<string, mixed>, artisan: array{id: int, businessName: string}, service: array{id: int, title: string, category: string}|null, histories: array<int, array{id: int, fromStatus: string|null, toStatus: string, notes: string|null, actorName: string|null, createdAt: string|null}>}
+     * @return array{id: int, trackerCode: string, status: string, customerName: string, customerPhone: string, customerEmail: string|null, scheduledAt: string|null, description: string|null, quotedAmount: int|null, quotedAmountDisplay: string|null, currencyCode: string, address: array<string, mixed>, artisan: array{id: int, businessName: string}, service: array{id: int, title: string, category: string}|null, canPay: bool, payment: array{id: int, status: string, reference: string, amountDisplay: string, commissionDisplay: string|null, providerFeeDisplay: string|null, netAmountDisplay: string|null, checkoutUrl: string|null}|null, histories: array<int, array{id: int, fromStatus: string|null, toStatus: string, notes: string|null, actorName: string|null, createdAt: string|null}>}
      */
     private function bookingPayload(Booking $booking): array
     {
         $service = $booking->artisanService()->first();
+        $payment = $booking->payments->sortByDesc('id')->first();
 
         return [
             'id' => $booking->id,
@@ -86,6 +88,8 @@ class BookingTrackerController extends Controller
                 'title' => $service->title,
                 'category' => $service->category()->firstOrFail()->name,
             ],
+            'canPay' => $booking->status->value === 'accepted' && $booking->quoted_amount !== null && $booking->quoted_amount > 0,
+            'payment' => $payment instanceof Payment ? $this->paymentPayload($payment) : null,
             'histories' => $booking->statusHistories
                 ->map(fn (BookingStatusHistory $history): array => [
                     'id' => $history->id,
@@ -96,6 +100,23 @@ class BookingTrackerController extends Controller
                     'createdAt' => $history->created_at?->toISOString(),
                 ])
                 ->all(),
+        ];
+    }
+
+    /**
+     * @return array{id: int, status: string, reference: string, amountDisplay: string, commissionDisplay: string|null, providerFeeDisplay: string|null, netAmountDisplay: string|null, checkoutUrl: string|null}
+     */
+    private function paymentPayload(Payment $payment): array
+    {
+        return [
+            'id' => $payment->id,
+            'status' => $payment->status->value,
+            'reference' => $payment->reference,
+            'amountDisplay' => number_format($payment->amount / 100, 2),
+            'commissionDisplay' => $payment->commission_amount === null ? null : number_format($payment->commission_amount / 100, 2),
+            'providerFeeDisplay' => $payment->provider_fee_amount === null ? null : number_format($payment->provider_fee_amount / 100, 2),
+            'netAmountDisplay' => $payment->net_amount === null ? null : number_format($payment->net_amount / 100, 2),
+            'checkoutUrl' => $payment->checkout_url,
         ];
     }
 }

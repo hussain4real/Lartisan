@@ -88,6 +88,16 @@ defineOptions({
                         <p class="text-sm text-muted-foreground">
                             {{ booking.address.line_1 ?? 'Address captured' }}
                         </p>
+                        <p
+                            v-if="booking.payment"
+                            class="text-sm text-muted-foreground"
+                        >
+                            Payment {{ booking.payment.status }}
+                            <template v-if="booking.payment.netAmountDisplay">
+                                · net {{ booking.currencyCode }}
+                                {{ booking.payment.netAmountDisplay }}
+                            </template>
+                        </p>
                     </div>
 
                     <div class="flex flex-wrap gap-2">
@@ -120,7 +130,7 @@ defineOptions({
                             </Button>
                         </Form>
                         <Form
-                            v-if="booking.status === 'accepted'"
+                            v-if="booking.status === 'escrowed'"
                             v-bind="
                                 start.form({
                                     current_team: props.currentTeam.slug,

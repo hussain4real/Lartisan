@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { Form, Head, Link } from '@inertiajs/vue3';
-import { CheckCircle2, Circle, ClipboardCheck, Store } from 'lucide-vue-next';
+import {
+    CheckCircle2,
+    Circle,
+    ClipboardCheck,
+    CreditCard,
+    Store,
+} from 'lucide-vue-next';
 import { computed } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { confirm as confirmTracker } from '@/routes/booking-tracker';
+import { store as payTracker } from '@/routes/booking-tracker/payments';
 import { index as marketplaceIndex } from '@/routes/marketplace';
 import type { BookingDetail } from '@/types';
 
@@ -16,9 +23,13 @@ const props = defineProps<{
 const statuses = [
     'requested',
     'accepted',
+    'paid',
+    'escrowed',
     'in_progress',
     'finished',
     'confirmed',
+    'settled',
+    'reviewed',
 ];
 
 const currentIndex = computed(() => statuses.indexOf(props.booking.status));
@@ -53,7 +64,7 @@ const currentIndex = computed(() => statuses.indexOf(props.booking.status));
                     </p>
                 </div>
 
-                <ol class="grid gap-3 sm:grid-cols-5">
+                <ol class="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
                     <li
                         v-for="(status, index) in statuses"
                         :key="status"
@@ -96,6 +107,34 @@ const currentIndex = computed(() => statuses.indexOf(props.booking.status));
                         </dd>
                     </div>
                 </dl>
+
+                <div
+                    v-if="booking.payment"
+                    class="grid gap-2 rounded-md border bg-muted/30 p-3 text-sm"
+                >
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="font-medium">Payment</span>
+                        <Badge variant="outline">
+                            {{ booking.payment.status }}
+                        </Badge>
+                    </div>
+                    <p class="text-muted-foreground">
+                        {{ booking.currencyCode }}
+                        {{ booking.payment.amountDisplay }}
+                    </p>
+                </div>
+
+                <Form
+                    v-if="booking.canPay"
+                    v-bind="payTracker.form(booking.trackerCode)"
+                    class="flex justify-end"
+                >
+                    <input type="hidden" name="token" :value="token" />
+                    <Button type="submit">
+                        <CreditCard />
+                        Pay securely
+                    </Button>
+                </Form>
 
                 <Form
                     v-if="booking.status === 'finished'"

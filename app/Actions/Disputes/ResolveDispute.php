@@ -3,6 +3,7 @@
 namespace App\Actions\Disputes;
 
 use App\Actions\Audit\RecordAuditLog;
+use App\Actions\Notifications\SendLifecycleNotification;
 use App\Enums\DisputeStatus;
 use App\Enums\PlatformPermission;
 use App\Enums\ReviewStatus;
@@ -18,6 +19,7 @@ class ResolveDispute
 {
     public function __construct(
         private readonly RecordAuditLog $recordAuditLog,
+        private readonly SendLifecycleNotification $sendLifecycleNotification,
     ) {}
 
     public function handle(Dispute $dispute, User $actor, string $resolution, bool $hideReview = false): Dispute
@@ -26,7 +28,7 @@ class ResolveDispute
             throw new InvalidArgumentException('A dispute resolution is required.');
         }
 
-        return DB::transaction(function () use ($dispute, $actor, $resolution, $hideReview): Dispute {
+        $updatedDispute = DB::transaction(function () use ($dispute, $actor, $resolution, $hideReview): Dispute {
             $lockedDispute = Dispute::query()->whereKey($dispute->id)->lockForUpdate()->firstOrFail();
             $this->authorize($lockedDispute, $actor);
 
@@ -69,6 +71,14 @@ class ResolveDispute
 
             return $lockedDispute->refresh();
         }, attempts: 3);
+
+        $this->sendLifecycleNotification->disputeResolved($updatedDispute);
+
+        foreach ($updatedDispute->supportCases()->get() as $supportCase) {
+            $this->sendLifecycleNotification->supportCaseResolved($supportCase);
+        }
+
+        return $updatedDispute->refresh();
     }
 
     private function authorize(Dispute $dispute, User $actor): void

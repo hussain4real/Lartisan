@@ -8,6 +8,7 @@ use App\Actions\Bookings\RejectBooking;
 use App\Actions\Bookings\StartBookingWork;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,7 +27,7 @@ class BookingController extends Controller
 
         return Inertia::render('artisan/Bookings', [
             'bookings' => $profile->bookings()
-                ->with(['customer', 'artisanService.category'])
+                ->with(['customer', 'artisanService.category', 'payments'])
                 ->latest('id')
                 ->get()
                 ->map(fn (Booking $booking): array => $this->bookingPayload($booking))
@@ -97,11 +98,12 @@ class BookingController extends Controller
     }
 
     /**
-     * @return array{id: int, status: string, customerName: string, customerPhone: string, customerEmail: string|null, scheduledAt: string|null, quotedAmountDisplay: string|null, currencyCode: string, service: array{id: int, title: string, category: string}|null, address: array<string, mixed>}
+     * @return array{id: int, status: string, customerName: string, customerPhone: string, customerEmail: string|null, scheduledAt: string|null, quotedAmountDisplay: string|null, currencyCode: string, service: array{id: int, title: string, category: string}|null, address: array<string, mixed>, payment: array{id: int, status: string, reference: string, amountDisplay: string, netAmountDisplay: string|null}|null}
      */
     private function bookingPayload(Booking $booking): array
     {
         $service = $booking->artisanService()->first();
+        $payment = $booking->payments->sortByDesc('id')->first();
 
         return [
             'id' => $booking->id,
@@ -118,6 +120,13 @@ class BookingController extends Controller
                 'title' => $service->title,
                 'category' => $service->category()->firstOrFail()->name,
             ],
+            'payment' => $payment instanceof Payment ? [
+                'id' => $payment->id,
+                'status' => $payment->status->value,
+                'reference' => $payment->reference,
+                'amountDisplay' => number_format($payment->amount / 100, 2),
+                'netAmountDisplay' => $payment->net_amount === null ? null : number_format($payment->net_amount / 100, 2),
+            ] : null,
         ];
     }
 }

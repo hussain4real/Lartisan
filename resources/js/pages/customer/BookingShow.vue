@@ -4,12 +4,14 @@ import {
     AlertTriangle,
     ArrowLeft,
     ClipboardCheck,
+    CreditCard,
     Star,
 } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { confirm, index as customerBookings } from '@/routes/customer/bookings';
 import { create as createDispute } from '@/routes/customer/bookings/disputes';
+import { store as payForBooking } from '@/routes/customer/bookings/payments';
 import { store as storeReview } from '@/routes/customer/bookings/reviews';
 import type { BookingDetail } from '@/types';
 
@@ -65,6 +67,37 @@ defineProps<{
                         </dd>
                     </div>
                 </dl>
+
+                <div
+                    v-if="booking.payment"
+                    class="grid gap-2 rounded-md border bg-muted/30 p-3 text-sm"
+                >
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="font-medium">Payment</span>
+                        <Badge variant="outline">
+                            {{ booking.payment.status }}
+                        </Badge>
+                    </div>
+                    <p class="text-muted-foreground">
+                        {{ booking.currencyCode }}
+                        {{ booking.payment.amountDisplay }}
+                        <template v-if="booking.payment.netAmountDisplay">
+                            · net settlement {{ booking.currencyCode }}
+                            {{ booking.payment.netAmountDisplay }}
+                        </template>
+                    </p>
+                </div>
+
+                <Form
+                    v-if="booking.canPay"
+                    v-bind="payForBooking.form(booking.id)"
+                    class="flex justify-end"
+                >
+                    <Button type="submit">
+                        <CreditCard />
+                        Pay securely
+                    </Button>
+                </Form>
 
                 <Form
                     v-if="booking.status === 'finished'"

@@ -12,6 +12,7 @@ use App\Http\Controllers\Artisan\ProfileController as ArtisanProfileController;
 use App\Http\Controllers\Artisan\ServiceController as ArtisanServiceController;
 use App\Http\Controllers\Artisan\SubscriptionController as ArtisanSubscriptionController;
 use App\Http\Controllers\Artisan\WalletController as ArtisanWalletController;
+use App\Http\Controllers\BookingPaymentController;
 use App\Http\Controllers\BookingTrackerController;
 use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
 use App\Http\Controllers\Customer\DisputeController as CustomerDisputeController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Controllers\WaitlistController;
 use App\Http\Controllers\WaitlistHostRedirectController;
 use App\Http\Controllers\Webhooks\PaystackWebhookController;
+use App\Http\Controllers\Webhooks\WhatsappWebhookController;
 use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -62,19 +64,33 @@ foreach ($waitlistHosts as $waitlistHost) {
 
 Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
 Route::get('waitlist', [WaitlistController::class, 'show'])->name('waitlist.show');
-Route::post('waitlist', [WaitlistController::class, 'store'])->name('waitlist.store');
+Route::post('waitlist', [WaitlistController::class, 'store'])
+    ->middleware('throttle:waitlist-submissions')
+    ->name('waitlist.store');
 Route::get('pricing', [PricingController::class, 'index'])->name('pricing');
 Route::get('privacy-policy', fn () => Inertia::render('Legal/PrivacyPolicy'))->name('privacy-policy');
 Route::get('terms-of-service', fn () => Inertia::render('Legal/TermsOfService'))->name('terms-of-service');
 
-Route::post('webhooks/paystack', PaystackWebhookController::class)->name('webhooks.paystack');
+Route::post('webhooks/paystack', PaystackWebhookController::class)
+    ->middleware('throttle:paystack-webhooks')
+    ->name('webhooks.paystack');
+Route::post('webhooks/whatsapp', WhatsappWebhookController::class)
+    ->middleware('throttle:whatsapp-webhooks')
+    ->name('webhooks.whatsapp');
 
 Route::get('marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
 Route::get('marketplace/artisans/{artisanProfile}', [MarketplaceController::class, 'show'])->name('marketplace.artisans.show');
 Route::get('marketplace/artisans/{artisanProfile}/book', [MarketplaceController::class, 'create'])->name('marketplace.bookings.create');
-Route::post('marketplace/artisans/{artisanProfile}/bookings', [MarketplaceController::class, 'store'])->name('marketplace.bookings.store');
+Route::post('marketplace/artisans/{artisanProfile}/bookings', [MarketplaceController::class, 'store'])
+    ->middleware('throttle:marketplace-bookings')
+    ->name('marketplace.bookings.store');
 Route::get('booking-tracker/{trackerCode}', [BookingTrackerController::class, 'show'])->name('booking-tracker.show');
-Route::post('booking-tracker/{trackerCode}/confirm', [BookingTrackerController::class, 'confirm'])->name('booking-tracker.confirm');
+Route::post('booking-tracker/{trackerCode}/payments', [BookingPaymentController::class, 'tracker'])
+    ->middleware('throttle:booking-tracker-actions')
+    ->name('booking-tracker.payments.store');
+Route::post('booking-tracker/{trackerCode}/confirm', [BookingTrackerController::class, 'confirm'])
+    ->middleware('throttle:booking-tracker-actions')
+    ->name('booking-tracker.confirm');
 
 Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])
@@ -87,12 +103,18 @@ Route::prefix('{current_team}')
             Route::post('onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
             Route::get('profile', [ArtisanProfileController::class, 'edit'])->name('profile.edit');
             Route::patch('profile', [ArtisanProfileController::class, 'update'])->name('profile.update');
-            Route::post('profile/portfolio', [ArtisanProfileController::class, 'portfolio'])->name('profile.portfolio.store');
+            Route::post('profile/portfolio', [ArtisanProfileController::class, 'portfolio'])
+                ->middleware('throttle:media-uploads')
+                ->name('profile.portfolio.store');
             Route::get('services', [ArtisanServiceController::class, 'index'])->name('services.index');
             Route::post('services', [ArtisanServiceController::class, 'store'])->name('services.store');
             Route::get('kyc', [KycController::class, 'show'])->name('kyc.show');
-            Route::post('kyc', [KycController::class, 'store'])->name('kyc.store');
-            Route::post('field-visits', [FieldVisitController::class, 'store'])->name('field-visits.store');
+            Route::post('kyc', [KycController::class, 'store'])
+                ->middleware('throttle:media-uploads')
+                ->name('kyc.store');
+            Route::post('field-visits', [FieldVisitController::class, 'store'])
+                ->middleware('throttle:media-uploads')
+                ->name('field-visits.store');
             Route::get('subscription', [ArtisanSubscriptionController::class, 'show'])->name('subscription.show');
             Route::post('subscription', [ArtisanSubscriptionController::class, 'store'])->name('subscription.store');
             Route::get('wallet', [ArtisanWalletController::class, 'show'])->name('wallet.show');
@@ -112,6 +134,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('customer/bookings', [CustomerBookingController::class, 'index'])->name('customer.bookings.index');
     Route::get('customer/bookings/{booking}', [CustomerBookingController::class, 'show'])->name('customer.bookings.show');
+    Route::post('customer/bookings/{booking}/payments', [BookingPaymentController::class, 'customer'])->name('customer.bookings.payments.store');
     Route::post('customer/bookings/{booking}/confirm', [CustomerBookingController::class, 'confirm'])->name('customer.bookings.confirm');
     Route::post('customer/bookings/{booking}/reviews', [CustomerReviewController::class, 'store'])->name('customer.bookings.reviews.store');
     Route::get('customer/bookings/{booking}/disputes/create', [CustomerDisputeController::class, 'create'])->name('customer.bookings.disputes.create');
@@ -119,12 +142,18 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('identity')->name('identity.')->group(function () {
         Route::get('phone', [PhoneVerificationController::class, 'edit'])->name('phone.edit');
-        Route::post('otp', [PhoneVerificationController::class, 'issue'])->name('otp.issue');
-        Route::post('otp/verify', [PhoneVerificationController::class, 'verify'])->name('otp.verify');
+        Route::post('otp', [PhoneVerificationController::class, 'issue'])
+            ->middleware('throttle:identity-otp')
+            ->name('otp.issue');
+        Route::post('otp/verify', [PhoneVerificationController::class, 'verify'])
+            ->middleware('throttle:identity-otp')
+            ->name('otp.verify');
     });
 });
 
 Route::get('claim-account', [AccountClaimController::class, 'show'])->name('account-claim.show');
-Route::post('claim-account', [AccountClaimController::class, 'store'])->name('account-claim.store');
+Route::post('claim-account', [AccountClaimController::class, 'store'])
+    ->middleware('throttle:account-claims')
+    ->name('account-claim.store');
 
 require __DIR__.'/settings.php';

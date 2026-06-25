@@ -3,6 +3,7 @@
 namespace App\Actions\Disputes;
 
 use App\Actions\Audit\RecordAuditLog;
+use App\Actions\Notifications\SendLifecycleNotification;
 use App\Enums\DisputeSeverity;
 use App\Enums\DisputeStatus;
 use App\Enums\PlatformPermission;
@@ -17,6 +18,7 @@ class EscalateDispute
 {
     public function __construct(
         private readonly RecordAuditLog $recordAuditLog,
+        private readonly SendLifecycleNotification $sendLifecycleNotification,
     ) {}
 
     public function handle(Dispute $dispute, User $actor, string $reason): Dispute
@@ -25,7 +27,7 @@ class EscalateDispute
             throw new InvalidArgumentException('An escalation reason is required.');
         }
 
-        return DB::transaction(function () use ($dispute, $actor, $reason): Dispute {
+        $updatedDispute = DB::transaction(function () use ($dispute, $actor, $reason): Dispute {
             $lockedDispute = Dispute::query()->whereKey($dispute->id)->lockForUpdate()->firstOrFail();
             $this->authorize($lockedDispute, $actor);
 
@@ -54,6 +56,10 @@ class EscalateDispute
 
             return $lockedDispute->refresh();
         }, attempts: 3);
+
+        $this->sendLifecycleNotification->disputeEscalated($updatedDispute);
+
+        return $updatedDispute->refresh();
     }
 
     private function authorize(Dispute $dispute, User $actor): void

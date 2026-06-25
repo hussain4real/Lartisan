@@ -3,6 +3,7 @@
 namespace App\Actions\Payouts;
 
 use App\Actions\Audit\RecordAuditLog;
+use App\Actions\Notifications\SendLifecycleNotification;
 use App\Actions\Payments\PostWalletLedgerEntry;
 use App\Enums\PayoutAttemptStatus;
 use App\Enums\PayoutStatus;
@@ -23,6 +24,7 @@ class ProcessPayout
     public function __construct(
         private readonly RecordAuditLog $recordAuditLog,
         private readonly PostWalletLedgerEntry $postWalletLedgerEntry,
+        private readonly SendLifecycleNotification $sendLifecycleNotification,
     ) {}
 
     /**
@@ -37,7 +39,7 @@ class ProcessPayout
         ?array $providerPayload = null,
         int $maxAttempts = 3,
     ): Payout {
-        return DB::transaction(function () use (
+        $updatedPayout = DB::transaction(function () use (
             $payout,
             $processor,
             $successful,
@@ -114,6 +116,10 @@ class ProcessPayout
 
             return $lockedPayout->refresh();
         }, attempts: 3);
+
+        $this->sendLifecycleNotification->payoutStatusChanged($updatedPayout);
+
+        return $updatedPayout->refresh();
     }
 
     private function releaseFailedPayoutBalance(Payout $payout, int $attemptNumber, ?string $failureReason): void

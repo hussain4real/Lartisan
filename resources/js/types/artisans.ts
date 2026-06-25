@@ -102,6 +102,7 @@ export type KycMediaItem = {
     id: number;
     name: string;
     fileName: string;
+    url: string;
 };
 
 export type KycSubmissionDetail = ArtisanKycSummary & {
@@ -295,6 +296,17 @@ export type BookingDispute = {
     openedAt: string | null;
 };
 
+export type BookingPaymentSummary = {
+    id: number;
+    status: string;
+    reference: string;
+    amountDisplay: string;
+    commissionDisplay?: string | null;
+    providerFeeDisplay?: string | null;
+    netAmountDisplay?: string | null;
+    checkoutUrl?: string | null;
+};
+
 export type BookingAddressSnapshot = {
     line_1?: string | null;
     line_2?: string | null;
@@ -320,8 +332,10 @@ export type BookingDetail = {
     address?: BookingAddressSnapshot;
     artisan: BookingArtisanSummary;
     service: BookingServiceSummary | null;
+    canPay?: boolean;
     histories?: BookingHistoryItem[];
     canReview?: boolean;
+    payment?: BookingPaymentSummary | null;
     review?: BookingReview | null;
     disputes?: BookingDispute[];
 };

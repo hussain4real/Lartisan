@@ -52,8 +52,14 @@ jobs:
       - name: Build Assets
         run: npm run build
 
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
       - name: Static Analysis
         run: composer analyse
 
       - name: Tests
         run: ./vendor/bin/pest --coverage --min=100
+
+      - name: Browser Smoke
+        run: composer browser:smoke

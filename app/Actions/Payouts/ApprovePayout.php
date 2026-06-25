@@ -3,6 +3,7 @@
 namespace App\Actions\Payouts;
 
 use App\Actions\Audit\RecordAuditLog;
+use App\Actions\Notifications\SendLifecycleNotification;
 use App\Actions\Payments\PostWalletLedgerEntry;
 use App\Enums\PayoutStatus;
 use App\Enums\PlatformPermission;
@@ -21,11 +22,12 @@ class ApprovePayout
     public function __construct(
         private readonly PostWalletLedgerEntry $postWalletLedgerEntry,
         private readonly RecordAuditLog $recordAuditLog,
+        private readonly SendLifecycleNotification $sendLifecycleNotification,
     ) {}
 
     public function handle(Payout $payout, User $approver): Payout
     {
-        return DB::transaction(function () use ($payout, $approver): Payout {
+        $updatedPayout = DB::transaction(function () use ($payout, $approver): Payout {
             $lockedPayout = Payout::query()->whereKey($payout->id)->lockForUpdate()->firstOrFail();
             $this->authorize($lockedPayout, $approver);
 
@@ -74,6 +76,10 @@ class ApprovePayout
 
             return $lockedPayout->refresh();
         }, attempts: 3);
+
+        $this->sendLifecycleNotification->payoutStatusChanged($updatedPayout);
+
+        return $updatedPayout->refresh();
     }
 
     private function authorize(Payout $payout, User $approver): void

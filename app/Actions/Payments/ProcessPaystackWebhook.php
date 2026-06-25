@@ -4,6 +4,7 @@ namespace App\Actions\Payments;
 
 use App\Contracts\Payments\PaymentProvider;
 use App\Enums\PaymentProviderName;
+use App\Enums\PaymentPurpose;
 use App\Enums\PaymentStatus;
 use App\Enums\ProviderWebhookEventStatus;
 use App\Models\Payment;
@@ -17,6 +18,7 @@ class ProcessPaystackWebhook
     public function __construct(
         private readonly PaymentProvider $paymentProvider,
         private readonly ActivateSubscription $activateSubscription,
+        private readonly EscrowBookingPayment $escrowBookingPayment,
     ) {}
 
     public function handle(string $payload, ?string $signature): ?Payment
@@ -93,7 +95,7 @@ class ProcessPaystackWebhook
                     'status' => PaymentStatus::Successful,
                 ])->save();
 
-                $this->activateSubscription->handle($payment->refresh());
+                $this->completeSuccessfulPayment($payment->refresh());
             }
 
             $this->finishEvent($event, ProviderWebhookEventStatus::Processed);
@@ -205,6 +207,14 @@ class ProcessPaystackWebhook
             'processed_at' => now(),
             'status' => $status,
         ])->save();
+    }
+
+    private function completeSuccessfulPayment(Payment $payment): void
+    {
+        match ($payment->purpose) {
+            PaymentPurpose::Subscription => $this->activateSubscription->handle($payment),
+            PaymentPurpose::Booking => $this->escrowBookingPayment->handle($payment),
+        };
     }
 
     private function stringValue(mixed $value): ?string

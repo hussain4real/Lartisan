@@ -5,8 +5,10 @@ namespace App\Services\Payments;
 use App\Contracts\Payments\PaymentProvider;
 use App\Models\Payment;
 use App\Support\Payments\PaymentInitialization;
+use App\Support\ProviderFailureLogger;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
+use Throwable;
 
 class PaystackPaymentProvider implements PaymentProvider
 {
@@ -16,30 +18,46 @@ class PaystackPaymentProvider implements PaymentProvider
         $owner = $profile->user()->firstOrFail();
         $metadata = json_encode([
             'artisan_profile_id' => $profile->id,
+            'booking_id' => $payment->booking_id,
             'payment_id' => $payment->id,
             'purpose' => $payment->purpose->value,
         ], JSON_THROW_ON_ERROR);
 
-        $response = Http::baseUrl($this->baseUrl())
-            ->withToken($this->secretKey())
-            ->acceptJson()
-            ->asJson()
-            ->timeout(10)
-            ->connectTimeout(5)
-            ->retry(2, 100, throw: false)
-            ->post('/transaction/initialize', [
-                'amount' => (string) $payment->amount,
-                'callback_url' => $callbackUrl,
-                'currency' => $payment->currency_code,
-                'email' => $owner->email,
-                'metadata' => $metadata,
+        try {
+            $response = Http::baseUrl($this->baseUrl())
+                ->withToken($this->secretKey())
+                ->acceptJson()
+                ->asJson()
+                ->timeout(10)
+                ->connectTimeout(5)
+                ->retry(2, 100, throw: false)
+                ->post('/transaction/initialize', [
+                    'amount' => (string) $payment->amount,
+                    'callback_url' => $callbackUrl,
+                    'currency' => $payment->currency_code,
+                    'email' => $owner->email,
+                    'metadata' => $metadata,
+                    'reference' => $payment->reference,
+                ]);
+        } catch (Throwable $throwable) {
+            app(ProviderFailureLogger::class)->report('paystack', 'transaction-initialize', $throwable, [
+                'payment_id' => $payment->id,
                 'reference' => $payment->reference,
             ]);
+
+            throw $throwable;
+        }
 
         /** @var mixed $payload */
         $payload = $response->json();
 
         if (! $response->successful() || ! is_array($payload) || ($payload['status'] ?? false) !== true) {
+            app(ProviderFailureLogger::class)->report('paystack', 'transaction-initialize', 'Unexpected transaction initialization response.', [
+                'payment_id' => $payment->id,
+                'reference' => $payment->reference,
+                'status' => $response->status(),
+            ]);
+
             throw new RuntimeException('Paystack could not initialize the transaction.');
         }
 
@@ -47,6 +65,12 @@ class PaystackPaymentProvider implements PaymentProvider
         $data = $payload['data'] ?? null;
 
         if (! is_array($data)) {
+            app(ProviderFailureLogger::class)->report('paystack', 'transaction-initialize', 'Missing transaction initialization data.', [
+                'payment_id' => $payment->id,
+                'reference' => $payment->reference,
+                'status' => $response->status(),
+            ]);
+
             throw new RuntimeException('Paystack returned an invalid transaction initialization payload.');
         }
 
@@ -55,6 +79,12 @@ class PaystackPaymentProvider implements PaymentProvider
         $reference = $data['reference'] ?? null;
 
         if (! is_string($authorizationUrl) || ! is_string($accessCode) || ! is_string($reference)) {
+            app(ProviderFailureLogger::class)->report('paystack', 'transaction-initialize', 'Missing transaction checkout credentials.', [
+                'payment_id' => $payment->id,
+                'reference' => $payment->reference,
+                'status' => $response->status(),
+            ]);
+
             throw new RuntimeException('Paystack did not return checkout credentials.');
         }
 

@@ -56,6 +56,12 @@ class BookingFactory extends Factory
             'finished_at' => null,
             'confirmed_at' => null,
             'wallet_released_at' => null,
+            'payment_started_at' => null,
+            'paid_at' => null,
+            'escrowed_at' => null,
+            'settled_at' => null,
+            'refunded_at' => null,
+            'reviewed_at' => null,
         ];
     }
 
@@ -82,6 +88,8 @@ class BookingFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'status' => BookingStatus::InProgress,
             'accepted_at' => now()->subHour(),
+            'paid_at' => now()->subMinutes(55),
+            'escrowed_at' => now()->subMinutes(50),
             'started_at' => now(),
         ]);
     }
@@ -91,6 +99,8 @@ class BookingFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'status' => BookingStatus::Finished,
             'accepted_at' => now()->subHours(2),
+            'paid_at' => now()->subMinutes(110),
+            'escrowed_at' => now()->subMinutes(100),
             'started_at' => now()->subHour(),
             'finished_at' => now(),
         ]);
@@ -101,9 +111,29 @@ class BookingFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'status' => BookingStatus::Confirmed,
             'accepted_at' => now()->subHours(3),
+            'paid_at' => now()->subMinutes(170),
+            'escrowed_at' => now()->subMinutes(160),
             'started_at' => now()->subHours(2),
             'finished_at' => now()->subHour(),
             'confirmed_at' => now(),
+        ]);
+    }
+
+    public function escrowed(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => BookingStatus::Escrowed,
+            'accepted_at' => now()->subHour(),
+            'paid_at' => now()->subMinutes(55),
+            'escrowed_at' => now()->subMinutes(50),
+        ]);
+    }
+
+    public function settled(): static
+    {
+        return $this->confirmed()->state(fn (array $attributes): array => [
+            'status' => BookingStatus::Settled,
+            'settled_at' => now(),
             'wallet_released_at' => now(),
         ]);
     }

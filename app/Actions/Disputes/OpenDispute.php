@@ -3,6 +3,7 @@
 namespace App\Actions\Disputes;
 
 use App\Actions\Audit\RecordAuditLog;
+use App\Actions\Notifications\SendLifecycleNotification;
 use App\Enums\DisputeSeverity;
 use App\Enums\DisputeStatus;
 use App\Enums\PlatformPermission;
@@ -25,6 +26,7 @@ class OpenDispute
 {
     public function __construct(
         private readonly RecordAuditLog $recordAuditLog,
+        private readonly SendLifecycleNotification $sendLifecycleNotification,
     ) {}
 
     /**
@@ -43,7 +45,7 @@ class OpenDispute
             throw new InvalidArgumentException('A dispute subject is required.');
         }
 
-        return DB::transaction(function () use ($booking, $actor, $subject, $description, $severity, $review, $evidence): Dispute {
+        $dispute = DB::transaction(function () use ($booking, $actor, $subject, $description, $severity, $review, $evidence): Dispute {
             $booking = Booking::query()->whereKey($booking->id)->lockForUpdate()->firstOrFail();
             $profile = $booking->artisanProfile()->firstOrFail();
 
@@ -100,6 +102,15 @@ class OpenDispute
 
             return $dispute->refresh();
         }, attempts: 3);
+
+        $this->sendLifecycleNotification->disputeOpened($dispute);
+        $supportCase = $dispute->supportCases()->latest('id')->first();
+
+        if ($supportCase instanceof SupportCase) {
+            $this->sendLifecycleNotification->supportCaseOpened($supportCase);
+        }
+
+        return $dispute->refresh();
     }
 
     private function authorize(User $actor, Booking $booking, ArtisanProfile $profile): void
