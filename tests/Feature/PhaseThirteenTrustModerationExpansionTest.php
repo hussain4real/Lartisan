@@ -4,6 +4,8 @@ use App\Actions\Bookings\ReleaseWalletBalance;
 use App\Actions\Disputes\OpenDispute;
 use App\Actions\Disputes\ResolveDispute;
 use App\Actions\Payments\EscrowBookingPayment;
+use App\Actions\Reviews\DetectSuspiciousReview;
+use App\Actions\Reviews\ModerateReview;
 use App\Actions\Reviews\RespondToReview;
 use App\Actions\Reviews\SubmitVerifiedReview;
 use App\Enums\BookingStatus;
@@ -16,8 +18,11 @@ use App\Enums\SupportCasePriority;
 use App\Enums\SupportCaseStatus;
 use App\Enums\WalletLedgerDirection;
 use App\Enums\WalletLedgerEntryType;
+use App\Filament\Resources\Disputes\Tables\DisputesTable;
 use App\Filament\Resources\Reviews\Pages\ListReviews;
+use App\Filament\Resources\Reviews\Pages\ViewReview;
 use App\Filament\Resources\Reviews\ReviewResource;
+use App\Http\Requests\Customer\StoreReviewRequest;
 use App\Models\ArtisanProfile;
 use App\Models\ArtisanService;
 use App\Models\AuditLog;
@@ -30,6 +35,7 @@ use App\Models\User;
 use App\Models\WalletLedgerEntry;
 use App\Policies\ReviewPolicy;
 use Database\Seeders\PilotUserSeeder;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
@@ -167,6 +173,19 @@ test('suspicious reviews collect private proof and route to moderation before pu
     expect(ReviewResource::getEloquentQuery()->whereKey($review->id)->exists())->toBeTrue();
     expect($policy->view($context['superAdmin'], $review))->toBeTrue();
     expect($policy->update($context['superAdmin'], $review))->toBeTrue();
+    expect($policy->create($context['superAdmin']))->toBeFalse();
+    expect($policy->delete($context['superAdmin'], $review))->toBeFalse();
+    expect($policy->restore($context['superAdmin'], $review))->toBeFalse();
+    expect($policy->forceDelete($context['superAdmin'], $review))->toBeFalse();
+    expect(fn () => app(ModerateReview::class)->handle($review, $context['superAdmin'], ReviewStatus::Published, ' '))
+        ->toThrow(InvalidArgumentException::class, 'Moderation notes are required.');
+    expect(fn () => app(ModerateReview::class)->handle($review, $context['superAdmin'], ReviewStatus::Disputed, 'Needs more review.'))
+        ->toThrow(InvalidArgumentException::class, 'Reviews can only be approved or hidden by this moderation action.');
+    expect(fn () => app(ModerateReview::class)->handle($review, $context['customer'], ReviewStatus::Published, 'Customer moderation.'))
+        ->toThrow(AuthorizationException::class, 'You cannot moderate this review.');
+
+    phaseThirteenLivewire($context['superAdmin'], ViewReview::class, ['record' => phaseThirteenRecordKey($review)])
+        ->assertOk();
 
     phaseThirteenLivewire($context['superAdmin'], ListReviews::class)
         ->assertCanSeeTableRecords([$review])
@@ -179,6 +198,43 @@ test('suspicious reviews collect private proof and route to moderation before pu
     expect($review->status)->toBe(ReviewStatus::Published);
     expect($review->supportCases()->firstOrFail()->status)->toBe(SupportCaseStatus::Resolved);
     expect(AuditLog::query()->where('action', 'review.moderated')->where('subject_id', $review->id)->exists())->toBeTrue();
+
+    phaseThirteenLivewire($context['superAdmin'], ListReviews::class)
+        ->callTableAction('hide', phaseThirteenRecordKey($review), [
+            'notes' => 'Evidence reviewed and review should be hidden.',
+        ])
+        ->assertHasNoTableActionErrors();
+
+    expect($review->refresh()->status)->toBe(ReviewStatus::Hidden);
+
+    auth()->logout();
+    expect(ReviewResource::getEloquentQuery()->whereKey($review->id)->exists())->toBeFalse();
+});
+
+test('review heuristics cover low-comment velocity and invalid configuration branches', function (): void {
+    $context = phaseThirteenContext();
+    $booking = phaseThirteenSettledBooking($context);
+    $detector = app(DetectSuspiciousReview::class);
+
+    $blankLowRating = $detector->handle($booking, 1, ' ');
+
+    expect($blankLowRating['is_suspicious'])->toBeTrue();
+    expect($blankLowRating['signal'])->toBe('low_rating_low_rating_no_comment');
+
+    Review::factory()->count(5)->create([
+        'artisan_profile_id' => $context['profile']->id,
+        'created_at' => now(),
+    ]);
+
+    $velocity = $detector->handle($booking, 5, 'Reliable follow-up.');
+
+    expect($velocity['signal'])->toBe('review_velocity');
+
+    config()->set('lartisan.trust.suspicious_review_keywords', 'not-an-array');
+
+    $invalidKeywordConfig = $detector->handle($booking, 5, 'unsafe keyword ignored by invalid config');
+
+    expect($invalidKeywordConfig['metadata']['keywords'])->toBe([]);
 });
 
 test('artisans can respond to visible reviews through the team route and hidden reviews reject responses', function (): void {
@@ -190,6 +246,13 @@ test('artisans can respond to visible reviews through the team route and hidden 
         rating: 5,
         comment: 'Excellent repair and tidy work.',
     );
+
+    expect(fn () => app(RespondToReview::class)->handle($review, $context['artisan'], ' '))
+        ->toThrow(InvalidArgumentException::class, 'A review response is required.');
+    expect(fn () => app(RespondToReview::class)->handle($review, $context['artisan'], str_repeat('a', 1201)))
+        ->toThrow(InvalidArgumentException::class, 'A review response may not be greater than 1200 characters.');
+    expect(fn () => app(RespondToReview::class)->handle($review, $context['customer'], 'Customer response.'))
+        ->toThrow(AuthorizationException::class, 'Only the reviewed artisan can respond to this review.');
 
     $this->actingAs($context['artisan'])
         ->post(route('artisan.reviews.response.store', [
@@ -258,6 +321,12 @@ test('review profile and payment dispute targets are tracked with audited money 
     expect($paymentDispute->payment_id)->toBe($payment->id);
     expect(data_get($paymentDispute->metadata, 'payment_reference'))->toBe($payment->reference);
     expect($profileDispute->target)->toBe(DisputeTargetType::Profile);
+    expect(fn () => app(ResolveDispute::class)->handle(
+        dispute: $paymentDispute,
+        actor: $context['superAdmin'],
+        resolution: 'Invalid adjustment.',
+        moneyAdjustmentAmount: 0,
+    ))->toThrow(InvalidArgumentException::class, 'A dispute money adjustment must be greater than zero.');
 
     $availableBeforeAdjustment = $context['profile']->wallet()->firstOrFail()->available_balance;
     $resolved = app(ResolveDispute::class)->handle(
@@ -279,6 +348,45 @@ test('review profile and payment dispute targets are tracked with audited money 
     expect($ledgerEntry->source()->firstOrFail()->is($resolved))->toBeTrue();
     expect(WalletLedgerEntry::query()->where('immutable_reference', $ledgerEntry->immutable_reference)->count())->toBe(1);
     expect(AuditLog::query()->where('action', 'dispute.resolved')->where('subject_id', $resolved->id)->exists())->toBeTrue();
+
+    $duplicateAdjustmentBooking = phaseThirteenSettledBooking($context);
+    $duplicateAdjustmentDispute = $openDispute->handle(
+        booking: $duplicateAdjustmentBooking,
+        actor: $context['customer'],
+        subject: 'Duplicate adjustment guard',
+        payment: $duplicateAdjustmentBooking->payments()->firstOrFail(),
+    );
+    $duplicateAdjustmentDispute->forceFill(['money_adjustment_ledger_entry_id' => $ledgerEntry->id])->save();
+
+    expect(fn () => app(ResolveDispute::class)->handle(
+        dispute: $duplicateAdjustmentDispute,
+        actor: $context['superAdmin'],
+        resolution: 'Duplicate ledger entry.',
+        moneyAdjustmentAmount: 1000,
+    ))->toThrow(InvalidArgumentException::class, 'This dispute already has a money adjustment.');
+
+    $tableActionBooking = phaseThirteenSettledBooking($context);
+    $tableActionDispute = $openDispute->handle(
+        booking: $tableActionBooking,
+        actor: $context['customer'],
+        subject: 'Credit adjustment through table',
+        payment: $tableActionBooking->payments()->firstOrFail(),
+    );
+    $this->actingAs($context['superAdmin']);
+    $resolveActionMethod = new ReflectionMethod(DisputesTable::class, 'resolveAction');
+    $resolveAction = $resolveActionMethod->invoke(null);
+    assert($resolveAction instanceof Action);
+    $resolveActionFunction = $resolveAction->getActionFunction();
+    assert($resolveActionFunction instanceof Closure);
+    $resolveActionFunction($tableActionDispute, [
+        'resolution' => 'Resolved with a credit adjustment from the table action.',
+        'hide_review' => false,
+        'money_adjustment_amount' => '25000',
+        'money_adjustment_direction' => WalletLedgerDirection::Credit->value,
+    ]);
+
+    expect($tableActionDispute->refresh()->moneyAdjustmentLedgerEntry()->firstOrFail()->type)
+        ->toBe(WalletLedgerEntryType::AdjustmentCredit);
 });
 
 test('customer forms accept review proof and expose payment dispute targets', function (): void {
@@ -308,4 +416,9 @@ test('customer forms accept review proof and expose payment dispute targets', fu
     expect($review->status)->toBe(ReviewStatus::PendingModeration);
     expect($review->getMedia(Review::PROOF_COLLECTION))->toHaveCount(1);
     expect(SupportCase::query()->where('supportable_type', $review->getMorphClass())->where('supportable_id', $review->id)->exists())->toBeTrue();
+
+    $singleProofRequest = StoreReviewRequest::create('/', 'POST', [], [], [
+        'proof' => UploadedFile::fake()->image('single-proof.png'),
+    ]);
+    expect($singleProofRequest->proof())->toHaveCount(1);
 });

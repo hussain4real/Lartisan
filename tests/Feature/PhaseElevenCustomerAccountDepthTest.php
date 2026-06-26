@@ -23,6 +23,7 @@ use App\Enums\PreferredChannel;
 use App\Enums\ReviewStatus;
 use App\Enums\SupportCasePriority;
 use App\Http\Requests\BookingTracker\StoreGuestDisputeRequest;
+use App\Http\Requests\BookingTracker\StoreGuestReviewRequest;
 use App\Models\Address;
 use App\Models\ArtisanProfile;
 use App\Models\ArtisanService;
@@ -440,9 +441,17 @@ test('guest tracker review and dispute flows are token limited and persisted', f
     expect($review->status)->toBe(ReviewStatus::Published);
     expect($booking->refresh()->status)->toBe(BookingStatus::Reviewed);
 
+    $singleProofRequest = StoreGuestReviewRequest::create('/', 'POST', [], [], [
+        'proof' => UploadedFile::fake()->image('single-proof.jpg'),
+    ]);
+    expect($singleProofRequest->proof())->toHaveCount(1);
+
     $wrongReview = Review::factory()->create();
     expect(fn () => app(OpenGuestDispute::class)->handle($booking, $tracked['token'], 'Wrong review', review: $wrongReview))
         ->toThrow(InvalidArgumentException::class, 'The selected review does not belong to this booking.');
+    $wrongPayment = Payment::factory()->successful()->create();
+    expect(fn () => app(OpenGuestDispute::class)->handle($booking, $tracked['token'], 'Wrong payment', payment: $wrongPayment))
+        ->toThrow(InvalidArgumentException::class, 'The selected payment does not belong to this booking.');
     expect(fn () => app(OpenGuestDispute::class)->handle($booking, $tracked['token'], ''))
         ->toThrow(InvalidArgumentException::class, 'A dispute subject is required.');
     expect(fn () => app(OpenGuestDispute::class)->handle($booking, 'wrong-token', 'Wrong token'))
