@@ -48,6 +48,7 @@ return [
 
     'rate_limits' => [
         'account_claims_per_minute' => (int) env('LARTISAN_ACCOUNT_CLAIMS_PER_MINUTE', 5),
+        'booking_chat_messages_per_minute' => (int) env('LARTISAN_BOOKING_CHAT_MESSAGES_PER_MINUTE', 20),
         'booking_tracker_actions_per_minute' => (int) env('LARTISAN_BOOKING_TRACKER_ACTIONS_PER_MINUTE', 10),
         'marketplace_bookings_per_minute' => (int) env('LARTISAN_MARKETPLACE_BOOKINGS_PER_MINUTE', 6),
         'media_uploads_per_minute' => (int) env('LARTISAN_MEDIA_UPLOADS_PER_MINUTE', 12),

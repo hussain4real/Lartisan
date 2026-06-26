@@ -8,18 +8,18 @@ This plan tracks the implemented Lartisan MVP phases and the remaining BRS-align
 
 The application already includes the scoped marketplace and operations foundation:
 
-- Phase 0 through Phase 9 from `docs/PLAN (1).md` are implemented for the scoped MVP plan.
+- Phase 0 through Phase 12 from `docs/PLAN (1).md` are implemented for the scoped MVP plan.
 - Laravel, Inertia, Vue, Filament, Pest, Larastan, Pint, ESLint, Prettier, Vite, and CI-aligned quality gates are present.
 - Geography, territories, admin profiles, customer profiles, artisan profiles, audit logs, roles, permissions, policies, and role-scoping tests are present.
-- Customer and artisan onboarding, phone-aware identity records, OTP record foundations, account claims, customer addresses, artisan workspace creation, and Inertia route contracts are present.
+- Customer and artisan onboarding, phone-aware identity records, OTP record foundations, OTP-at-booking, account claims, customer addresses, saved-address booking, artisan workspace creation, guest account upgrade, guest tracker review/dispute flows, and Inertia route contracts are present.
 - Artisan public profile setup, service categories, artisan services, portfolio media, private KYC evidence, field visits, verification status history, and artisan-facing validation flows are present.
 - Filament operations panels exist for Area Agent, LGA Admin, State Coordinator, and Super Admin verification workflows.
 - Subscription plans, Paystack subscription checkout, subscription webhooks, provider event idempotency, wallets, immutable ledger entries, payout account foundations, booking payment checkout, booking escrow, commission/provider-fee snapshots, refund adjustments, and net settlement ledgers are present.
-- Marketplace search and filtering, public artisan profiles, guest and registered booking requests, secure booking tracker, customer booking screens, artisan booking screens, browser-smoke coverage, and scoped booking lifecycle actions are present.
-- Verified reviews, disputes, support case foundations, manual payout requests, payout approval and processing, payout attempts, report snapshots, PDFs, and scoped report tests are present.
-- Transactional email and WhatsApp notification abstractions, delivery logs, provider callback intake, retry/dead-letter workflows, and booking/subscription/payout/review/dispute/support notifications are present.
+- Marketplace search and filtering, public artisan profiles, guest and registered booking requests, secure booking tracker, customer booking screens, artisan booking screens, controlled booking chat, browser-smoke coverage, and scoped booking lifecycle actions are present.
+- Verified reviews, disputes, support case foundations, support inbox assignment/internal-note workflows, manual payout requests, payout approval and processing, payout attempts, report snapshots, PDFs, and scoped report tests are present.
+- Transactional email and WhatsApp notification abstractions, delivery logs, provider callback intake, retry/dead-letter workflows, booking/subscription/payout/review/dispute/support notifications, customer favorites, and customer booking preferences are present.
 
-The implementation does not yet satisfy every requirement in `docs/lartisan_brs.md`. The remaining BRS scope includes full transactional notifications, chat, OTP-at-booking, saved-address booking, guest review and dispute flows, payout automation, provider transfer callbacks, deeper trust tooling, observability, and data recovery.
+The implementation does not yet satisfy every requirement in `docs/lartisan_brs.md`. The remaining BRS scope includes payout automation, provider transfer callbacks, deeper trust tooling, observability, and data recovery.
 
 ## Implementation Principles
 
@@ -474,7 +474,7 @@ Implement transactional communication across booking, payment, review, subscript
 
 ### Status
 
-Pending.
+Completed and verified on June 25, 2026.
 
 ### Goal
 
@@ -490,29 +490,36 @@ Complete the deeper customer journey for guest and registered customers.
 
 ### Checklist
 
-- [ ] Add OTP-at-booking for guest and customer flows where required.
-- [ ] Expose saved-address selection in the booking flow.
-- [ ] Add guest account upgrade flow after booking.
-- [ ] Add guest review submission where booking eligibility permits.
-- [ ] Add guest dispute submission where booking eligibility permits.
-- [ ] Add favorites and customer booking preferences.
-- [ ] Add tests for guest and registered customer denial paths.
+- [x] Add OTP-at-booking for guest and customer flows where required.
+- [x] Expose saved-address selection in the booking flow.
+- [x] Add guest account upgrade flow after booking.
+- [x] Add guest review submission where booking eligibility permits.
+- [x] Add guest dispute submission where booking eligibility permits.
+- [x] Add favorites and customer booking preferences.
+- [x] Add tests for guest and registered customer denial paths.
 
 ### Deliverables
 
-- Customer journey routes, forms, actions, policies, and tests for OTP, saved addresses, guest upgrade, guest reviews, guest disputes, favorites, and preferences.
+- Booking OTP endpoint and verification action for guest and changed-phone customer bookings.
+- Saved-address booking support with server-side address ownership validation.
+- Guest tracker account upgrade action that creates a customer account, personal team, profile, default address, and attaches the booking.
+- Guest tracker review and dispute submission routes, forms, token checks, support-case creation, and private evidence media support.
+- Customer favorite model/table/routes and booking preference routes/page backed by customer profile preferences.
+- Focused Phase 11 feature tests for OTP, saved addresses, guest upgrades, guest reviews, guest disputes, favorites, preferences, and denial paths.
 
 ### Acceptance Criteria
 
 - Guest and registered customer flows satisfy the BRS customer journey.
 - OTP, saved addresses, favorites, guest upgrades, guest reviews, and guest disputes are covered by tests.
 - Guest access remains limited to the intended booking or tracker context.
+- Focused feature coverage passed with `php artisan test --compact tests/Feature/PhaseElevenCustomerAccountDepthTest.php`.
+- Adjacent booking, trust, payment, and customer-depth flows passed with `php artisan test --compact tests/Feature/PhaseSixDiscoveryBookingFlowTest.php tests/Feature/PhaseSevenTrustLoopTest.php tests/Feature/PhaseNineBookingPaymentEscrowTest.php tests/Feature/PhaseElevenCustomerAccountDepthTest.php`.
 
 ## Phase 12: Chat And Support Inbox
 
 ### Status
 
-Pending.
+Completed and verified on June 25, 2026.
 
 ### Goal
 
@@ -526,23 +533,29 @@ Add controlled booking chat and dedicated support inbox workflows.
 
 ### Checklist
 
-- [ ] Define eligible booking states for chat.
-- [ ] Add chat message model, policies, and routes.
-- [ ] Add customer and artisan chat UI.
-- [ ] Add support inbox views and assignment workflow.
-- [ ] Add support-case internal notes and status transitions as needed.
-- [ ] Add contact/privacy safeguards.
-- [ ] Add tests for visibility, authorization, and closed-booking behavior.
+- [x] Define eligible booking states for chat.
+- [x] Add chat message model, policies, and routes.
+- [x] Add customer and artisan chat UI.
+- [x] Add support inbox views and assignment workflow.
+- [x] Add support-case internal notes and status transitions as needed.
+- [x] Add contact/privacy safeguards.
+- [x] Add tests for visibility, authorization, and closed-booking behavior.
 
 ### Deliverables
 
-- Chat models, actions, routes, Inertia UI, support inbox resources, assignment actions, contact/privacy rules, and tests.
+- Booking chat model, enum, policy, action, route, rate limit, validation request, and shared Inertia chat UI for registered customer and artisan participants.
+- Chat eligibility for requested, accepted, paid, escrowed, and in-progress registered bookings, with closed bookings readable but not writable.
+- Privacy validation blocking emails, URLs, and phone-like contact details in chat messages.
+- Filament support inbox resource with scoped list/view access, assignment action, internal notes, and audited status transitions.
+- Focused Phase 12 feature tests covering chat visibility, authorization, contact blocking, guest/closed-booking behavior, support scoping, assignment, notes, status transitions, notifications, and audit logs.
 
 ### Acceptance Criteria
 
 - Eligible booking states allow controlled chat.
 - Support teams can triage cases in dedicated inboxes.
 - Users cannot access unrelated conversations or hidden support notes.
+- Focused feature coverage passed with `php artisan test --compact tests/Feature/PhaseTwelveChatSupportInboxTest.php`.
+- Static analysis and frontend lint, format, and type checks passed for the Phase 12 implementation.
 
 ## Phase 13: Trust And Moderation Expansion
 
@@ -662,12 +675,9 @@ Add deeper operational reporting, observability, and recovery readiness.
 
 ## Suggested Phase Order
 
-1. Phase 10: Communication And Notifications
-2. Phase 11: Customer Account Depth
-3. Phase 12: Chat And Support Inbox
-4. Phase 13: Trust And Moderation Expansion
-5. Phase 14: Payout Automation And Finance Ops
-6. Phase 15: Reporting, Observability, And Recovery
+1. Phase 13: Trust And Moderation Expansion
+2. Phase 14: Payout Automation And Finance Ops
+3. Phase 15: Reporting, Observability, And Recovery
 
 Phase 15 should begin as a parallel readiness track once provider, queue, logging, backup, and deployment decisions are available. It should not wait until all product phases are complete.
 

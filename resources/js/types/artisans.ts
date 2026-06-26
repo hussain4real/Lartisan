@@ -257,8 +257,34 @@ export type MarketplaceArtisanDetail = MarketplaceArtisanCard & {
     serviceRadiusKm: number | null;
     publicPhone: string | null;
     publicEmail: string | null;
+    isFavorite: boolean;
     services: MarketplaceService[];
     portfolio: MarketplacePortfolioItem[];
+};
+
+export type CustomerSavedAddressOption = {
+    id: number;
+    label: string;
+    contactName: string | null;
+    phone: string | null;
+    line1: string;
+    line2: string | null;
+    landmark: string | null;
+    countryId: number | null;
+    stateId: number;
+    localGovernmentId: number;
+    territoryId: number | null;
+    isDefault: boolean;
+};
+
+export type CustomerBookingDefaults = {
+    name: string | null;
+    email: string | null;
+    phoneCountryCode: string;
+    phoneNumber: string | null;
+    preferredChannel: string;
+    defaultNotes: string | null;
+    scheduleWindow: string;
 };
 
 export type BookingServiceSummary = {
@@ -333,8 +359,11 @@ export type BookingDetail = {
     artisan: BookingArtisanSummary;
     service: BookingServiceSummary | null;
     canPay?: boolean;
+    canChat?: boolean;
     histories?: BookingHistoryItem[];
     canReview?: boolean;
+    canUpgrade?: boolean;
+    canDispute?: boolean;
     payment?: BookingPaymentSummary | null;
     review?: BookingReview | null;
     disputes?: BookingDispute[];
@@ -344,4 +373,26 @@ export type ArtisanBookingItem = BookingDetail & {
     customerPhone: string;
     customerEmail: string | null;
     address: BookingAddressSnapshot;
+};
+
+export type BookingChatMessage = {
+    id: number;
+    senderRole: 'customer' | 'artisan';
+    senderName: string;
+    body: string;
+    mine: boolean;
+    createdAt: string | null;
+};
+
+export type BookingChatPage = {
+    role: 'customer' | 'artisan';
+    backUrl: string;
+    currentTeamSlug: string | null;
+    canSend: boolean;
+    privacyNotice: string;
+    booking: Pick<
+        BookingDetail,
+        'id' | 'trackerCode' | 'status' | 'customerName' | 'artisan' | 'service'
+    >;
+    messages: BookingChatMessage[];
 };

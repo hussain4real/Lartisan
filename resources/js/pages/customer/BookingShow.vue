@@ -5,11 +5,13 @@ import {
     ArrowLeft,
     ClipboardCheck,
     CreditCard,
+    MessageSquare,
     Star,
 } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { confirm, index as customerBookings } from '@/routes/customer/bookings';
+import { show as showChat } from '@/routes/customer/bookings/chat';
 import { create as createDispute } from '@/routes/customer/bookings/disputes';
 import { store as payForBooking } from '@/routes/customer/bookings/payments';
 import { store as storeReview } from '@/routes/customer/bookings/reviews';
@@ -98,6 +100,15 @@ defineProps<{
                         Pay securely
                     </Button>
                 </Form>
+
+                <div v-if="booking.canChat" class="flex justify-end">
+                    <Button as-child variant="outline">
+                        <Link :href="showChat(booking.id).url">
+                            <MessageSquare />
+                            Open chat
+                        </Link>
+                    </Button>
+                </div>
 
                 <Form
                     v-if="booking.status === 'finished'"

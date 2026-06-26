@@ -200,6 +200,14 @@ class Booking extends Model implements HasMedia
     }
 
     /**
+     * @return HasMany<BookingMessage, $this>
+     */
+    public function messages(): HasMany
+    {
+        return $this->hasMany(BookingMessage::class);
+    }
+
+    /**
      * @return MorphMany<SupportCase, $this>
      */
     public function supportCases(): MorphMany

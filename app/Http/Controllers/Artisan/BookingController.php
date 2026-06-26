@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Artisan;
 
 use App\Actions\Bookings\AcceptBooking;
 use App\Actions\Bookings\FinishBookingWork;
+use App\Actions\Bookings\PostBookingMessage;
 use App\Actions\Bookings\RejectBooking;
 use App\Actions\Bookings\StartBookingWork;
 use App\Http\Controllers\Controller;
@@ -98,7 +99,7 @@ class BookingController extends Controller
     }
 
     /**
-     * @return array{id: int, status: string, customerName: string, customerPhone: string, customerEmail: string|null, scheduledAt: string|null, quotedAmountDisplay: string|null, currencyCode: string, service: array{id: int, title: string, category: string}|null, address: array<string, mixed>, payment: array{id: int, status: string, reference: string, amountDisplay: string, netAmountDisplay: string|null}|null}
+     * @return array{id: int, status: string, customerName: string, customerPhone: string, customerEmail: string|null, scheduledAt: string|null, quotedAmountDisplay: string|null, currencyCode: string, service: array{id: int, title: string, category: string}|null, address: array<string, mixed>, canChat: bool, payment: array{id: int, status: string, reference: string, amountDisplay: string, netAmountDisplay: string|null}|null}
      */
     private function bookingPayload(Booking $booking): array
     {
@@ -115,6 +116,7 @@ class BookingController extends Controller
             'quotedAmountDisplay' => $booking->quoted_amount === null ? null : number_format($booking->quoted_amount / 100, 2),
             'currencyCode' => $booking->currency_code,
             'address' => $booking->address_snapshot,
+            'canChat' => PostBookingMessage::canSend($booking),
             'service' => $service === null ? null : [
                 'id' => $service->id,
                 'title' => $service->title,

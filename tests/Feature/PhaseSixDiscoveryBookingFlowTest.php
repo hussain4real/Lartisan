@@ -9,11 +9,13 @@ use App\Actions\Bookings\RejectBooking;
 use App\Actions\Bookings\ReleaseWalletBalance;
 use App\Actions\Bookings\SearchArtisans;
 use App\Actions\Bookings\StartBookingWork;
+use App\Actions\Identity\IssueOtp;
 use App\Actions\Payments\EscrowBookingPayment;
 use App\Enums\ArtisanAvailabilityStatus;
 use App\Enums\ArtisanSubscriptionStatus;
 use App\Enums\ArtisanVerificationStatus;
 use App\Enums\BookingStatus;
+use App\Enums\OtpPurpose;
 use App\Enums\WalletLedgerEntryType;
 use App\Models\ArtisanProfile;
 use App\Models\ArtisanService;
@@ -359,13 +361,22 @@ test('marketplace geography filters are scoped and stale child selections are no
 test('guest and registered customers can create bookings and use secure tracker screens', function () {
     Storage::fake('local');
     $context = phaseSixArtisanContext();
+    app(IssueOtp::class)->handle(
+        user: null,
+        phoneCountryCode: '+234',
+        phoneNumber: '8039990000',
+        purpose: OtpPurpose::BookingGuest,
+        plainCode: '123456',
+    );
 
     /** @var TestResponse<Response> $guestResponse */
     $guestResponse = $this->post(route('marketplace.bookings.store', ['artisanProfile' => $context['profile']]), [
         'artisan_service_id' => $context['service']->id,
         'customer_name' => 'Guest Customer',
-        'customer_phone' => '+2348039990000',
+        'phone_country_code' => '+234',
+        'customer_phone' => '8039990000',
         'customer_email' => 'guest@example.test',
+        'otp_code' => '123456',
         'scheduled_at' => now()->addDay()->toDateString(),
         'line_1' => '12 Guest Street',
         'line_2' => 'Flat 1',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Actions\Bookings\ConfirmBookingCompletion;
+use App\Actions\Bookings\PostBookingMessage;
 use App\Http\Controllers\Controller;
 use App\Models\ArtisanProfile;
 use App\Models\ArtisanService;
@@ -69,7 +70,7 @@ class BookingController extends Controller
     }
 
     /**
-     * @return array{id: int, status: string, customerName: string, scheduledAt: string|null, quotedAmountDisplay: string|null, currencyCode: string, artisan: array{id: int, businessName: string}, service: array{id: int, title: string, category: string}|null, trackerCode: string, canPay: bool, canReview: bool, payment: array{id: int, status: string, reference: string, amountDisplay: string, commissionDisplay: string|null, providerFeeDisplay: string|null, netAmountDisplay: string|null, checkoutUrl: string|null}|null, review: array{id: int, rating: int, comment: string|null, status: string}|null, disputes: array<int, array{id: int, status: string, severity: string, subject: string, openedAt: string|null}>}
+     * @return array{id: int, status: string, customerName: string, scheduledAt: string|null, quotedAmountDisplay: string|null, currencyCode: string, artisan: array{id: int, businessName: string}, service: array{id: int, title: string, category: string}|null, trackerCode: string, canPay: bool, canChat: bool, canReview: bool, payment: array{id: int, status: string, reference: string, amountDisplay: string, commissionDisplay: string|null, providerFeeDisplay: string|null, netAmountDisplay: string|null, checkoutUrl: string|null}|null, review: array{id: int, rating: int, comment: string|null, status: string}|null, disputes: array<int, array{id: int, status: string, severity: string, subject: string, openedAt: string|null}>}
      */
     private function bookingCardPayload(Booking $booking): array
     {
@@ -94,6 +95,7 @@ class BookingController extends Controller
             ],
             'service' => $service instanceof ArtisanService ? $this->servicePayload($service) : null,
             'canPay' => $booking->status->value === 'accepted' && $booking->quoted_amount !== null && $booking->quoted_amount > 0,
+            'canChat' => PostBookingMessage::canSend($booking),
             'canReview' => $booking->status->value === 'settled' && $booking->wallet_released_at !== null && ! $review instanceof Review,
             'payment' => $payment instanceof Payment ? $this->paymentPayload($payment) : null,
             'review' => $review instanceof Review ? [

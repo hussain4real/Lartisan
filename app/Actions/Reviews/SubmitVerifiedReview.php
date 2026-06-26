@@ -23,18 +23,16 @@ class SubmitVerifiedReview
         private readonly SendLifecycleNotification $sendLifecycleNotification,
     ) {}
 
-    public function handle(Booking $booking, User $customer, int $rating, ?string $comment = null): Review
+    public function handle(Booking $booking, ?User $customer, int $rating, ?string $comment = null, ?string $trackerToken = null): Review
     {
         if ($rating < 1 || $rating > 5) {
             throw new InvalidArgumentException('Review rating must be between one and five.');
         }
 
-        $review = DB::transaction(function () use ($booking, $customer, $rating, $comment): Review {
+        $review = DB::transaction(function () use ($booking, $customer, $rating, $comment, $trackerToken): Review {
             $lockedBooking = Booking::query()->whereKey($booking->id)->lockForUpdate()->firstOrFail();
 
-            if ($lockedBooking->customer_id !== $customer->id) {
-                throw new AuthorizationException('Only the booking customer can review this booking.');
-            }
+            $this->authorizeReviewer($lockedBooking, $customer, $trackerToken);
 
             if ($lockedBooking->review()->exists()) {
                 throw new InvalidArgumentException('This booking has already been reviewed.');
@@ -57,7 +55,7 @@ class SubmitVerifiedReview
 
             $review = Review::query()->create([
                 'booking_id' => $lockedBooking->id,
-                'customer_id' => $customer->id,
+                'customer_id' => $customer?->id,
                 'artisan_profile_id' => $lockedBooking->artisan_profile_id,
                 'rating' => $rating,
                 'comment' => $comment,
@@ -76,7 +74,10 @@ class SubmitVerifiedReview
                 $fromStatus,
                 BookingStatus::Reviewed,
                 'booking.reviewed',
-                ['review_id' => $review->id],
+                [
+                    'review_id' => $review->id,
+                    'source' => $customer instanceof User ? 'registered' : 'guest_tracker',
+                ],
             );
 
             return $review;
@@ -86,5 +87,24 @@ class SubmitVerifiedReview
         $this->sendLifecycleNotification->bookingStatusChanged($review->booking()->firstOrFail(), BookingStatus::Reviewed);
 
         return $review->refresh();
+    }
+
+    private function authorizeReviewer(Booking $booking, ?User $customer, ?string $trackerToken): void
+    {
+        if ($customer instanceof User) {
+            if ($booking->customer_id === $customer->id) {
+                return;
+            }
+
+            throw new AuthorizationException('Only the booking customer can review this booking.');
+        }
+
+        if ($booking->customer_id === null
+            && is_string($trackerToken)
+            && hash_equals($booking->secure_token_hash, hash('sha256', $trackerToken))) {
+            return;
+        }
+
+        throw new AuthorizationException('Only the booking customer can review this booking.');
     }
 }

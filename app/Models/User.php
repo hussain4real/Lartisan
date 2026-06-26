@@ -39,8 +39,12 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read Collection<int, ArtisanProfile> $artisanProfiles
  * @property-read Collection<int, Booking> $customerBookings
  * @property-read CustomerProfile|null $customerProfile
+ * @property-read Collection<int, CustomerFavorite> $customerFavorites
+ * @property-read Collection<int, BookingMessage> $bookingMessages
  * @property-read Collection<int, Review> $reviews
  * @property-read Collection<int, Dispute> $openedDisputes
+ * @property-read Collection<int, SupportCase> $assignedSupportCases
+ * @property-read Collection<int, SupportCaseNote> $supportCaseNotes
  */
 #[Fillable([
     'name',
@@ -105,6 +109,22 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
     }
 
     /**
+     * @return HasMany<CustomerFavorite, $this>
+     */
+    public function customerFavorites(): HasMany
+    {
+        return $this->hasMany(CustomerFavorite::class);
+    }
+
+    /**
+     * @return HasMany<BookingMessage, $this>
+     */
+    public function bookingMessages(): HasMany
+    {
+        return $this->hasMany(BookingMessage::class, 'sender_id');
+    }
+
+    /**
      * @return HasMany<Review, $this>
      */
     public function reviews(): HasMany
@@ -126,6 +146,22 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
     public function assignedDisputes(): HasMany
     {
         return $this->hasMany(Dispute::class, 'assigned_to_id');
+    }
+
+    /**
+     * @return HasMany<SupportCase, $this>
+     */
+    public function assignedSupportCases(): HasMany
+    {
+        return $this->hasMany(SupportCase::class, 'owner_id');
+    }
+
+    /**
+     * @return HasMany<SupportCaseNote, $this>
+     */
+    public function supportCaseNotes(): HasMany
+    {
+        return $this->hasMany(SupportCaseNote::class, 'author_id');
     }
 
     /**

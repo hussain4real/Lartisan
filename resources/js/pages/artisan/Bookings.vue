@@ -6,6 +6,7 @@ import {
     Check,
     CirclePlay,
     Flag,
+    MessageSquare,
     X,
 } from 'lucide-vue-next';
 import Heading from '@/components/Heading.vue';
@@ -13,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { dashboard as artisanDashboard } from '@/routes/artisan';
 import { accept, finish, reject, start } from '@/routes/artisan/bookings';
+import { show as showChat } from '@/routes/artisan/bookings/chat';
 import { create as createDispute } from '@/routes/artisan/bookings/disputes';
 import type { ArtisanBookingItem, Team } from '@/types';
 
@@ -157,6 +159,24 @@ defineOptions({
                                 Finish
                             </Button>
                         </Form>
+                        <Button
+                            v-if="booking.canChat"
+                            as-child
+                            variant="outline"
+                            size="sm"
+                        >
+                            <Link
+                                :href="
+                                    showChat({
+                                        current_team: props.currentTeam.slug,
+                                        booking: booking.id,
+                                    }).url
+                                "
+                            >
+                                <MessageSquare />
+                                Chat
+                            </Link>
+                        </Button>
                         <Button as-child variant="outline" size="sm">
                             <Link
                                 :href="

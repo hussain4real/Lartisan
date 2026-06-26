@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Enums\PlatformPermission;
 use App\Enums\SupportCaseCategory;
 use App\Enums\SupportCasePriority;
 use App\Enums\SupportCaseStatus;
 use Database\Factories\SupportCaseFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
@@ -73,6 +76,69 @@ class SupportCase extends Model
     public function supportable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * @return HasMany<SupportCaseNote, $this>
+     */
+    public function notes(): HasMany
+    {
+        return $this->hasMany(SupportCaseNote::class);
+    }
+
+    /**
+     * @param  Builder<SupportCase>  $query
+     */
+    public function scopeVisibleTo(Builder $query, User $user): void
+    {
+        if ($user->can(PlatformPermission::ViewGlobalReports->value)) {
+            return;
+        }
+
+        $visibleArtisanProfiles = ArtisanProfile::query()
+            ->visibleTo($user)
+            ->select('id');
+
+        $query->where(function (Builder $query) use ($user, $visibleArtisanProfiles): void {
+            $query
+                ->where('owner_id', $user->id)
+                ->orWhere('requester_id', $user->id)
+                ->orWhere(function (Builder $query) use ($visibleArtisanProfiles): void {
+                    $query
+                        ->where('supportable_type', (new ArtisanProfile)->getMorphClass())
+                        ->whereIn('supportable_id', clone $visibleArtisanProfiles);
+                })
+                ->orWhere(function (Builder $query) use ($visibleArtisanProfiles): void {
+                    $query
+                        ->where('supportable_type', (new Booking)->getMorphClass())
+                        ->whereIn(
+                            'supportable_id',
+                            Booking::query()
+                                ->whereIn('artisan_profile_id', clone $visibleArtisanProfiles)
+                                ->select('id'),
+                        );
+                })
+                ->orWhere(function (Builder $query) use ($visibleArtisanProfiles): void {
+                    $query
+                        ->where('supportable_type', (new Dispute)->getMorphClass())
+                        ->whereIn(
+                            'supportable_id',
+                            Dispute::query()
+                                ->whereIn('artisan_profile_id', clone $visibleArtisanProfiles)
+                                ->select('id'),
+                        );
+                })
+                ->orWhere(function (Builder $query) use ($visibleArtisanProfiles): void {
+                    $query
+                        ->where('supportable_type', (new Payout)->getMorphClass())
+                        ->whereIn(
+                            'supportable_id',
+                            Payout::query()
+                                ->whereIn('artisan_profile_id', clone $visibleArtisanProfiles)
+                                ->select('id'),
+                        );
+                });
+        });
     }
 
     /**

@@ -71,6 +71,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('booking-tracker-actions', fn (Request $request): Limit => Limit::perMinute($this->rateLimit('booking_tracker_actions_per_minute'))
             ->by(is_scalar($request->route('trackerCode')) ? (string) $request->route('trackerCode') : (string) $request->ip()));
 
+        RateLimiter::for('booking-chat', fn (Request $request): Limit => Limit::perMinute($this->rateLimit('booking_chat_messages_per_minute'))
+            ->by($request->user()?->id !== null ? 'user:'.$request->user()->id : (string) $request->ip()));
+
         RateLimiter::for('identity-otp', fn (Request $request): Limit => Limit::perMinute($this->rateLimit('otp_requests_per_minute'))
             ->by($request->user()?->id !== null ? 'user:'.$request->user()->id : (string) $request->ip()));
 
