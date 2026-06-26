@@ -10,6 +10,7 @@ use App\Http\Controllers\Artisan\KycController;
 use App\Http\Controllers\Artisan\OnboardingController;
 use App\Http\Controllers\Artisan\PayoutController as ArtisanPayoutController;
 use App\Http\Controllers\Artisan\ProfileController as ArtisanProfileController;
+use App\Http\Controllers\Artisan\ReviewResponseController as ArtisanReviewResponseController;
 use App\Http\Controllers\Artisan\ServiceController as ArtisanServiceController;
 use App\Http\Controllers\Artisan\SubscriptionController as ArtisanSubscriptionController;
 use App\Http\Controllers\Artisan\WalletController as ArtisanWalletController;
@@ -150,6 +151,7 @@ Route::prefix('{current_team}')
                 ->name('bookings.chat.messages.store');
             Route::get('bookings/{booking}/disputes/create', [ArtisanDisputeController::class, 'create'])->name('bookings.disputes.create');
             Route::post('bookings/{booking}/disputes', [ArtisanDisputeController::class, 'store'])->name('bookings.disputes.store');
+            Route::post('reviews/{review}/response', ArtisanReviewResponseController::class)->name('reviews.response.store');
         });
     });
 

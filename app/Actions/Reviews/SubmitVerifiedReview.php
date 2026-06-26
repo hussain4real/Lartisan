@@ -6,13 +6,18 @@ use App\Actions\Bookings\RecordBookingStatus;
 use App\Actions\Notifications\SendLifecycleNotification;
 use App\Enums\BookingStatus;
 use App\Enums\ReviewStatus;
+use App\Enums\SupportCaseCategory;
+use App\Enums\SupportCasePriority;
+use App\Enums\SupportCaseStatus;
 use App\Enums\WalletLedgerDirection;
 use App\Enums\WalletLedgerEntryType;
 use App\Models\Booking;
 use App\Models\Review;
+use App\Models\SupportCase;
 use App\Models\User;
 use App\Models\WalletLedgerEntry;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -21,16 +26,30 @@ class SubmitVerifiedReview
     public function __construct(
         private readonly RecordBookingStatus $recordBookingStatus,
         private readonly SendLifecycleNotification $sendLifecycleNotification,
+        private readonly DetectSuspiciousReview $detectSuspiciousReview,
     ) {}
 
-    public function handle(Booking $booking, ?User $customer, int $rating, ?string $comment = null, ?string $trackerToken = null): Review
-    {
+    /**
+     * @param  array<int, UploadedFile>  $proof
+     */
+    public function handle(
+        Booking $booking,
+        ?User $customer,
+        int $rating,
+        ?string $comment = null,
+        ?string $trackerToken = null,
+        array $proof = [],
+    ): Review {
         if ($rating < 1 || $rating > 5) {
             throw new InvalidArgumentException('Review rating must be between one and five.');
         }
 
-        $review = DB::transaction(function () use ($booking, $customer, $rating, $comment, $trackerToken): Review {
-            $lockedBooking = Booking::query()->whereKey($booking->id)->lockForUpdate()->firstOrFail();
+        $review = DB::transaction(function () use ($booking, $customer, $rating, $comment, $trackerToken, $proof): Review {
+            $lockedBooking = Booking::query()
+                ->with('artisanProfile')
+                ->whereKey($booking->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
             $this->authorizeReviewer($lockedBooking, $customer, $trackerToken);
 
@@ -53,15 +72,44 @@ class SubmitVerifiedReview
                 throw new InvalidArgumentException('Only bookings with released settlement credit can be reviewed.');
             }
 
+            $moderation = $this->detectSuspiciousReview->handle($lockedBooking, $rating, $comment);
+
             $review = Review::query()->create([
                 'booking_id' => $lockedBooking->id,
                 'customer_id' => $customer?->id,
                 'artisan_profile_id' => $lockedBooking->artisan_profile_id,
                 'rating' => $rating,
                 'comment' => $comment,
-                'status' => ReviewStatus::Published,
+                'status' => $moderation['is_suspicious'] ? ReviewStatus::PendingModeration : ReviewStatus::Published,
                 'reviewed_at' => now(),
+                'moderation_signal' => $moderation['signal'],
+                'moderation_score' => $moderation['score'],
+                'moderation_notes' => $moderation['reason'],
+                'moderation_metadata' => $moderation['metadata'],
             ]);
+
+            foreach ($proof as $file) {
+                $review->addMedia($file)->toMediaCollection(Review::PROOF_COLLECTION);
+            }
+
+            if ($moderation['is_suspicious']) {
+                SupportCase::query()->create([
+                    'requester_id' => $customer?->id,
+                    'supportable_type' => $review->getMorphClass(),
+                    'supportable_id' => $review->id,
+                    'category' => SupportCaseCategory::Safety,
+                    'priority' => $moderation['score'] >= 75 ? SupportCasePriority::High : SupportCasePriority::Normal,
+                    'status' => SupportCaseStatus::Open,
+                    'subject' => 'Review moderation: '.$lockedBooking->tracker_code,
+                    'description' => $moderation['reason'],
+                    'opened_at' => now(),
+                    'metadata' => [
+                        'source' => 'review_moderation',
+                        'signal' => $moderation['signal'],
+                        'score' => $moderation['score'],
+                    ],
+                ]);
+            }
 
             $fromStatus = $lockedBooking->status;
             $lockedBooking->forceFill([
@@ -85,6 +133,11 @@ class SubmitVerifiedReview
 
         $this->sendLifecycleNotification->reviewSubmitted($review);
         $this->sendLifecycleNotification->bookingStatusChanged($review->booking()->firstOrFail(), BookingStatus::Reviewed);
+        $supportCase = $review->supportCases()->latest('id')->first();
+
+        if ($supportCase instanceof SupportCase) {
+            $this->sendLifecycleNotification->supportCaseOpened($supportCase);
+        }
 
         return $review->refresh();
     }

@@ -312,6 +312,9 @@ export type BookingReview = {
     rating: number;
     comment: string | null;
     status: string;
+    proofCount?: number;
+    artisanResponse?: string | null;
+    artisanRespondedAt?: string | null;
 };
 
 export type BookingDispute = {

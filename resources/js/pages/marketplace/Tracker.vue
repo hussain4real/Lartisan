@@ -10,7 +10,7 @@ import {
     Store,
     UserPlus,
 } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -42,6 +42,7 @@ const statuses = [
 ];
 
 const currentIndex = computed(() => statuses.indexOf(props.booking.status));
+const disputeTarget = ref('booking');
 </script>
 
 <template>
@@ -241,17 +242,36 @@ const currentIndex = computed(() => statuses.indexOf(props.booking.status));
                 <div v-if="booking.review" class="space-y-2 text-sm">
                     <p class="font-medium">{{ booking.review.rating }} / 5</p>
                     <p
+                        v-if="booking.review.proofCount"
+                        class="text-muted-foreground"
+                    >
+                        {{ booking.review.proofCount }} private proof file{{
+                            booking.review.proofCount === 1 ? '' : 's'
+                        }}
+                        attached
+                    </p>
+                    <p
                         v-if="booking.review.comment"
                         class="text-muted-foreground"
                     >
                         {{ booking.review.comment }}
                     </p>
+                    <div
+                        v-if="booking.review.artisanResponse"
+                        class="rounded-md border bg-muted/30 p-3"
+                    >
+                        <p class="text-xs text-muted-foreground uppercase">
+                            Artisan response
+                        </p>
+                        <p>{{ booking.review.artisanResponse }}</p>
+                    </div>
                 </div>
 
                 <Form
                     v-else
                     v-bind="storeGuestReview.form(booking.trackerCode)"
                     class="grid gap-4"
+                    enctype="multipart/form-data"
                     #default="{ errors, processing }"
                 >
                     <input type="hidden" name="token" :value="token" />
@@ -279,6 +299,16 @@ const currentIndex = computed(() => statuses.indexOf(props.booking.status));
                         />
                         <InputError :message="errors.comment" />
                     </label>
+                    <div class="grid gap-2">
+                        <Label for="review_proof">Proof of work</Label>
+                        <Input
+                            id="review_proof"
+                            name="proof[]"
+                            type="file"
+                            multiple
+                        />
+                        <InputError :message="errors.proof" />
+                    </div>
                     <div class="flex justify-end">
                         <Button type="submit" :disabled="processing">
                             <Star />
@@ -326,11 +356,37 @@ const currentIndex = computed(() => statuses.indexOf(props.booking.status));
                 >
                     <input type="hidden" name="token" :value="token" />
                     <input
-                        v-if="booking.review"
+                        v-if="booking.review && disputeTarget === 'review'"
                         type="hidden"
                         name="review_id"
                         :value="booking.review.id"
                     />
+                    <input
+                        v-if="booking.payment && disputeTarget === 'payment'"
+                        type="hidden"
+                        name="payment_id"
+                        :value="booking.payment.id"
+                    />
+                    <div class="grid gap-2">
+                        <Label for="dispute_target">Target</Label>
+                        <select
+                            id="dispute_target"
+                            v-model="disputeTarget"
+                            name="target"
+                            class="h-10 rounded-md border bg-background px-3 text-sm"
+                            required
+                        >
+                            <option value="booking">Booking</option>
+                            <option value="profile">Artisan profile</option>
+                            <option v-if="booking.payment" value="payment">
+                                Payment {{ booking.payment.reference }}
+                            </option>
+                            <option v-if="booking.review" value="review">
+                                Review
+                            </option>
+                        </select>
+                        <InputError :message="errors.target" />
+                    </div>
                     <div class="grid gap-2">
                         <Label for="dispute_subject">Subject</Label>
                         <Input

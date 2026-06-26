@@ -28,7 +28,7 @@ class BookingController extends Controller
 
         return Inertia::render('artisan/Bookings', [
             'bookings' => $profile->bookings()
-                ->with(['customer', 'artisanService.category', 'payments'])
+                ->with(['customer', 'artisanService.category', 'payments', 'review'])
                 ->latest('id')
                 ->get()
                 ->map(fn (Booking $booking): array => $this->bookingPayload($booking))
@@ -99,12 +99,13 @@ class BookingController extends Controller
     }
 
     /**
-     * @return array{id: int, status: string, customerName: string, customerPhone: string, customerEmail: string|null, scheduledAt: string|null, quotedAmountDisplay: string|null, currencyCode: string, service: array{id: int, title: string, category: string}|null, address: array<string, mixed>, canChat: bool, payment: array{id: int, status: string, reference: string, amountDisplay: string, netAmountDisplay: string|null}|null}
+     * @return array{id: int, status: string, customerName: string, customerPhone: string, customerEmail: string|null, scheduledAt: string|null, quotedAmountDisplay: string|null, currencyCode: string, service: array{id: int, title: string, category: string}|null, address: array<string, mixed>, canChat: bool, payment: array{id: int, status: string, reference: string, amountDisplay: string, netAmountDisplay: string|null}|null, review: array{id: int, rating: int, comment: string|null, status: string, artisanResponse: string|null, artisanRespondedAt: string|null}|null}
      */
     private function bookingPayload(Booking $booking): array
     {
         $service = $booking->artisanService()->first();
         $payment = $booking->payments->sortByDesc('id')->first();
+        $review = $booking->review;
 
         return [
             'id' => $booking->id,
@@ -129,6 +130,14 @@ class BookingController extends Controller
                 'amountDisplay' => number_format($payment->amount / 100, 2),
                 'netAmountDisplay' => $payment->net_amount === null ? null : number_format($payment->net_amount / 100, 2),
             ] : null,
+            'review' => $review === null ? null : [
+                'id' => $review->id,
+                'rating' => $review->rating,
+                'comment' => $review->comment,
+                'status' => $review->status->value,
+                'artisanResponse' => $review->artisan_response,
+                'artisanRespondedAt' => $review->artisan_responded_at?->toISOString(),
+            ],
         ];
     }
 }

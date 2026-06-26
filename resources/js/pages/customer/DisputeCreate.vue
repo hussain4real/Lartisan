@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Form, Head, Link } from '@inertiajs/vue3';
 import { AlertTriangle, ArrowLeft } from 'lucide-vue-next';
+import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { show as customerBooking } from '@/routes/customer/bookings';
 import { store as storeDispute } from '@/routes/customer/bookings/disputes';
@@ -21,7 +22,13 @@ defineProps<{
         rating: number;
         comment: string | null;
     } | null;
+    payment: {
+        id: number;
+        reference: string;
+    } | null;
 }>();
+
+const target = ref('booking');
 </script>
 
 <template>
@@ -55,11 +62,36 @@ defineProps<{
                     #default="{ errors, processing }"
                 >
                     <input
-                        v-if="review"
+                        v-if="review && target === 'review'"
                         type="hidden"
                         name="review_id"
                         :value="review.id"
                     />
+                    <input
+                        v-if="payment && target === 'payment'"
+                        type="hidden"
+                        name="payment_id"
+                        :value="payment.id"
+                    />
+                    <label class="grid gap-2 text-sm">
+                        Target
+                        <select
+                            v-model="target"
+                            name="target"
+                            class="h-10 rounded-md border bg-background px-3"
+                            required
+                        >
+                            <option value="booking">Booking</option>
+                            <option value="profile">Artisan profile</option>
+                            <option v-if="payment" value="payment">
+                                Payment {{ payment.reference }}
+                            </option>
+                            <option v-if="review" value="review">Review</option>
+                        </select>
+                        <span v-if="errors.target" class="text-destructive">
+                            {{ errors.target }}
+                        </span>
+                    </label>
                     <label class="grid gap-2 text-sm">
                         Subject
                         <input

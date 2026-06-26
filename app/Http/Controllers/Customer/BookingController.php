@@ -26,7 +26,7 @@ class BookingController extends Controller
 
         return Inertia::render('customer/Bookings', [
             'bookings' => $user->customerBookings()
-                ->with(['artisanProfile', 'artisanService.category', 'payments', 'review', 'disputes'])
+                ->with(['artisanProfile', 'artisanService.category', 'payments', 'review.media', 'disputes'])
                 ->latest('id')
                 ->get()
                 ->map(fn (Booking $booking): array => $this->bookingCardPayload($booking))
@@ -103,6 +103,9 @@ class BookingController extends Controller
                 'rating' => $review->rating,
                 'comment' => $review->comment,
                 'status' => $review->status->value,
+                'proofCount' => $review->getMedia(Review::PROOF_COLLECTION)->count(),
+                'artisanResponse' => $review->artisan_response,
+                'artisanRespondedAt' => $review->artisan_responded_at?->toISOString(),
             ] : null,
             'disputes' => $booking->disputes
                 ->sortByDesc('id')

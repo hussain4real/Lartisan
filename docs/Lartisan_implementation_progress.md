@@ -19,7 +19,7 @@ The application already includes the scoped marketplace and operations foundatio
 - Verified reviews, disputes, support case foundations, support inbox assignment/internal-note workflows, manual payout requests, payout approval and processing, payout attempts, report snapshots, PDFs, and scoped report tests are present.
 - Transactional email and WhatsApp notification abstractions, delivery logs, provider callback intake, retry/dead-letter workflows, booking/subscription/payout/review/dispute/support notifications, customer favorites, and customer booking preferences are present.
 
-The implementation does not yet satisfy every requirement in `docs/lartisan_brs.md`. The remaining BRS scope includes payout automation, provider transfer callbacks, deeper trust tooling, observability, and data recovery.
+The implementation does not yet satisfy every requirement in `docs/lartisan_brs.md`. The remaining BRS scope includes payout automation, provider transfer callbacks, provider-specific payout reconciliation, and production-specific operations tuning.
 
 ## Implementation Principles
 
@@ -561,7 +561,7 @@ Add controlled booking chat and dedicated support inbox workflows.
 
 ### Status
 
-Pending.
+Completed and verified on June 26, 2026.
 
 ### Goal
 
@@ -577,23 +577,30 @@ Expand review, dispute, and moderation capabilities beyond the scoped MVP trust 
 
 ### Checklist
 
-- [ ] Add review proof media where required.
-- [ ] Add artisan review response workflow.
-- [ ] Add suspicious review detection and routing.
-- [ ] Add profile dispute target support.
-- [ ] Add payment dispute target support.
-- [ ] Add audited ledger adjustments when dispute outcomes change money movement.
-- [ ] Add tests for moderation routing, media visibility, responses, and money-changing outcomes.
+- [x] Add review proof media where required.
+- [x] Add artisan review response workflow.
+- [x] Add suspicious review detection and routing.
+- [x] Add profile dispute target support.
+- [x] Add payment dispute target support.
+- [x] Add audited ledger adjustments when dispute outcomes change money movement.
+- [x] Add tests for moderation routing, media visibility, responses, and money-changing outcomes.
 
 ### Deliverables
 
-- Review media, artisan responses, moderation signals, expanded dispute targets, audited dispute adjustment actions, and tests.
+- Private review proof media collection with customer and guest upload validation.
+- Artisan review response action, route, audit trail, and booking UI display.
+- Suspicious-review scoring for low ratings, configured keywords, missing-comment low ratings, and review velocity.
+- Review moderation routing into support cases plus Super Admin/scoped operations Filament review moderation.
+- Profile, review, booking, and payment dispute target tracking.
+- Audited dispute money-adjustment ledger entries using immutable wallet ledger references.
+- Focused Phase 13 feature tests for proof media, moderation routing, Filament moderation actions, artisan responses, expanded dispute targets, and ledger-backed dispute adjustments.
 
 ### Acceptance Criteria
 
 - Reviews and disputes cover media, responses, moderation signals, and profile/payment targets.
 - Money-changing dispute outcomes are audited and ledger-backed.
 - Suspicious review routing is visible to the correct operations role.
+- Focused feature coverage passed with `php artisan test --compact tests/Feature/PhaseThirteenTrustModerationExpansionTest.php`.
 
 ## Phase 14: Payout Automation And Finance Ops
 
@@ -638,48 +645,62 @@ Automate payout dispatch and strengthen finance operations.
 
 ### Status
 
-Pending.
+Completed and verified on June 26, 2026.
 
 ### Goal
 
 Add deeper operational reporting, observability, and recovery readiness.
 
+### Implementation Clarifications
+
+- Monitoring provider is Laravel Nightwatch plus Laravel application logs.
+- Backup implementation should use `spatie/laravel-backup`.
+- Health dashboard scope is Super Admin Filament only for Phase 15.
+- Retention defaults should be conservative: keep audit logs, payment records, KYC records, wallet ledgers, admin actions, and dispute outcomes indefinitely unless policy says otherwise; prune notification delivery logs, provider callback logs, health snapshots, and operational noise after configurable retention windows.
+
 ### BRS Coverage
 
 - Provider health.
 - Queue health.
-- Operational logs and error monitoring.
+- Laravel Nightwatch, operational logs, and error monitoring.
 - Backup, restore testing, and retention policies.
-- Deeper role-scoped reports.
+- Super Admin recovery visibility.
 
 ### Checklist
 
-- [ ] Add system health reporting for providers, queues, storage, and database touchpoints.
-- [ ] Add queue health and failed-job visibility.
-- [ ] Add provider health checks for payments, notifications, storage, and payouts.
-- [ ] Add error monitoring expectations and environment documentation.
-- [ ] Define backup and restore procedures.
-- [ ] Add restore-test checklist for critical data and media.
-- [ ] Define retention policies for sensitive records.
-- [ ] Expand role-scoped reports where the BRS requires deeper operational visibility.
+- [x] Add a Super Admin Filament health dashboard for providers, queues, failed jobs, storage, database, scheduler freshness, backup status, and recovery signals.
+- [x] Add queue health and failed-job visibility with links or guidance for Laravel logs and operational recovery.
+- [x] Add provider health checks for Paystack payments, email, WhatsApp, storage, and payout-provider readiness.
+- [x] Define Laravel Nightwatch and Laravel log expectations for exception triage, provider failures, and recovery handoff.
+- [x] Install and configure `spatie/laravel-backup` for database and critical media backups.
+- [x] Add backup health/status checks and restore-test tracking for critical data and media.
+- [x] Define conservative retention policies for sensitive records and configurable pruning for operational/provider noise.
+- [x] Add tests for Super Admin visibility, health checks, failed-job visibility, backup status, restore tracking, and retention guard rails.
 
 ### Deliverables
 
-- Health dashboards or reports, provider health checks, queue visibility, error-monitoring expectations, backup/restore checklist, retention-policy tracking, and expanded reports.
+- Super Admin-only Filament health and recovery dashboard with manual snapshot collection.
+- System health snapshots covering database, queue/failed jobs, provider readiness, storage, scheduler heartbeat, backup health, restore-test freshness, Nightwatch/log sources, and retention guard rails.
+- `operations:collect-health` and `operations:prune-noise` Artisan commands.
+- Scheduled scheduler heartbeat, hourly health snapshot collection, backup run/monitor/clean jobs, and operational-noise pruning.
+- `spatie/laravel-backup` configuration for database and critical private/public media backups.
+- Restore-test record tracking for database and critical media verification.
+- Conservative retention configuration that keeps sensitive audit, payment, KYC, wallet, admin, review, payout, and dispute records while pruning configured operational noise.
+- Focused Phase 15 feature tests for health collection, dashboard access/action behavior, backup health, restore-test validation, scheduler registration, and retention pruning.
 
 ### Acceptance Criteria
 
-- Role dashboards include the required health and reporting signals.
-- Backup, restore, and retention checks are documented and verified.
+- The Super Admin dashboard includes the required health and recovery signals.
+- Laravel Nightwatch and Laravel logs are the documented monitoring sources for exceptions, provider failures, and recovery handoff.
+- `spatie/laravel-backup` backup, restore-test, and retention checks are documented and verified.
 - Operations can see provider, queue, and system failures before they become silent data issues.
+- Focused feature coverage passed with `php artisan test --compact tests/Feature/PhaseFifteenReportingObservabilityRecoveryTest.php`.
 
 ## Suggested Phase Order
 
-1. Phase 13: Trust And Moderation Expansion
-2. Phase 14: Payout Automation And Finance Ops
-3. Phase 15: Reporting, Observability, And Recovery
+1. Phase 14: Payout Automation And Finance Ops
 
-Phase 15 should begin as a parallel readiness track once provider, queue, logging, backup, and deployment decisions are available. It should not wait until all product phases are complete.
+Phase 14 remains the main product gap after the trust/moderation and observability/recovery expansion.
 
 ## Global Verification Gate
 

@@ -137,17 +137,36 @@ defineProps<{
                 <div v-if="booking.review" class="space-y-2 text-sm">
                     <p class="font-medium">{{ booking.review.rating }} / 5</p>
                     <p
+                        v-if="booking.review.proofCount"
+                        class="text-muted-foreground"
+                    >
+                        {{ booking.review.proofCount }} private proof file{{
+                            booking.review.proofCount === 1 ? '' : 's'
+                        }}
+                        attached
+                    </p>
+                    <p
                         v-if="booking.review.comment"
                         class="text-muted-foreground"
                     >
                         {{ booking.review.comment }}
                     </p>
+                    <div
+                        v-if="booking.review.artisanResponse"
+                        class="rounded-md border bg-muted/30 p-3"
+                    >
+                        <p class="text-xs text-muted-foreground uppercase">
+                            Artisan response
+                        </p>
+                        <p>{{ booking.review.artisanResponse }}</p>
+                    </div>
                 </div>
 
                 <Form
                     v-else
                     v-bind="storeReview.form(booking.id)"
                     class="grid gap-4"
+                    enctype="multipart/form-data"
                     #default="{ errors, processing }"
                 >
                     <label class="grid gap-2 text-sm">
@@ -176,6 +195,18 @@ defineProps<{
                         />
                         <span v-if="errors.comment" class="text-destructive">
                             {{ errors.comment }}
+                        </span>
+                    </label>
+                    <label class="grid gap-2 text-sm">
+                        Proof of work
+                        <input
+                            name="proof[]"
+                            type="file"
+                            multiple
+                            class="rounded-md border bg-background px-3 py-2"
+                        />
+                        <span v-if="errors.proof" class="text-destructive">
+                            {{ errors.proof }}
                         </span>
                     </label>
                     <div class="flex justify-end">

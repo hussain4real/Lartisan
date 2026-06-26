@@ -6,6 +6,7 @@ use App\Actions\Audit\RecordAuditLog;
 use App\Actions\Notifications\SendLifecycleNotification;
 use App\Enums\DisputeSeverity;
 use App\Enums\DisputeStatus;
+use App\Enums\DisputeTargetType;
 use App\Enums\PlatformPermission;
 use App\Enums\ReviewStatus;
 use App\Enums\SupportCaseCategory;
@@ -14,6 +15,7 @@ use App\Enums\SupportCaseStatus;
 use App\Models\ArtisanProfile;
 use App\Models\Booking;
 use App\Models\Dispute;
+use App\Models\Payment;
 use App\Models\Review;
 use App\Models\SupportCase;
 use App\Models\User;
@@ -40,12 +42,14 @@ class OpenDispute
         DisputeSeverity $severity = DisputeSeverity::Medium,
         ?Review $review = null,
         array $evidence = [],
+        ?Payment $payment = null,
+        DisputeTargetType $target = DisputeTargetType::Booking,
     ): Dispute {
         if (trim($subject) === '') {
             throw new InvalidArgumentException('A dispute subject is required.');
         }
 
-        $dispute = DB::transaction(function () use ($booking, $actor, $subject, $description, $severity, $review, $evidence): Dispute {
+        $dispute = DB::transaction(function () use ($booking, $actor, $subject, $description, $severity, $review, $evidence, $payment, $target): Dispute {
             $booking = Booking::query()->whereKey($booking->id)->lockForUpdate()->firstOrFail();
             $profile = $booking->artisanProfile()->firstOrFail();
 
@@ -55,17 +59,33 @@ class OpenDispute
                 throw new InvalidArgumentException('The selected review does not belong to this booking.');
             }
 
+            if ($payment instanceof Payment && $payment->booking_id !== $booking->id) {
+                throw new InvalidArgumentException('The selected payment does not belong to this booking.');
+            }
+
+            $target = match (true) {
+                $review instanceof Review => DisputeTargetType::Review,
+                $payment instanceof Payment => DisputeTargetType::Payment,
+                default => $target,
+            };
+
             $dispute = Dispute::query()->create([
                 'booking_id' => $booking->id,
                 'review_id' => $review?->id,
+                'payment_id' => $payment?->id,
                 'artisan_profile_id' => $profile->id,
                 'customer_id' => $booking->customer_id,
                 'opened_by_id' => $actor->id,
                 'status' => DisputeStatus::Open,
                 'severity' => $severity,
+                'target' => $target,
                 'subject' => trim($subject),
                 'description' => $description,
                 'opened_at' => now(),
+                'metadata' => [
+                    'target' => $target->value,
+                    'payment_reference' => $payment?->reference,
+                ],
             ]);
 
             foreach ($evidence as $file) {
@@ -96,6 +116,7 @@ class OpenDispute
                     'status' => $dispute->status->value,
                     'severity' => $dispute->severity->value,
                     'booking_id' => $booking->id,
+                    'target' => $target->value,
                 ],
                 reason: $description,
             );

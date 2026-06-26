@@ -25,6 +25,7 @@ class BookingTrackerReviewController extends Controller
             rating: $request->integer('rating'),
             comment: $request->comment(),
             trackerToken: $this->trackerToken($request),
+            proof: $request->proof(),
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Review submitted.')]);

@@ -237,7 +237,7 @@ test('phase seven data model enums factories and relationships are wired', funct
     ]);
     $globalSnapshot = ReportSnapshot::factory()->create();
 
-    expect(ReviewStatus::cases())->toHaveCount(3);
+    expect(ReviewStatus::cases())->toHaveCount(4);
     expect(DisputeStatus::cases())->toHaveCount(5);
     expect(DisputeSeverity::cases())->toHaveCount(4);
     expect(PayoutStatus::cases())->toHaveCount(9);
@@ -703,7 +703,7 @@ test('phase seven filament resources policies and table actions are scoped', fun
     expect(array_keys(DisputeResource::getPages()))->toBe(['index', 'view']);
     expect(array_keys(PayoutResource::getPages()))->toBe(['index', 'view']);
     expect(array_keys(ReportSnapshotResource::getPages()))->toBe(['index', 'view']);
-    expect(DisputeResource::infolist(Schema::make())->getComponents())->toHaveCount(10);
+    expect(DisputeResource::infolist(Schema::make())->getComponents())->toHaveCount(14);
     expect(PayoutResource::infolist(Schema::make())->getComponents())->toHaveCount(10);
     expect(ReportSnapshotResource::infolist(Schema::make())->getComponents())->toHaveCount(6);
     expect(DisputeResource::getEloquentQuery()->whereKey($dispute->id)->exists())->toBeTrue();

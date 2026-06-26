@@ -20,6 +20,8 @@ class BookingTrackerDisputeController extends Controller
         $booking = $this->bookingFromTracker($request, $trackerCode);
         $reviewId = $request->integer('review_id') ?: null;
         $review = $reviewId === null ? null : $booking->review()->whereKey($reviewId)->firstOrFail();
+        $paymentId = $request->paymentId();
+        $payment = $paymentId === null ? null : $booking->payments()->whereKey($paymentId)->firstOrFail();
 
         $openGuestDispute->handle(
             booking: $booking,
@@ -29,6 +31,8 @@ class BookingTrackerDisputeController extends Controller
             severity: $request->severity(),
             review: $review,
             evidence: $request->evidence(),
+            payment: $payment,
+            target: $request->target(),
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Dispute opened.')]);
