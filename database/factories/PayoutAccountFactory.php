@@ -30,6 +30,10 @@ class PayoutAccountFactory extends Factory
             'recipient_code' => null,
             'status' => PayoutAccountStatus::Pending,
             'verified_at' => null,
+            'verification_checked_at' => null,
+            'recipient_registered_at' => null,
+            'verification_provider_status' => null,
+            'verification_failure_reason' => null,
             'metadata' => ['source' => 'factory'],
         ];
     }
@@ -40,6 +44,10 @@ class PayoutAccountFactory extends Factory
             'recipient_code' => 'RCP_'.fake()->unique()->lexify('????????'),
             'status' => PayoutAccountStatus::Verified,
             'verified_at' => now(),
+            'verification_checked_at' => now(),
+            'recipient_registered_at' => now(),
+            'verification_provider_status' => 'active',
+            'verification_failure_reason' => null,
         ]);
     }
 }

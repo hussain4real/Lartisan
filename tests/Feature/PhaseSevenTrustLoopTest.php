@@ -241,7 +241,7 @@ test('phase seven data model enums factories and relationships are wired', funct
     expect(DisputeStatus::cases())->toHaveCount(5);
     expect(DisputeSeverity::cases())->toHaveCount(4);
     expect(PayoutStatus::cases())->toHaveCount(9);
-    expect(PayoutAttemptStatus::cases())->toHaveCount(3);
+    expect(PayoutAttemptStatus::cases())->toHaveCount(5);
     expect(SupportCaseStatus::cases())->toHaveCount(4);
     expect(SupportCasePriority::cases())->toHaveCount(4);
     expect(SupportCaseCategory::cases())->toHaveCount(6);
@@ -704,7 +704,7 @@ test('phase seven filament resources policies and table actions are scoped', fun
     expect(array_keys(PayoutResource::getPages()))->toBe(['index', 'view']);
     expect(array_keys(ReportSnapshotResource::getPages()))->toBe(['index', 'view']);
     expect(DisputeResource::infolist(Schema::make())->getComponents())->toHaveCount(14);
-    expect(PayoutResource::infolist(Schema::make())->getComponents())->toHaveCount(10);
+    expect(PayoutResource::infolist(Schema::make())->getComponents())->toHaveCount(18);
     expect(ReportSnapshotResource::infolist(Schema::make())->getComponents())->toHaveCount(6);
     expect(DisputeResource::getEloquentQuery()->whereKey($dispute->id)->exists())->toBeTrue();
     expect(PayoutResource::getEloquentQuery()->whereKey($payout->id)->exists())->toBeTrue();
@@ -776,7 +776,9 @@ test('phase seven filament resources policies and table actions are scoped', fun
         ])
         ->assertHasNoTableActionErrors();
     phaseSevenLivewire($context['superAdmin'], ListPayouts::class)
-        ->callTableAction('process', phaseSevenRecordKey($payout->refresh()))
+        ->callTableAction('process', phaseSevenRecordKey($payout->refresh()), [
+            'reason' => 'Manual confirmation from finance.',
+        ])
         ->assertHasNoTableActionErrors();
     phaseSevenLivewire($context['superAdmin'], ViewPayout::class, ['record' => phaseSevenRecordKey($payout->refresh())])
         ->assertOk();

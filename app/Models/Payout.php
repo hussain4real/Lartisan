@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
  * @property int $artisan_profile_id
  * @property int $payout_account_id
  * @property int $wallet_id
+ * @property int|null $payout_batch_id
  * @property int|null $requested_by
  * @property int|null $approved_by
  * @property int|null $processed_by
@@ -31,12 +32,16 @@ use Illuminate\Support\Carbon;
  * @property string|null $failure_reason
  * @property string|null $provider_reference
  * @property string|null $provider_transfer_code
+ * @property string|null $provider_status
+ * @property Carbon|null $reconciled_at
+ * @property Carbon|null $next_retry_at
  * @property array<string, mixed>|null $metadata
  */
 #[Fillable([
     'artisan_profile_id',
     'payout_account_id',
     'wallet_id',
+    'payout_batch_id',
     'requested_by',
     'approved_by',
     'processed_by',
@@ -51,6 +56,9 @@ use Illuminate\Support\Carbon;
     'failure_reason',
     'provider_reference',
     'provider_transfer_code',
+    'provider_status',
+    'reconciled_at',
+    'next_retry_at',
     'metadata',
 ])]
 class Payout extends Model
@@ -80,6 +88,14 @@ class Payout extends Model
     public function wallet(): BelongsTo
     {
         return $this->belongsTo(Wallet::class);
+    }
+
+    /**
+     * @return BelongsTo<PayoutBatch, $this>
+     */
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(PayoutBatch::class, 'payout_batch_id');
     }
 
     /**
@@ -140,8 +156,10 @@ class Payout extends Model
             'approved_at' => 'datetime',
             'failed_at' => 'datetime',
             'metadata' => 'array',
+            'next_retry_at' => 'datetime',
             'paid_at' => 'datetime',
             'processing_at' => 'datetime',
+            'reconciled_at' => 'datetime',
             'requested_at' => 'datetime',
             'status' => PayoutStatus::class,
         ];

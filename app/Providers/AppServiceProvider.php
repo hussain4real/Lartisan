@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Contracts\Documents\DocumentRenderer;
 use App\Contracts\Payments\PaymentProvider;
+use App\Contracts\Payouts\PayoutProvider;
 use App\Services\Documents\LaravelPdfDocumentRenderer;
 use App\Services\Payments\PaystackPaymentProvider;
+use App\Services\Payouts\PaystackPayoutProvider;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(DocumentRenderer::class, LaravelPdfDocumentRenderer::class);
         $this->app->bind(PaymentProvider::class, PaystackPaymentProvider::class);
+        $this->app->bind(PayoutProvider::class, PaystackPayoutProvider::class);
     }
 
     /**

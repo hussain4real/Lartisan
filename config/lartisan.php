@@ -177,4 +177,25 @@ return [
         'provider_fee_basis_points' => (int) env('LARTISAN_BOOKING_PROVIDER_FEE_BASIS_POINTS', 150),
         'provider_fee_flat_amount' => (int) env('LARTISAN_BOOKING_PROVIDER_FEE_FLAT_AMOUNT', 10000),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Payout Automation
+    |--------------------------------------------------------------------------
+    |
+    | Phase 14 dispatches provider-backed payouts individually, grouping each
+    | scheduled run into an auditable batch while reconciliation remains safe
+    | for duplicate webhooks and stale provider states.
+    |
+    */
+
+    'payouts' => [
+        'batch_limit' => (int) env('LARTISAN_PAYOUT_BATCH_LIMIT', 100),
+        'dispatch_weekly_day' => (int) env('LARTISAN_PAYOUT_DISPATCH_WEEKLY_DAY', 1),
+        'dispatch_weekly_time' => env('LARTISAN_PAYOUT_DISPATCH_WEEKLY_TIME', '09:00'),
+        'max_attempts' => (int) env('LARTISAN_PAYOUT_MAX_ATTEMPTS', 3),
+        'reconciliation_limit' => (int) env('LARTISAN_PAYOUT_RECONCILIATION_LIMIT', 100),
+        'retry_delay_minutes' => (int) env('LARTISAN_PAYOUT_RETRY_DELAY_MINUTES', 60),
+        'stale_processing_minutes' => (int) env('LARTISAN_PAYOUT_STALE_PROCESSING_MINUTES', 30),
+    ],
 ];

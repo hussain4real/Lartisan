@@ -98,7 +98,7 @@ class WalletController extends Controller
     }
 
     /**
-     * @return array{id: int, provider: string, bankName: string, accountName: string, recipientCode: string|null, status: string, verifiedAt: string|null}
+     * @return array{id: int, provider: string, bankName: string, accountName: string, status: string, verifiedAt: string|null}
      */
     private function payoutAccountPayload(PayoutAccount $account): array
     {
@@ -107,24 +107,31 @@ class WalletController extends Controller
             'provider' => $account->provider->value,
             'bankName' => $account->bank_name,
             'accountName' => $account->account_name,
-            'recipientCode' => $account->recipient_code,
             'status' => $account->status->value,
             'verifiedAt' => $account->verified_at?->toISOString(),
         ];
     }
 
     /**
-     * @return array{id: int, status: string, amount: int, amountDisplay: string, currencyCode: string, requestedAt: string|null, failureReason: string|null}
+     * @return array{id: int, status: string, providerStatus: string|null, amount: int, amountDisplay: string, currencyCode: string, requestedAt: string|null, approvedAt: string|null, processingAt: string|null, paidAt: string|null, failedAt: string|null, reconciledAt: string|null, nextRetryAt: string|null, trackingReference: string|null, failureReason: string|null}
      */
     private function payoutPayload(Payout $payout): array
     {
         return [
             'id' => $payout->id,
             'status' => $payout->status->value,
+            'providerStatus' => $payout->provider_status,
             'amount' => $payout->amount,
             'amountDisplay' => number_format($payout->amount / 100, 2),
             'currencyCode' => $payout->currency_code,
             'requestedAt' => $payout->requested_at->toISOString(),
+            'approvedAt' => $payout->approved_at?->toISOString(),
+            'processingAt' => $payout->processing_at?->toISOString(),
+            'paidAt' => $payout->paid_at?->toISOString(),
+            'failedAt' => $payout->failed_at?->toISOString(),
+            'reconciledAt' => $payout->reconciled_at?->toISOString(),
+            'nextRetryAt' => $payout->next_retry_at?->toISOString(),
+            'trackingReference' => $payout->provider_transfer_code ?? $payout->provider_reference,
             'failureReason' => $payout->failure_reason,
         ];
     }

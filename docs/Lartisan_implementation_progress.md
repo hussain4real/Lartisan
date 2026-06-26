@@ -606,7 +606,7 @@ Expand review, dispute, and moderation capabilities beyond the scoped MVP trust 
 
 ### Status
 
-Pending, with manual payout request and attempt foundations already present.
+Implemented. Manual payout foundations now have Paystack-backed automation, scheduled batches, webhook and polling reconciliation, finance exception queues, and no-double-pay recovery safeguards.
 
 ### Goal
 
@@ -619,27 +619,34 @@ Automate payout dispatch and strengthen finance operations.
 - Scheduled payout batches.
 - Bank and BVN verification where available.
 - Finance review queues and payout exception recovery.
+- Artisan payout status visibility without exposing sensitive payout-account internals.
 
 ### Checklist
 
-- [ ] Confirm payout provider capabilities and required compliance fields.
-- [ ] Add provider transfer dispatch.
-- [ ] Add payout webhook or polling reconciliation.
-- [ ] Add scheduled payout batches.
-- [ ] Add bank and BVN verification where available.
-- [ ] Add finance review queues for exceptions.
-- [ ] Add payout recovery workflows for failed, reversed, duplicate, or uncertain transfers.
-- [ ] Add tests for provider failures, retries, reconciliation, and finance approvals.
+- [x] Confirm payout provider capabilities and required compliance fields.
+- [x] Add provider transfer dispatch.
+- [x] Add payout webhook or polling reconciliation.
+- [x] Add scheduled payout batches.
+- [x] Add bank and BVN verification where available.
+- [x] Add finance review queues for exceptions.
+- [x] Add payout recovery workflows for failed, reversed, duplicate, or uncertain transfers.
+- [x] Add tests for provider failures, retries, reconciliation, and finance approvals.
 
 ### Deliverables
 
-- Provider-backed payout dispatch, reconciliation, scheduled batches, verification checks, finance queues, exception recovery, and tests.
+- Paystack payout provider contract and implementation for bank resolve, transfer recipient registration, transfer dispatch, transfer verification, and webhook signature validation.
+- Payout batch persistence and scheduled `payouts:dispatch-approved` automation.
+- `payouts:reconcile-processing` polling for stale or uncertain transfers.
+- Paystack transfer webhook reconciliation for success, failed, and reversed transfers.
+- Finance exception queues through payout support cases for failed, reversed, uncertain, missing-debit, and action-required transfers.
+- Artisan wallet payout status details with provider status, tracking reference, and lifecycle timestamps while hiding recipient codes.
 
 ### Acceptance Criteria
 
 - Payouts can run through provider-backed automation.
 - Scheduled batches respect finance rules and verified accounts.
 - Failed or uncertain transfers are recoverable without double-paying artisans.
+- Focused Phase 14 coverage passed with `php artisan test --compact tests/Feature/PhaseFourteenPayoutAutomationTest.php`.
 
 ## Phase 15: Reporting, Observability, And Recovery
 
@@ -698,9 +705,7 @@ Add deeper operational reporting, observability, and recovery readiness.
 
 ## Suggested Phase Order
 
-1. Phase 14: Payout Automation And Finance Ops
-
-Phase 14 remains the main product gap after the trust/moderation and observability/recovery expansion.
+All planned MVP phases in this tracker now have implementation coverage. Continue using the global verification gate when extending or hardening any shipped phase.
 
 ## Global Verification Gate
 

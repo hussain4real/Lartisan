@@ -2,13 +2,16 @@
 
 namespace App\Actions\Payments;
 
+use App\Actions\Payouts\ReconcilePayoutTransfer;
 use App\Contracts\Payments\PaymentProvider;
 use App\Enums\PaymentProviderName;
 use App\Enums\PaymentPurpose;
 use App\Enums\PaymentStatus;
 use App\Enums\ProviderWebhookEventStatus;
 use App\Models\Payment;
+use App\Models\Payout;
 use App\Models\ProviderWebhookEvent;
+use App\Support\Payouts\TransferVerification;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -19,6 +22,7 @@ class ProcessPaystackWebhook
         private readonly PaymentProvider $paymentProvider,
         private readonly ActivateSubscription $activateSubscription,
         private readonly EscrowBookingPayment $escrowBookingPayment,
+        private readonly ReconcilePayoutTransfer $reconcilePayoutTransfer,
     ) {}
 
     public function handle(string $payload, ?string $signature): ?Payment
@@ -40,6 +44,11 @@ class ProcessPaystackWebhook
 
         /** @var array<string, mixed> $eventPayload */
         $eventPayload = $decoded;
+        $eventName = $this->stringValue($eventPayload['event'] ?? null) ?? 'unknown';
+
+        if (str_starts_with($eventName, 'transfer.')) {
+            return $this->handleTransferEvent($eventPayload, $signature);
+        }
 
         return DB::transaction(function () use ($eventPayload, $signature): ?Payment {
             $data = $this->dataFrom($eventPayload);
@@ -214,6 +223,100 @@ class ProcessPaystackWebhook
         match ($payment->purpose) {
             PaymentPurpose::Subscription => $this->activateSubscription->handle($payment),
             PaymentPurpose::Booking => $this->escrowBookingPayment->handle($payment),
+        };
+    }
+
+    /**
+     * @param  array<string, mixed>  $eventPayload
+     */
+    private function handleTransferEvent(array $eventPayload, ?string $signature): null
+    {
+        return DB::transaction(function () use ($eventPayload, $signature): null {
+            $data = $this->dataFrom($eventPayload);
+            $eventName = $this->stringValue($eventPayload['event'] ?? null) ?? 'unknown';
+            $reference = $this->stringValue($data['reference'] ?? null);
+            $transferCode = $this->stringValue($data['transfer_code'] ?? null);
+            $rawProviderEventId = $this->stringValue($data['id'] ?? null);
+            $providerEventId = $rawProviderEventId === null ? null : $eventName.':'.$rawProviderEventId;
+            $event = $this->webhookEvent($eventName, $providerEventId, $reference, $eventPayload, $signature);
+
+            if (in_array($event->status, [
+                ProviderWebhookEventStatus::Ignored,
+                ProviderWebhookEventStatus::Processed,
+            ], true)) {
+                return null;
+            }
+
+            if ($reference === null && $transferCode === null) {
+                $this->finishEvent($event, ProviderWebhookEventStatus::Failed, 'Webhook payload did not include a transfer reference.');
+
+                return null;
+            }
+
+            $payout = Payout::query()
+                ->where(function ($query) use ($reference, $transferCode): void {
+                    if ($reference !== null) {
+                        $query->where('provider_reference', $reference);
+                    } elseif ($transferCode !== null) {
+                        $query->where('provider_transfer_code', $transferCode);
+                    }
+
+                    if ($reference !== null && $transferCode !== null) {
+                        $query->orWhere('provider_transfer_code', $transferCode);
+                    }
+                })
+                ->lockForUpdate()
+                ->first();
+
+            if (! $payout instanceof Payout) {
+                $this->finishEvent($event, ProviderWebhookEventStatus::Ignored, 'No local payout matched the webhook reference.');
+
+                return null;
+            }
+
+            if (! $this->payoutAmountMatches($payout, $data)) {
+                $this->finishEvent($event, ProviderWebhookEventStatus::Failed, 'Webhook amount or currency did not match the payout.');
+
+                return null;
+            }
+
+            $this->reconcilePayoutTransfer->handle(
+                payout: $payout,
+                verification: new TransferVerification(
+                    reference: $reference ?? (string) $payout->provider_reference,
+                    transferCode: $transferCode ?? $payout->provider_transfer_code,
+                    providerStatus: $this->transferStatusFrom($eventName, $data),
+                    failureReason: $this->stringValue($data['failure_reason'] ?? null)
+                        ?? $this->stringValue($data['gateway_response'] ?? null)
+                        ?? $this->stringValue($data['reason'] ?? null),
+                    raw: $eventPayload,
+                ),
+                webhookEvent: $event,
+            );
+
+            return null;
+        }, attempts: 3);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function payoutAmountMatches(Payout $payout, array $data): bool
+    {
+        return $this->integerValue($data['amount'] ?? null) === $payout->amount
+            && strtoupper($this->stringValue($data['currency'] ?? null) ?? $payout->currency_code) === $payout->currency_code;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function transferStatusFrom(string $eventName, array $data): string
+    {
+        return match ($eventName) {
+            'transfer.success' => 'success',
+            'transfer.failed' => 'failed',
+            'transfer.reversed' => 'reversed',
+            default => strtolower($this->stringValue($data['status'] ?? null) ?? 'pending'),
         };
     }
 

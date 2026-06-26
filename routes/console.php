@@ -117,3 +117,16 @@ Schedule::command('notifications:send-subscription-reminders --days=7')
     ->dailyAt('08:00')
     ->withoutOverlapping()
     ->onOneServer();
+
+$payoutDispatchDay = config('lartisan.payouts.dispatch_weekly_day', 1);
+$payoutDispatchTime = config('lartisan.payouts.dispatch_weekly_time', '09:00');
+
+Schedule::command('payouts:dispatch-approved --no-interaction')
+    ->weeklyOn(is_numeric($payoutDispatchDay) ? (int) $payoutDispatchDay : 1, is_string($payoutDispatchTime) ? $payoutDispatchTime : '09:00')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+Schedule::command('payouts:reconcile-processing --no-interaction')
+    ->everyThirtyMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();

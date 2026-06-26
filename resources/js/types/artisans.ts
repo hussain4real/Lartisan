@@ -174,7 +174,6 @@ export type PayoutAccountItem = {
     provider: string;
     bankName: string;
     accountName: string;
-    recipientCode: string | null;
     status: string;
     verifiedAt: string | null;
 };
@@ -182,10 +181,18 @@ export type PayoutAccountItem = {
 export type PayoutItem = {
     id: number;
     status: string;
+    providerStatus: string | null;
     amount: number;
     amountDisplay: string;
     currencyCode: string;
     requestedAt: string | null;
+    approvedAt: string | null;
+    processingAt: string | null;
+    paidAt: string | null;
+    failedAt: string | null;
+    reconciledAt: string | null;
+    nextRetryAt: string | null;
+    trackingReference: string | null;
     failureReason: string | null;
 };
 
