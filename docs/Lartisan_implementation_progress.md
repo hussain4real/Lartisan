@@ -2,13 +2,13 @@
 
 Prepared: June 24, 2026
 
-This plan tracks the implemented Lartisan MVP phases and the remaining BRS-aligned work that is not yet complete. It follows the same phase-section format as the PowerX pending plan while preserving Lartisan's original phase numbering from `docs/PLAN (1).md`.
+This plan tracks the implemented Lartisan MVP phases, completed BRS expansion phases, and planned next-phase work. It follows the same phase-section format as the PowerX pending plan while preserving Lartisan's original phase numbering from `docs/PLAN (1).md`.
 
 ## Current Implementation Baseline
 
 The application already includes the scoped marketplace and operations foundation:
 
-- Phase 0 through Phase 12 from `docs/PLAN (1).md` are implemented for the scoped MVP plan.
+- Phase 0 through Phase 15 from `docs/PLAN (1).md` are implemented for the scoped MVP and completed BRS expansion plan.
 - Laravel, Inertia, Vue, Filament, Pest, Larastan, Pint, ESLint, Prettier, Vite, and CI-aligned quality gates are present.
 - Geography, territories, admin profiles, customer profiles, artisan profiles, audit logs, roles, permissions, policies, and role-scoping tests are present.
 - Customer and artisan onboarding, phone-aware identity records, OTP record foundations, OTP-at-booking, account claims, customer addresses, saved-address booking, artisan workspace creation, guest account upgrade, guest tracker review/dispute flows, and Inertia route contracts are present.
@@ -18,8 +18,9 @@ The application already includes the scoped marketplace and operations foundatio
 - Marketplace search and filtering, public artisan profiles, guest and registered booking requests, secure booking tracker, customer booking screens, artisan booking screens, controlled booking chat, browser-smoke coverage, and scoped booking lifecycle actions are present.
 - Verified reviews, disputes, support case foundations, support inbox assignment/internal-note workflows, manual payout requests, payout approval and processing, payout attempts, report snapshots, PDFs, and scoped report tests are present.
 - Transactional email and WhatsApp notification abstractions, delivery logs, provider callback intake, retry/dead-letter workflows, booking/subscription/payout/review/dispute/support notifications, customer favorites, and customer booking preferences are present.
+- Review proof media, artisan responses, moderation routing, profile/payment dispute targets, Paystack-backed payout automation, finance exception queues, provider reconciliation, system-health snapshots, backup/recovery checks, and retention guard rails are present.
 
-The implementation does not yet satisfy every requirement in `docs/lartisan_brs.md`. The remaining BRS scope includes payout automation, provider transfer callbacks, provider-specific payout reconciliation, and production-specific operations tuning.
+The scoped implementation now covers the planned Phase 0 through Phase 15 requirements. Phase 16 is the next planned BRS expansion for opt-in marketplace proximity discovery; other remaining BRS follow-up is limited to product, provider, or policy decisions intentionally kept outside the current shipped scope, such as SMS/push/richer in-app notification expansion, role dashboards beyond the scoped Super Admin recovery dashboard, Agent compensation policy, Flutterwave expansion beyond Paystack, and launch-specific operating rules.
 
 ## Implementation Principles
 
@@ -703,9 +704,61 @@ Add deeper operational reporting, observability, and recovery readiness.
 - Operations can see provider, queue, and system failures before they become silent data issues.
 - Focused feature coverage passed with `php artisan test --compact tests/Feature/PhaseFifteenReportingObservabilityRecoveryTest.php`.
 
+## Phase 16: Location-Aware Marketplace Proximity Discovery
+
+### Status
+
+Planned / Pending.
+
+### Goal
+
+Add opt-in location-aware marketplace discovery so users can see nearby verified artisan services ranked by proximity while keeping the existing manual State, LGA, and Territory filters.
+
+### Implementation Clarifications
+
+- Location source is opt-in browser geolocation.
+- Marketplace query inputs are `near_lat`, `near_lng`, and `radius_km`.
+- Manual category, State, LGA, and Territory filters remain visible and authoritative.
+- Precise user coordinates are rounded before request, used only for the active marketplace search, and not persisted to customer, profile, or session records.
+- No new third-party dependencies are expected; use the browser Geolocation API and app-side distance calculation compatible with existing tests.
+
+### BRS Coverage
+
+- Location-aware artisan recommendations.
+- Prioritization of verified active artisans within the customer's nearby area or declared service radius.
+- Marketplace search by category, keyword, location, availability, rating, price, and relevance without removing manual location filters.
+- Privacy-safe geolocation behavior for customer discovery.
+
+### Checklist
+
+- [ ] Add verified artisan marketplace coordinates or document a reliable coordinate source from verified shop or field-visit data.
+- [ ] Extend marketplace request validation for `near_lat`, `near_lng`, and `radius_km`.
+- [ ] Extend `SearchArtisans` for proximity ranking, radius filtering where appropriate, and manual-filter interaction.
+- [ ] Add approximate distance payloads for artisan cards when proximity search is active.
+- [ ] Extend marketplace TypeScript filter and artisan-card types for proximity inputs and optional distance fields.
+- [ ] Add marketplace UI controls for `Use my location`, radius selection, clear-location state, permission-denied fallback, unavailable-geolocation fallback, and distance labels.
+- [ ] Add tests for malformed proximity input, nearby ranking, manual filters, no coordinate persistence, browser geolocation states, clearing location, and radius changes.
+
+### Deliverables
+
+- Marketplace proximity query contract using `near_lat`, `near_lng`, and `radius_km`.
+- Privacy-safe browser-location workflow that does not persist precise user coordinates.
+- Nearby artisan ranking and distance display for verified active marketplace results.
+- Existing manual location filters preserved as explicit user controls.
+- Focused Phase 16 feature and UI/browser tests.
+
+### Acceptance Criteria
+
+- Users can opt in to current-location marketplace discovery.
+- Nearby verified active artisan services rank ahead of farther artisans when proximity search is active.
+- Manual State, LGA, Territory, category, and keyword filters continue to work with or without proximity search.
+- Marketplace cards can show approximate distance when proximity is active.
+- Declined or unavailable geolocation falls back cleanly to manual location filters.
+- No precise user coordinates are persisted.
+
 ## Suggested Phase Order
 
-All planned MVP phases in this tracker now have implementation coverage. Continue using the global verification gate when extending or hardening any shipped phase.
+Phase 0 through Phase 15 now have implementation coverage. Phase 16 is the next planned BRS expansion and should use the global verification gate when implemented.
 
 ## Global Verification Gate
 
