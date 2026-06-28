@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PayoutStatus;
+use App\Enums\WalletLedgerEntryType;
 use Database\Factories\PayoutFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -144,6 +145,13 @@ class Payout extends Model
     public function supportCases(): MorphMany
     {
         return $this->morphMany(SupportCase::class, 'supportable');
+    }
+
+    public function hasReservedDebit(): bool
+    {
+        return $this->ledgerEntries()
+            ->where('type', WalletLedgerEntryType::PayoutDebit)
+            ->exists();
     }
 
     /**

@@ -119,7 +119,8 @@ class PayoutsTable
                     ->maxLength(2000),
             ])
             ->visible(fn (Payout $record): bool => self::canUpdate($record)
-                && in_array($record->status, [PayoutStatus::Approved, PayoutStatus::InReview, PayoutStatus::Retrying], true))
+                && in_array($record->status, [PayoutStatus::Approved, PayoutStatus::InReview, PayoutStatus::Retrying], true)
+                && $record->hasReservedDebit())
             ->action(function (Payout $record, array $data): void {
                 /** @var User $actor */
                 $actor = auth()->user();

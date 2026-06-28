@@ -12,6 +12,7 @@ use App\Enums\BookingStatus;
 use App\Enums\DisputeSeverity;
 use App\Enums\DisputeStatus;
 use App\Enums\DisputeTargetType;
+use App\Enums\PlatformPermission;
 use App\Enums\ReviewStatus;
 use App\Enums\SupportCaseCategory;
 use App\Enums\SupportCasePriority;
@@ -34,6 +35,7 @@ use App\Models\Team;
 use App\Models\User;
 use App\Models\WalletLedgerEntry;
 use App\Policies\ReviewPolicy;
+use App\Policies\SupportCasePolicy;
 use Database\Seeders\PilotUserSeeder;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -155,6 +157,12 @@ test('suspicious reviews collect private proof and route to moderation before pu
     );
     $supportCase = $review->supportCases()->firstOrFail();
     $policy = new ReviewPolicy;
+    $supportCasePolicy = new SupportCasePolicy;
+
+    $supportCase->forceFill([
+        'owner_id' => null,
+        'requester_id' => null,
+    ])->save();
 
     expect($review->status)->toBe(ReviewStatus::PendingModeration);
     expect($review->moderation_signal)->toBe('low_rating_keyword');
@@ -163,6 +171,9 @@ test('suspicious reviews collect private proof and route to moderation before pu
     expect($supportCase->category)->toBe(SupportCaseCategory::Safety);
     expect($supportCase->priority)->toBe(SupportCasePriority::High);
     expect($supportCase->status)->toBe(SupportCaseStatus::Open);
+    expect($context['localGovernmentAdmin']->can(PlatformPermission::ManageSupportCases->value))->toBeTrue()
+        ->and($context['localGovernmentAdmin']->can(PlatformPermission::ViewGlobalReports->value))->toBeFalse()
+        ->and($supportCasePolicy->view($context['localGovernmentAdmin'], $supportCase->refresh()))->toBeTrue();
 
     $this->actingAs($context['superAdmin']);
     Filament::setCurrentPanel('admin');

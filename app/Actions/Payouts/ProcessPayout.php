@@ -53,6 +53,10 @@ class ProcessPayout
                 throw new InvalidArgumentException('Only approved or retrying payouts can be processed.');
             }
 
+            if ($successful && ! $lockedPayout->hasReservedDebit()) {
+                throw new InvalidArgumentException('Successful payout processing requires a reserved wallet debit. Re-approve the payout before marking it paid.');
+            }
+
             $latestAttemptNumber = $lockedPayout->attempts()->max('attempt_number');
             $attemptNumber = (is_numeric($latestAttemptNumber) ? (int) $latestAttemptNumber : 0) + 1;
             $attempt = PayoutAttempt::query()->create([

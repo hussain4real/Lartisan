@@ -137,6 +137,16 @@ class SupportCase extends Model
                                 ->whereIn('artisan_profile_id', clone $visibleArtisanProfiles)
                                 ->select('id'),
                         );
+                })
+                ->orWhere(function (Builder $query) use ($visibleArtisanProfiles): void {
+                    $query
+                        ->where('supportable_type', (new Review)->getMorphClass())
+                        ->whereIn(
+                            'supportable_id',
+                            Review::query()
+                                ->whereIn('artisan_profile_id', clone $visibleArtisanProfiles)
+                                ->select('id'),
+                        );
                 });
         });
     }

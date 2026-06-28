@@ -9,12 +9,10 @@ use App\Enums\PayoutAccountStatus;
 use App\Enums\PayoutAttemptStatus;
 use App\Enums\PayoutStatus;
 use App\Enums\SupportCasePriority;
-use App\Enums\WalletLedgerEntryType;
 use App\Models\Payout;
 use App\Models\PayoutAttempt;
 use App\Models\PayoutBatch;
 use App\Models\User;
-use App\Models\WalletLedgerEntry;
 use App\Support\Payouts\ActionRequiredPayoutException;
 use App\Support\Payouts\PayoutProviderException;
 use App\Support\Payouts\TransferDispatch;
@@ -92,7 +90,7 @@ class DispatchPayoutTransfer
                 throw new InvalidArgumentException('Only approved or retrying payouts can be dispatched.');
             }
 
-            if (! $this->hasReservedDebit($lockedPayout)) {
+            if (! $lockedPayout->hasReservedDebit()) {
                 return [
                     $this->moveToReview(
                         payout: $lockedPayout,
@@ -416,15 +414,6 @@ class DispatchPayoutTransfer
         $this->sendLifecycleNotification->payoutStatusChanged($updatedPayout);
 
         return $updatedPayout->refresh();
-    }
-
-    private function hasReservedDebit(Payout $payout): bool
-    {
-        return WalletLedgerEntry::query()
-            ->where('source_type', $payout->getMorphClass())
-            ->where('source_id', $payout->id)
-            ->where('type', WalletLedgerEntryType::PayoutDebit)
-            ->exists();
     }
 
     private function transferReference(Payout $payout, int $attemptNumber): string

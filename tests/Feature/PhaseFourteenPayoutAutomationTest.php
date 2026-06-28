@@ -2,6 +2,7 @@
 
 use App\Actions\Payouts\CreatePayoutExceptionCase;
 use App\Actions\Payouts\DispatchPayoutTransfer;
+use App\Actions\Payouts\ProcessPayout;
 use App\Actions\Payouts\ReconcilePayoutTransfer;
 use App\Actions\Payouts\ReleaseFailedPayoutBalance;
 use App\Actions\Payouts\VerifyPayoutAccount;
@@ -908,6 +909,35 @@ test('filament payout table exposes exception filter and dispatch controls', fun
         ->callTableAction('dispatch', (string) $dispatchPayout->id)
         ->assertHasNoTableActionErrors();
     expect($dispatchDouble->called)->toBeTrue();
+});
+
+test('manual payout success requires the reserved wallet debit', function () {
+    $manager = phaseFourteenFinanceUser();
+    $context = phaseFourteenApprovedPayout();
+    $payout = $context['payout'];
+    $payout->ledgerEntries()->delete();
+    $payout->forceFill([
+        'provider_status' => 'missing_debit',
+        'status' => PayoutStatus::InReview,
+    ])->save();
+
+    expect(fn () => app(ProcessPayout::class)->handle(
+        payout: $payout->refresh(),
+        processor: $manager,
+        successful: true,
+        providerReference: 'manual-'.$payout->id,
+        providerPayload: ['source' => 'test'],
+    ))->toThrow(InvalidArgumentException::class, 'Successful payout processing requires a reserved wallet debit.');
+
+    expect($payout->refresh()->status)->toBe(PayoutStatus::InReview)
+        ->and($payout->attempts()->count())->toBe(0)
+        ->and($payout->ledgerEntries()->where('type', WalletLedgerEntryType::PayoutDebit)->count())->toBe(0);
+
+    Filament::setCurrentPanel('admin');
+    Livewire::actingAs($manager);
+
+    Livewire::test(ListPayouts::class)
+        ->assertTableActionHidden('process', (string) $payout->id);
 });
 
 /**
