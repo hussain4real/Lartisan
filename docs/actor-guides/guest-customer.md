@@ -43,6 +43,6 @@ Guest Customers can make limited one-off booking requests without creating a ful
 
 ## Current Limitations
 
-- Guest booking does not currently enforce OTP at submission time.
-- Booking payment, chat, guest dispute submission, notification delivery, and guest review flow are planned later.
+- Guests use tracker links, OTP, notifications, payment, review, and dispute flows instead of persistent in-app chat.
 - Guest account claiming is separate from agent-created artisan account claiming.
+- Payout automation, provider transfer callbacks, deeper review moderation, and observability/recovery workflows are planned later.

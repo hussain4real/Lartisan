@@ -47,5 +47,6 @@ State Coordinators supervise Lartisan operations within one state. They focus on
 
 ## Current Limitations
 
-- Operations booking exception queues, dedicated review moderation panels, and customer support inboxes are planned later.
+- Operations booking exception queues and dedicated review moderation panels are planned later.
+- Customer support cases are triaged through the scoped support inbox.
 - State finance dashboards are scoped to current payment/payout visibility and report snapshots.

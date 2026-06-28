@@ -2,6 +2,7 @@
 
 namespace App\Actions\Bookings;
 
+use App\Actions\Notifications\SendLifecycleNotification;
 use App\Enums\ArtisanAvailabilityStatus;
 use App\Enums\ArtisanServiceStatus;
 use App\Enums\ArtisanSubscriptionStatus;
@@ -23,6 +24,7 @@ class CreateBooking
 {
     public function __construct(
         private readonly RecordBookingStatus $recordBookingStatus,
+        private readonly SendLifecycleNotification $sendLifecycleNotification,
     ) {}
 
     /**
@@ -101,6 +103,8 @@ class CreateBooking
                 ->addMedia($attachment)
                 ->toMediaCollection(Booking::MEDIA_COLLECTION);
         }
+
+        $this->sendLifecycleNotification->bookingStatusChanged($booking, BookingStatus::Requested);
 
         return new CreatedBooking($booking->refresh(), $trackerToken);
     }

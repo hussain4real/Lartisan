@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Form, Head, Link } from '@inertiajs/vue3';
 import {
     ArrowLeft,
     BriefcaseBusiness,
     CalendarPlus,
+    Heart,
     MapPin,
 } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    destroy as removeFavorite,
+    store as storeFavorite,
+} from '@/routes/customer/favorites';
 import { index as marketplaceIndex } from '@/routes/marketplace';
 import { create as createBooking } from '@/routes/marketplace/bookings';
 import type { MarketplaceArtisanDetail } from '@/types';
@@ -29,12 +34,29 @@ defineProps<{
                         Marketplace
                     </Link>
                 </Button>
-                <Button as-child size="sm">
-                    <Link :href="createBooking(artisan.id).url">
-                        <CalendarPlus />
-                        Book artisan
-                    </Link>
-                </Button>
+                <div class="flex items-center gap-2">
+                    <Form
+                        v-if="artisan.isFavorite"
+                        v-bind="removeFavorite.form(artisan.id)"
+                    >
+                        <Button type="submit" variant="outline" size="sm">
+                            <Heart />
+                            Saved
+                        </Button>
+                    </Form>
+                    <Form v-else v-bind="storeFavorite.form(artisan.id)">
+                        <Button type="submit" variant="outline" size="sm">
+                            <Heart />
+                            Save
+                        </Button>
+                    </Form>
+                    <Button as-child size="sm">
+                        <Link :href="createBooking(artisan.id).url">
+                            <CalendarPlus />
+                            Book artisan
+                        </Link>
+                    </Button>
+                </div>
             </nav>
 
             <section class="grid gap-5">

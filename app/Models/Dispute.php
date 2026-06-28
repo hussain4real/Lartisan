@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\DisputeSeverity;
 use App\Enums\DisputeStatus;
+use App\Enums\DisputeTargetType;
+use App\Enums\WalletLedgerDirection;
 use App\Support\MediaDisk;
 use Database\Factories\DisputeFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -20,6 +22,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property int $id
  * @property int|null $booking_id
  * @property int|null $review_id
+ * @property int|null $payment_id
  * @property int|null $artisan_profile_id
  * @property int|null $customer_id
  * @property int|null $opened_by_id
@@ -27,6 +30,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property int|null $resolved_by_id
  * @property DisputeStatus $status
  * @property DisputeSeverity $severity
+ * @property DisputeTargetType $target
  * @property string $subject
  * @property string|null $description
  * @property string|null $escalation_reason
@@ -36,10 +40,15 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property Carbon|null $resolved_at
  * @property Carbon|null $closed_at
  * @property array<string, mixed>|null $metadata
+ * @property int|null $money_adjustment_amount
+ * @property WalletLedgerDirection|null $money_adjustment_direction
+ * @property int|null $money_adjustment_ledger_entry_id
+ * @property Carbon|null $money_adjusted_at
  */
 #[Fillable([
     'booking_id',
     'review_id',
+    'payment_id',
     'artisan_profile_id',
     'customer_id',
     'opened_by_id',
@@ -47,6 +56,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
     'resolved_by_id',
     'status',
     'severity',
+    'target',
     'subject',
     'description',
     'escalation_reason',
@@ -56,6 +66,10 @@ use Spatie\MediaLibrary\MediaCollections\File;
     'resolved_at',
     'closed_at',
     'metadata',
+    'money_adjustment_amount',
+    'money_adjustment_direction',
+    'money_adjustment_ledger_entry_id',
+    'money_adjusted_at',
 ])]
 class Dispute extends Model implements HasMedia
 {
@@ -90,6 +104,14 @@ class Dispute extends Model implements HasMedia
     public function review(): BelongsTo
     {
         return $this->belongsTo(Review::class);
+    }
+
+    /**
+     * @return BelongsTo<Payment, $this>
+     */
+    public function payment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class);
     }
 
     /**
@@ -133,6 +155,14 @@ class Dispute extends Model implements HasMedia
     }
 
     /**
+     * @return BelongsTo<WalletLedgerEntry, $this>
+     */
+    public function moneyAdjustmentLedgerEntry(): BelongsTo
+    {
+        return $this->belongsTo(WalletLedgerEntry::class, 'money_adjustment_ledger_entry_id');
+    }
+
+    /**
      * @return MorphMany<SupportCase, $this>
      */
     public function supportCases(): MorphMany
@@ -149,10 +179,14 @@ class Dispute extends Model implements HasMedia
             'closed_at' => 'datetime',
             'escalated_at' => 'datetime',
             'metadata' => 'array',
+            'money_adjusted_at' => 'datetime',
+            'money_adjustment_amount' => 'integer',
+            'money_adjustment_direction' => WalletLedgerDirection::class,
             'opened_at' => 'datetime',
             'resolved_at' => 'datetime',
             'severity' => DisputeSeverity::class,
             'status' => DisputeStatus::class,
+            'target' => DisputeTargetType::class,
         ];
     }
 }

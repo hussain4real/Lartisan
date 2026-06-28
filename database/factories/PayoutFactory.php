@@ -26,6 +26,7 @@ class PayoutFactory extends Factory
             'artisan_profile_id' => ArtisanProfile::factory(),
             'payout_account_id' => PayoutAccount::factory(),
             'wallet_id' => Wallet::factory(),
+            'payout_batch_id' => null,
             'requested_by' => User::factory(),
             'approved_by' => null,
             'processed_by' => null,
@@ -40,6 +41,9 @@ class PayoutFactory extends Factory
             'failure_reason' => null,
             'provider_reference' => null,
             'provider_transfer_code' => null,
+            'provider_status' => null,
+            'reconciled_at' => null,
+            'next_retry_at' => null,
             'metadata' => ['source' => 'factory'],
         ];
     }

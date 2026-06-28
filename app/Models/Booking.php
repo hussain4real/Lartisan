@@ -44,6 +44,12 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property Carbon|null $finished_at
  * @property Carbon|null $confirmed_at
  * @property Carbon|null $wallet_released_at
+ * @property Carbon|null $payment_started_at
+ * @property Carbon|null $paid_at
+ * @property Carbon|null $escrowed_at
+ * @property Carbon|null $settled_at
+ * @property Carbon|null $refunded_at
+ * @property Carbon|null $reviewed_at
  */
 #[Fillable([
     'customer_id',
@@ -71,6 +77,12 @@ use Spatie\MediaLibrary\MediaCollections\File;
     'finished_at',
     'confirmed_at',
     'wallet_released_at',
+    'payment_started_at',
+    'paid_at',
+    'escrowed_at',
+    'settled_at',
+    'refunded_at',
+    'reviewed_at',
 ])]
 class Booking extends Model implements HasMedia
 {
@@ -164,6 +176,14 @@ class Booking extends Model implements HasMedia
     }
 
     /**
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
      * @return HasOne<Review, $this>
      */
     public function review(): HasOne
@@ -177,6 +197,14 @@ class Booking extends Model implements HasMedia
     public function disputes(): HasMany
     {
         return $this->hasMany(Dispute::class);
+    }
+
+    /**
+     * @return HasMany<BookingMessage, $this>
+     */
+    public function messages(): HasMany
+    {
+        return $this->hasMany(BookingMessage::class);
     }
 
     /**
@@ -196,10 +224,16 @@ class Booking extends Model implements HasMedia
             'accepted_at' => 'datetime',
             'address_snapshot' => 'array',
             'confirmed_at' => 'datetime',
+            'escrowed_at' => 'datetime',
             'finished_at' => 'datetime',
+            'paid_at' => 'datetime',
+            'payment_started_at' => 'datetime',
             'quoted_amount' => 'integer',
             'rejected_at' => 'datetime',
+            'refunded_at' => 'datetime',
+            'reviewed_at' => 'datetime',
             'scheduled_at' => 'datetime',
+            'settled_at' => 'datetime',
             'started_at' => 'datetime',
             'status' => BookingStatus::class,
             'wallet_released_at' => 'datetime',

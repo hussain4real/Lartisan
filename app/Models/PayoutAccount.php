@@ -23,6 +23,10 @@ use Illuminate\Support\Carbon;
  * @property string|null $recipient_code
  * @property PayoutAccountStatus $status
  * @property Carbon|null $verified_at
+ * @property Carbon|null $verification_checked_at
+ * @property Carbon|null $recipient_registered_at
+ * @property string|null $verification_provider_status
+ * @property string|null $verification_failure_reason
  * @property array<string, mixed>|null $metadata
  */
 #[Fillable([
@@ -35,6 +39,10 @@ use Illuminate\Support\Carbon;
     'recipient_code',
     'status',
     'verified_at',
+    'verification_checked_at',
+    'recipient_registered_at',
+    'verification_provider_status',
+    'verification_failure_reason',
     'metadata',
 ])]
 class PayoutAccount extends Model
@@ -67,7 +75,9 @@ class PayoutAccount extends Model
             'account_number' => 'encrypted',
             'metadata' => 'array',
             'provider' => PaymentProviderName::class,
+            'recipient_registered_at' => 'datetime',
             'status' => PayoutAccountStatus::class,
+            'verification_checked_at' => 'datetime',
             'verified_at' => 'datetime',
         ];
     }

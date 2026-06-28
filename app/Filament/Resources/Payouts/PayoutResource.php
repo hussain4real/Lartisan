@@ -51,7 +51,8 @@ class PayoutResource extends Resource
 
         /** @var Builder<Payout> $query */
         $query = parent::getEloquentQuery()
-            ->with(['artisanProfile.localGovernment', 'payoutAccount', 'wallet', 'requestedBy', 'approvedBy', 'processedBy']);
+            ->with(['artisanProfile.localGovernment', 'batch', 'payoutAccount', 'wallet', 'requestedBy', 'approvedBy', 'processedBy'])
+            ->withCount('attempts');
 
         if ($user === null) {
             return $query->whereRaw('1 = 0');

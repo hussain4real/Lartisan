@@ -7,4 +7,6 @@ enum PayoutAttemptStatus: string
     case Processing = 'processing';
     case Successful = 'successful';
     case Failed = 'failed';
+    case Uncertain = 'uncertain';
+    case ActionRequired = 'action_required';
 }

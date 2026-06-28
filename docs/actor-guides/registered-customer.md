@@ -49,6 +49,6 @@ Registered Customers use Lartisan to find verified subscribed artisans, submit b
 
 ## Current Limitations
 
-- Saved-address selection inside the booking form is not implemented yet.
-- Booking payment, chat, payment receipts, notification delivery, and a standalone support inbox are future phases.
-- Guest-to-registered conversion flows are not fully implemented yet.
+- Booking chat is available only for registered bookings while they are requested, accepted, paid, escrowed, or in progress; closed booking chats remain readable but not writable.
+- Support help continues through booking disputes and the operations support inbox rather than a separate customer-facing support center.
+- Payout automation, provider transfer callbacks, deeper review moderation, and observability/recovery workflows are planned later.

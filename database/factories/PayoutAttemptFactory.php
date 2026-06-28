@@ -24,8 +24,11 @@ class PayoutAttemptFactory extends Factory
             'attempt_number' => 1,
             'status' => PayoutAttemptStatus::Processing,
             'provider_reference' => null,
+            'provider_transfer_code' => null,
+            'provider_status' => null,
             'failure_reason' => null,
             'provider_payload' => ['source' => 'factory'],
+            'last_reconciled_at' => null,
             'processed_at' => null,
         ];
     }

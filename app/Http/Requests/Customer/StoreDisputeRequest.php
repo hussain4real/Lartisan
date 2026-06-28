@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Customer;
 
 use App\Enums\DisputeSeverity;
+use App\Enums\DisputeTargetType;
 use App\Models\Booking;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
@@ -33,10 +34,18 @@ class StoreDisputeRequest extends FormRequest
             'subject' => ['required', 'string', 'max:160'],
             'description' => ['nullable', 'string', 'max:2000'],
             'severity' => ['required', Rule::enum(DisputeSeverity::class)],
+            'target' => ['nullable', Rule::enum(DisputeTargetType::class)],
             'review_id' => [
                 'nullable',
                 'integer',
                 Rule::exists('reviews', 'id')->where(
+                    fn (Builder $query): Builder => $query->where('booking_id', $bookingId),
+                ),
+            ],
+            'payment_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('payments', 'id')->where(
                     fn (Builder $query): Builder => $query->where('booking_id', $bookingId),
                 ),
             ],
@@ -46,5 +55,19 @@ class StoreDisputeRequest extends FormRequest
                 File::types(['pdf', 'jpg', 'jpeg', 'png', 'webp'])->max(8 * 1024),
             ],
         ];
+    }
+
+    public function target(): DisputeTargetType
+    {
+        $target = $this->string('target')->toString();
+
+        return $target === '' ? DisputeTargetType::Booking : DisputeTargetType::from($target);
+    }
+
+    public function paymentId(): ?int
+    {
+        $paymentId = $this->integer('payment_id');
+
+        return $paymentId === 0 ? null : $paymentId;
     }
 }

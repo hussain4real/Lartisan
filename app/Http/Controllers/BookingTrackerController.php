@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Bookings\ConfirmBookingCompletion;
+use App\Enums\BookingStatus;
+use App\Http\Controllers\Concerns\ResolvesBookingTracker;
 use App\Models\Booking;
 use App\Models\BookingStatusHistory;
+use App\Models\Dispute;
+use App\Models\Payment;
+use App\Models\Review;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,6 +17,8 @@ use Inertia\Response;
 
 class BookingTrackerController extends Controller
 {
+    use ResolvesBookingTracker;
+
     public function show(Request $request, string $trackerCode): Response
     {
         $booking = $this->bookingFromTracker($request, $trackerCode);
@@ -38,31 +45,14 @@ class BookingTrackerController extends Controller
         ]);
     }
 
-    private function bookingFromTracker(Request $request, string $trackerCode): Booking
-    {
-        $booking = Booking::query()
-            ->with(['artisanProfile', 'artisanService.category', 'statusHistories.actor'])
-            ->where('tracker_code', $trackerCode)
-            ->firstOrFail();
-
-        abort_unless(hash_equals($booking->secure_token_hash, hash('sha256', $this->trackerToken($request))), 403);
-
-        return $booking;
-    }
-
-    private function trackerToken(Request $request): string
-    {
-        $token = $request->input('token', $request->query('token', ''));
-
-        return is_scalar($token) ? (string) $token : '';
-    }
-
     /**
-     * @return array{id: int, trackerCode: string, status: string, customerName: string, customerPhone: string, customerEmail: string|null, scheduledAt: string|null, description: string|null, quotedAmount: int|null, quotedAmountDisplay: string|null, currencyCode: string, address: array<string, mixed>, artisan: array{id: int, businessName: string}, service: array{id: int, title: string, category: string}|null, histories: array<int, array{id: int, fromStatus: string|null, toStatus: string, notes: string|null, actorName: string|null, createdAt: string|null}>}
+     * @return array{id: int, trackerCode: string, status: string, customerName: string, customerPhone: string, customerEmail: string|null, scheduledAt: string|null, description: string|null, quotedAmount: int|null, quotedAmountDisplay: string|null, currencyCode: string, address: array<string, mixed>, artisan: array{id: int, businessName: string}, service: array{id: int, title: string, category: string}|null, canPay: bool, canUpgrade: bool, canReview: bool, canDispute: bool, payment: array{id: int, status: string, reference: string, amountDisplay: string, commissionDisplay: string|null, providerFeeDisplay: string|null, netAmountDisplay: string|null, checkoutUrl: string|null}|null, review: array{id: int, rating: int, comment: string|null, status: string}|null, disputes: array<int, array{id: int, status: string, severity: string, subject: string, openedAt: string|null}>, histories: array<int, array{id: int, fromStatus: string|null, toStatus: string, notes: string|null, actorName: string|null, createdAt: string|null}>}
      */
     private function bookingPayload(Booking $booking): array
     {
         $service = $booking->artisanService()->first();
+        $payment = $booking->payments->sortByDesc('id')->first();
+        $review = $booking->review;
 
         return [
             'id' => $booking->id,
@@ -86,6 +76,35 @@ class BookingTrackerController extends Controller
                 'title' => $service->title,
                 'category' => $service->category()->firstOrFail()->name,
             ],
+            'canPay' => $booking->status === BookingStatus::Accepted && $booking->quoted_amount !== null && $booking->quoted_amount > 0,
+            'canUpgrade' => $booking->customer_id === null,
+            'canReview' => $booking->customer_id === null
+                && $booking->status === BookingStatus::Settled
+                && $booking->wallet_released_at !== null
+                && ! $review instanceof Review,
+            'canDispute' => $booking->customer_id === null
+                && ! in_array($booking->status, [BookingStatus::Cancelled, BookingStatus::Rejected], true),
+            'payment' => $payment instanceof Payment ? $this->paymentPayload($payment) : null,
+            'review' => $review instanceof Review ? [
+                'id' => $review->id,
+                'rating' => $review->rating,
+                'comment' => $review->comment,
+                'status' => $review->status->value,
+                'proofCount' => $review->getMedia(Review::PROOF_COLLECTION)->count(),
+                'artisanResponse' => $review->artisan_response,
+                'artisanRespondedAt' => $review->artisan_responded_at?->toISOString(),
+            ] : null,
+            'disputes' => $booking->disputes
+                ->sortByDesc('id')
+                ->values()
+                ->map(fn (Dispute $dispute): array => [
+                    'id' => $dispute->id,
+                    'status' => $dispute->status->value,
+                    'severity' => $dispute->severity->value,
+                    'subject' => $dispute->subject,
+                    'openedAt' => $dispute->opened_at->toISOString(),
+                ])
+                ->all(),
             'histories' => $booking->statusHistories
                 ->map(fn (BookingStatusHistory $history): array => [
                     'id' => $history->id,
@@ -96,6 +115,23 @@ class BookingTrackerController extends Controller
                     'createdAt' => $history->created_at?->toISOString(),
                 ])
                 ->all(),
+        ];
+    }
+
+    /**
+     * @return array{id: int, status: string, reference: string, amountDisplay: string, commissionDisplay: string|null, providerFeeDisplay: string|null, netAmountDisplay: string|null, checkoutUrl: string|null}
+     */
+    private function paymentPayload(Payment $payment): array
+    {
+        return [
+            'id' => $payment->id,
+            'status' => $payment->status->value,
+            'reference' => $payment->reference,
+            'amountDisplay' => number_format($payment->amount / 100, 2),
+            'commissionDisplay' => $payment->commission_amount === null ? null : number_format($payment->commission_amount / 100, 2),
+            'providerFeeDisplay' => $payment->provider_fee_amount === null ? null : number_format($payment->provider_fee_amount / 100, 2),
+            'netAmountDisplay' => $payment->net_amount === null ? null : number_format($payment->net_amount / 100, 2),
+            'checkoutUrl' => $payment->checkout_url,
         ];
     }
 }

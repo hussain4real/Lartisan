@@ -25,6 +25,7 @@ class ReviewController extends Controller
             customer: $user,
             rating: $request->integer('rating'),
             comment: $request->string('comment')->trim()->toString() ?: null,
+            proof: $request->proof(),
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Review submitted.')]);

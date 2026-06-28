@@ -15,6 +15,8 @@
         "laravel/tinker": "^3.0",
         "laravel/wayfinder": "^0.1.14",
         "league/flysystem-aws-s3-v3": "^3.0",
+        "resend/resend-php": "^1.4",
+        "spatie/laravel-backup": "^10.3",
         "spatie/laravel-medialibrary": "^11.23",
         "spatie/laravel-pdf": "^2.11",
         "spatie/laravel-permission": "^8.0"
@@ -30,6 +32,7 @@
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.9.3",
         "pestphp/pest": "^4.7",
+        "pestphp/pest-plugin-browser": "^4.3",
         "pestphp/pest-plugin-laravel": "^4.1"
     },
     "autoload": {
@@ -73,6 +76,9 @@
             "npm run types:check",
             "@analyse",
             "@test"
+        ],
+        "browser:smoke": [
+            "@php vendor/bin/pest tests/Browser --group=smoke"
         ],
         "test": [
             "@php artisan config:clear --ansi",

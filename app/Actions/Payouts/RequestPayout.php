@@ -2,6 +2,7 @@
 
 namespace App\Actions\Payouts;
 
+use App\Actions\Notifications\SendLifecycleNotification;
 use App\Actions\Payments\EnsureWallet;
 use App\Enums\PayoutAccountStatus;
 use App\Enums\PayoutStatus;
@@ -17,6 +18,7 @@ class RequestPayout
 {
     public function __construct(
         private readonly EnsureWallet $ensureWallet,
+        private readonly SendLifecycleNotification $sendLifecycleNotification,
     ) {}
 
     /**
@@ -41,7 +43,7 @@ class RequestPayout
             throw new InvalidArgumentException('A verified payout account is required.');
         }
 
-        return DB::transaction(function () use ($profile, $payoutAccount, $requester, $amount, $metadata): Payout {
+        $payout = DB::transaction(function () use ($profile, $payoutAccount, $requester, $amount, $metadata): Payout {
             $wallet = $this->ensureWallet->handle($profile);
             $wallet->refresh();
 
@@ -61,5 +63,9 @@ class RequestPayout
                 'metadata' => $metadata,
             ]);
         }, attempts: 3);
+
+        $this->sendLifecycleNotification->payoutStatusChanged($payout);
+
+        return $payout->refresh();
     }
 }

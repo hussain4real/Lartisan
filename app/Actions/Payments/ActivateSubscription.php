@@ -2,8 +2,10 @@
 
 namespace App\Actions\Payments;
 
+use App\Actions\Notifications\SendLifecycleNotification;
 use App\Enums\ArtisanSubscriptionStatus;
 use App\Enums\ArtisanVerificationStatus;
+use App\Enums\PaymentPurpose;
 use App\Enums\PaymentStatus;
 use App\Enums\SubscriptionStatus;
 use App\Models\ArtisanProfile;
@@ -16,11 +18,12 @@ class ActivateSubscription
 {
     public function __construct(
         private readonly EnsureWallet $ensureWallet,
+        private readonly SendLifecycleNotification $sendLifecycleNotification,
     ) {}
 
     public function handle(Payment $payment): Subscription
     {
-        return DB::transaction(function () use ($payment): Subscription {
+        $subscription = DB::transaction(function () use ($payment): Subscription {
             $lockedPayment = Payment::query()
                 ->whereKey($payment->id)
                 ->lockForUpdate()
@@ -32,6 +35,10 @@ class ActivateSubscription
 
             if ($lockedPayment->status !== PaymentStatus::Successful) {
                 throw new InvalidArgumentException('Only successful payments can activate a subscription.');
+            }
+
+            if ($lockedPayment->purpose !== PaymentPurpose::Subscription) {
+                throw new InvalidArgumentException('Only subscription payments can activate a subscription.');
             }
 
             $profile = ArtisanProfile::query()
@@ -70,5 +77,9 @@ class ActivateSubscription
 
             return $subscription->refresh();
         }, attempts: 3);
+
+        $this->sendLifecycleNotification->subscriptionActivated($subscription);
+
+        return $subscription->refresh();
     }
 }

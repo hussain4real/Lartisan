@@ -228,6 +228,8 @@ test('outside Nigeria waitlist submission creates an entry without local geograp
 });
 
 test('nullable waitlist geography migration backfills rows before rollback', function (): void {
+    $migrationPath = 'database/migrations/2026_06_14_082715_allow_waitlist_entries_without_local_geography.php';
+
     $this->seed(GeographySeeder::class);
 
     $outsideNigeria = Country::query()
@@ -242,7 +244,10 @@ test('nullable waitlist geography migration backfills rows before rollback', fun
     ]);
 
     try {
-        expect(Artisan::call('migrate:rollback', ['--step' => 1, '--no-interaction' => true]))->toBe(0);
+        expect(Artisan::call('migrate:rollback', [
+            '--path' => $migrationPath,
+            '--no-interaction' => true,
+        ]))->toBe(0);
 
         $entry->refresh();
         $country = Country::query()->where('iso_code', 'NG')->firstOrFail();
@@ -254,7 +259,7 @@ test('nullable waitlist geography migration backfills rows before rollback', fun
             ->and($entry->local_government_id)->toBe($localGovernment->id);
     } finally {
         Artisan::call('migrate', [
-            '--path' => 'database/migrations/2026_06_14_082715_allow_waitlist_entries_without_local_geography.php',
+            '--path' => $migrationPath,
             '--no-interaction' => true,
         ]);
     }

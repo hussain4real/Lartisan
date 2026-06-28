@@ -91,4 +91,5 @@ Current KYC upload collections:
 
 ## Current Limitations
 
-- Booking payment collection, chat, notification delivery, payout account self-service, and artisan review responses are planned later.
+- Booking chat is available only for registered customer bookings while they are requested, accepted, paid, escrowed, or in progress; closed booking chats remain readable but not writable.
+- Payout account self-service, payout automation, and artisan review responses are planned later.

@@ -7,6 +7,7 @@ use App\Enums\DisputeSeverity;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Artisan\StoreDisputeRequest;
 use App\Models\Booking;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,6 +31,7 @@ class DisputeController extends Controller
                 'status' => $booking->status->value,
                 'customerName' => $booking->customer_name,
             ],
+            'payment' => $booking->payments()->latest('id')->first()?->only(['id', 'reference']),
         ]);
     }
 
@@ -42,6 +44,8 @@ class DisputeController extends Controller
         $this->assertCurrentTeamBooking($request, $booking);
         $user = $request->user();
         assert($user instanceof User);
+        $paymentId = $request->paymentId();
+        $payment = $paymentId === null ? null : $booking->payments()->whereKey($paymentId)->firstOrFail();
         $uploadedEvidence = $request->file('evidence', []);
         /** @var array<int, UploadedFile> $evidence */
         $evidence = is_array($uploadedEvidence) ? array_values($uploadedEvidence) : [$uploadedEvidence];
@@ -53,6 +57,8 @@ class DisputeController extends Controller
             description: $request->string('description')->trim()->toString() ?: null,
             severity: DisputeSeverity::from($request->string('severity')->toString()),
             evidence: $evidence,
+            payment: $payment instanceof Payment ? $payment : null,
+            target: $request->target(),
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Dispute opened.')]);
