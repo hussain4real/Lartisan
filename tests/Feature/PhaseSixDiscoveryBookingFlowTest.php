@@ -9,10 +9,13 @@ use App\Actions\Bookings\RejectBooking;
 use App\Actions\Bookings\ReleaseWalletBalance;
 use App\Actions\Bookings\SearchArtisans;
 use App\Actions\Bookings\StartBookingWork;
+use App\Actions\Identity\IssueOtp;
+use App\Actions\Payments\EscrowBookingPayment;
 use App\Enums\ArtisanAvailabilityStatus;
 use App\Enums\ArtisanSubscriptionStatus;
 use App\Enums\ArtisanVerificationStatus;
 use App\Enums\BookingStatus;
+use App\Enums\OtpPurpose;
 use App\Enums\WalletLedgerEntryType;
 use App\Models\ArtisanProfile;
 use App\Models\ArtisanService;
@@ -20,6 +23,7 @@ use App\Models\Booking;
 use App\Models\BookingStatusHistory;
 use App\Models\Country;
 use App\Models\LocalGovernment;
+use App\Models\Payment;
 use App\Models\ServiceCategory;
 use App\Models\State;
 use App\Models\Subscription;
@@ -152,6 +156,16 @@ function phaseSixCreateBooking(array $context, array $overrides = []): CreatedBo
     );
 }
 
+function phaseSixEscrowBooking(Booking $booking): Booking
+{
+    $payment = Payment::factory()->booking($booking)->successful()->create([
+        'amount' => $booking->quoted_amount,
+        'currency_code' => $booking->currency_code,
+    ]);
+
+    return app(EscrowBookingPayment::class)->handle($payment);
+}
+
 test('phase six models expose booking media status geography and wallet relationships', function () {
     Storage::fake('local');
     $context = phaseSixArtisanContext();
@@ -178,7 +192,7 @@ test('phase six models expose booking media status geography and wallet relation
     $booking = $createdBooking->booking;
     $history = $booking->statusHistories()->firstOrFail();
 
-    expect(BookingStatus::cases())->toHaveCount(7);
+    expect(BookingStatus::cases())->toHaveCount(12);
     expect($createdBooking->trackerUrl())->toContain($booking->tracker_code);
     expect($booking->status)->toBe(BookingStatus::Requested);
     expect($booking->quoted_amount)->toBe(2500000);
@@ -347,13 +361,22 @@ test('marketplace geography filters are scoped and stale child selections are no
 test('guest and registered customers can create bookings and use secure tracker screens', function () {
     Storage::fake('local');
     $context = phaseSixArtisanContext();
+    app(IssueOtp::class)->handle(
+        user: null,
+        phoneCountryCode: '+234',
+        phoneNumber: '8039990000',
+        purpose: OtpPurpose::BookingGuest,
+        plainCode: '123456',
+    );
 
     /** @var TestResponse<Response> $guestResponse */
     $guestResponse = $this->post(route('marketplace.bookings.store', ['artisanProfile' => $context['profile']]), [
         'artisan_service_id' => $context['service']->id,
         'customer_name' => 'Guest Customer',
-        'customer_phone' => '+2348039990000',
+        'phone_country_code' => '+234',
+        'customer_phone' => '8039990000',
         'customer_email' => 'guest@example.test',
+        'otp_code' => '123456',
         'scheduled_at' => now()->addDay()->toDateString(),
         'line_1' => '12 Guest Street',
         'line_2' => 'Flat 1',
@@ -406,7 +429,7 @@ test('guest and registered customers can create bookings and use secure tracker 
 
     $finishedGuest = app(FinishBookingWork::class)->handle(
         app(StartBookingWork::class)->handle(
-            app(AcceptBooking::class)->handle($guestBooking, $context['owner']),
+            phaseSixEscrowBooking(app(AcceptBooking::class)->handle($guestBooking, $context['owner'])),
             $context['owner'],
         ),
         $context['owner'],
@@ -439,7 +462,7 @@ test('booking lifecycle actions enforce status authorization and release wallet 
     expect(fn () => app(AcceptBooking::class)->handle($booking, $stranger))
         ->toThrow(AuthorizationException::class);
     expect(fn () => app(StartBookingWork::class)->handle($booking, $context['owner']))
-        ->toThrow(InvalidArgumentException::class, 'Only accepted bookings can be started.');
+        ->toThrow(InvalidArgumentException::class, 'Only escrowed bookings can be started.');
 
     $accepted = app(AcceptBooking::class)->handle($booking, $context['owner']);
     expect($accepted->status)->toBe(BookingStatus::Accepted);
@@ -450,7 +473,11 @@ test('booking lifecycle actions enforce status authorization and release wallet 
     expect(fn () => app(FinishBookingWork::class)->handle($accepted, $context['owner']))
         ->toThrow(InvalidArgumentException::class, 'Only in-progress bookings can be finished.');
 
-    $inProgress = app(StartBookingWork::class)->handle($accepted, $context['owner']);
+    expect(fn () => app(StartBookingWork::class)->handle($accepted, $context['owner']))
+        ->toThrow(InvalidArgumentException::class, 'Only escrowed bookings can be started.');
+
+    $escrowed = phaseSixEscrowBooking($accepted);
+    $inProgress = app(StartBookingWork::class)->handle($escrowed, $context['owner']);
     $finished = app(FinishBookingWork::class)->handle($inProgress, $context['owner']);
     $unconfirmed = phaseSixCreateBooking($context)->booking;
     expect(fn () => app(ConfirmBookingCompletion::class)->handle($unconfirmed, $context['customer']))
@@ -462,17 +489,18 @@ test('booking lifecycle actions enforce status authorization and release wallet 
     $ledgerEntry = WalletLedgerEntry::query()
         ->where('source_type', $confirmed->getMorphClass())
         ->where('source_id', $confirmed->id)
+        ->where('type', WalletLedgerEntryType::SettlementCredit)
         ->firstOrFail();
     $secondRelease = app(ReleaseWalletBalance::class)->handle($confirmed);
 
-    expect($confirmed->status)->toBe(BookingStatus::Confirmed);
+    expect($confirmed->status)->toBe(BookingStatus::Settled);
     expect($confirmed->wallet_released_at)->not->toBeNull();
-    expect($ledgerEntry->type)->toBe(WalletLedgerEntryType::BookingCredit);
-    expect($ledgerEntry->amount)->toBe(2500000);
+    expect($ledgerEntry->type)->toBe(WalletLedgerEntryType::SettlementCredit);
+    expect($ledgerEntry->amount)->toBe(2202500);
     expect($ledgerEntry->source()->firstOrFail()->is($confirmed))->toBeTrue();
-    expect($ledgerEntry->wallet()->firstOrFail()->available_balance)->toBe(2500000);
+    expect($ledgerEntry->wallet()->firstOrFail()->available_balance)->toBe(2202500);
     expect($secondRelease->is($ledgerEntry))->toBeTrue();
-    expect(BookingStatusHistory::query()->where('booking_id', $confirmed->id)->count())->toBe(5);
+    expect(BookingStatusHistory::query()->where('booking_id', $confirmed->id)->count())->toBe(8);
 
     $noAmount = Booking::factory()->create([
         'artisan_profile_id' => $context['profile']->id,
@@ -483,7 +511,7 @@ test('booking lifecycle actions enforce status authorization and release wallet 
     expect(fn () => app(ReleaseWalletBalance::class)->handle($unreleased))
         ->toThrow(InvalidArgumentException::class, 'Only confirmed bookings can release wallet balance.');
     expect(fn () => app(ReleaseWalletBalance::class)->handle($noAmount))
-        ->toThrow(InvalidArgumentException::class, 'Booking has no releasable amount.');
+        ->toThrow(InvalidArgumentException::class, 'Booking has no successful payment to settle.');
 
     $rejectable = phaseSixCreateBooking($context)->booking;
     expect(app(RejectBooking::class)->handle($rejectable, $context['owner'])->status)->toBe(BookingStatus::Rejected);
@@ -497,18 +525,18 @@ test('phase six inertia contracts and artisan booking routes are wired', functio
         ->toMediaCollection(ArtisanProfile::PORTFOLIO_COLLECTION);
     $requested = phaseSixCreateBooking($context)->booking;
     $rejectable = phaseSixCreateBooking($context)->booking;
-    $accepted = Booking::factory()->accepted()->create([
+    $accepted = phaseSixEscrowBooking(Booking::factory()->accepted()->create([
         'customer_id' => $context['customer']->id,
         'artisan_profile_id' => $context['profile']->id,
         'artisan_service_id' => $context['service']->id,
         'service_category_id' => $context['category']->id,
-    ]);
-    $inProgress = Booking::factory()->inProgress()->create([
+    ]));
+    $inProgress = app(StartBookingWork::class)->handle(phaseSixEscrowBooking(Booking::factory()->accepted()->create([
         'customer_id' => $context['customer']->id,
         'artisan_profile_id' => $context['profile']->id,
         'artisan_service_id' => $context['service']->id,
         'service_category_id' => $context['category']->id,
-    ]);
+    ])), $context['owner']);
 
     $this->get(route('marketplace.index', [
         'query' => 'Electrical',

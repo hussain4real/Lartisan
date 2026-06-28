@@ -102,6 +102,7 @@ export type KycMediaItem = {
     id: number;
     name: string;
     fileName: string;
+    url: string;
 };
 
 export type KycSubmissionDetail = ArtisanKycSummary & {
@@ -173,7 +174,6 @@ export type PayoutAccountItem = {
     provider: string;
     bankName: string;
     accountName: string;
-    recipientCode: string | null;
     status: string;
     verifiedAt: string | null;
 };
@@ -181,10 +181,18 @@ export type PayoutAccountItem = {
 export type PayoutItem = {
     id: number;
     status: string;
+    providerStatus: string | null;
     amount: number;
     amountDisplay: string;
     currencyCode: string;
     requestedAt: string | null;
+    approvedAt: string | null;
+    processingAt: string | null;
+    paidAt: string | null;
+    failedAt: string | null;
+    reconciledAt: string | null;
+    nextRetryAt: string | null;
+    trackingReference: string | null;
     failureReason: string | null;
 };
 
@@ -256,8 +264,34 @@ export type MarketplaceArtisanDetail = MarketplaceArtisanCard & {
     serviceRadiusKm: number | null;
     publicPhone: string | null;
     publicEmail: string | null;
+    isFavorite: boolean;
     services: MarketplaceService[];
     portfolio: MarketplacePortfolioItem[];
+};
+
+export type CustomerSavedAddressOption = {
+    id: number;
+    label: string;
+    contactName: string | null;
+    phone: string | null;
+    line1: string;
+    line2: string | null;
+    landmark: string | null;
+    countryId: number | null;
+    stateId: number;
+    localGovernmentId: number;
+    territoryId: number | null;
+    isDefault: boolean;
+};
+
+export type CustomerBookingDefaults = {
+    name: string | null;
+    email: string | null;
+    phoneCountryCode: string;
+    phoneNumber: string | null;
+    preferredChannel: string;
+    defaultNotes: string | null;
+    scheduleWindow: string;
 };
 
 export type BookingServiceSummary = {
@@ -285,6 +319,9 @@ export type BookingReview = {
     rating: number;
     comment: string | null;
     status: string;
+    proofCount?: number;
+    artisanResponse?: string | null;
+    artisanRespondedAt?: string | null;
 };
 
 export type BookingDispute = {
@@ -293,6 +330,17 @@ export type BookingDispute = {
     severity: string;
     subject: string;
     openedAt: string | null;
+};
+
+export type BookingPaymentSummary = {
+    id: number;
+    status: string;
+    reference: string;
+    amountDisplay: string;
+    commissionDisplay?: string | null;
+    providerFeeDisplay?: string | null;
+    netAmountDisplay?: string | null;
+    checkoutUrl?: string | null;
 };
 
 export type BookingAddressSnapshot = {
@@ -320,8 +368,13 @@ export type BookingDetail = {
     address?: BookingAddressSnapshot;
     artisan: BookingArtisanSummary;
     service: BookingServiceSummary | null;
+    canPay?: boolean;
+    canChat?: boolean;
     histories?: BookingHistoryItem[];
     canReview?: boolean;
+    canUpgrade?: boolean;
+    canDispute?: boolean;
+    payment?: BookingPaymentSummary | null;
     review?: BookingReview | null;
     disputes?: BookingDispute[];
 };
@@ -330,4 +383,26 @@ export type ArtisanBookingItem = BookingDetail & {
     customerPhone: string;
     customerEmail: string | null;
     address: BookingAddressSnapshot;
+};
+
+export type BookingChatMessage = {
+    id: number;
+    senderRole: 'customer' | 'artisan';
+    senderName: string;
+    body: string;
+    mine: boolean;
+    createdAt: string | null;
+};
+
+export type BookingChatPage = {
+    role: 'customer' | 'artisan';
+    backUrl: string;
+    currentTeamSlug: string | null;
+    canSend: boolean;
+    privacyNotice: string;
+    booking: Pick<
+        BookingDetail,
+        'id' | 'trackerCode' | 'status' | 'customerName' | 'artisan' | 'service'
+    >;
+    messages: BookingChatMessage[];
 };

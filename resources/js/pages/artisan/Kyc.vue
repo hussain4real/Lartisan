@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
-import { FileUp, ShieldCheck } from 'lucide-vue-next';
+import { Download, FileUp, ShieldCheck } from 'lucide-vue-next';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import { Badge } from '@/components/ui/badge';
@@ -161,6 +161,16 @@ defineOptions({
                                 'No file'
                             }}
                         </p>
+                        <a
+                            v-if="latestSubmission.media[collection]?.url"
+                            :href="latestSubmission.media[collection]?.url"
+                            target="_blank"
+                            rel="noreferrer"
+                            class="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary underline-offset-4 hover:underline"
+                        >
+                            <Download class="size-3.5" />
+                            Download
+                        </a>
                     </div>
                 </div>
             </div>

@@ -1,17 +1,18 @@
 <?php
 
+use App\Actions\Bookings\ReleaseWalletBalance;
 use App\Actions\Disputes\EscalateDispute;
 use App\Actions\Disputes\OpenDispute;
 use App\Actions\Disputes\ResolveDispute;
 use App\Actions\Documents\RenderDocument;
-use App\Actions\Payments\EnsureWallet;
-use App\Actions\Payments\PostWalletLedgerEntry;
+use App\Actions\Payments\EscrowBookingPayment;
 use App\Actions\Payouts\ApprovePayout;
 use App\Actions\Payouts\ProcessPayout;
 use App\Actions\Payouts\RequestPayout;
 use App\Actions\Reports\GenerateScopedReport;
 use App\Actions\Reviews\SubmitVerifiedReview;
 use App\Contracts\Documents\DocumentRenderer;
+use App\Enums\BookingStatus;
 use App\Enums\DisputeSeverity;
 use App\Enums\DisputeStatus;
 use App\Enums\PayoutAttemptStatus;
@@ -41,6 +42,7 @@ use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\Dispute;
 use App\Models\LocalGovernment;
+use App\Models\Payment;
 use App\Models\Payout;
 use App\Models\PayoutAccount;
 use App\Models\PayoutAttempt;
@@ -116,7 +118,7 @@ function phaseSevenConfirmedBooking(array $context, array $overrides = []): Book
     $customer = $overrides['customer'] ?? $context['customer'];
     $amount = $overrides['amount'] ?? 2500000;
 
-    $booking = Booking::factory()->confirmed()->forCustomer($customer)->create([
+    $booking = Booking::factory()->accepted()->forCustomer($customer)->create([
         'artisan_profile_id' => $profile->id,
         'artisan_service_id' => $service->id,
         'service_category_id' => $service->service_category_id,
@@ -127,17 +129,17 @@ function phaseSevenConfirmedBooking(array $context, array $overrides = []): Book
         'quoted_amount' => $amount,
         'currency_code' => 'NGN',
     ]);
+    $payment = Payment::factory()->booking($booking)->successful()->create([
+        'amount' => $amount,
+        'currency_code' => 'NGN',
+    ]);
 
-    $wallet = app(EnsureWallet::class)->handle($profile);
-    app(PostWalletLedgerEntry::class)->handle(
-        wallet: $wallet,
-        type: WalletLedgerEntryType::BookingCredit,
-        direction: WalletLedgerDirection::Credit,
-        amount: $amount,
-        source: $booking,
-        immutableReference: 'phase-seven-booking-'.$booking->id,
-        description: 'Phase seven test booking release',
-    );
+    app(EscrowBookingPayment::class)->handle($payment);
+    $booking->forceFill([
+        'confirmed_at' => now(),
+        'status' => BookingStatus::Confirmed,
+    ])->save();
+    app(ReleaseWalletBalance::class)->handle($booking);
 
     return $booking->refresh();
 }
@@ -235,11 +237,11 @@ test('phase seven data model enums factories and relationships are wired', funct
     ]);
     $globalSnapshot = ReportSnapshot::factory()->create();
 
-    expect(ReviewStatus::cases())->toHaveCount(3);
+    expect(ReviewStatus::cases())->toHaveCount(4);
     expect(DisputeStatus::cases())->toHaveCount(5);
     expect(DisputeSeverity::cases())->toHaveCount(4);
     expect(PayoutStatus::cases())->toHaveCount(9);
-    expect(PayoutAttemptStatus::cases())->toHaveCount(3);
+    expect(PayoutAttemptStatus::cases())->toHaveCount(5);
     expect(SupportCaseStatus::cases())->toHaveCount(4);
     expect(SupportCasePriority::cases())->toHaveCount(4);
     expect(SupportCaseCategory::cases())->toHaveCount(6);
@@ -307,9 +309,9 @@ test('verified reviews require the booking customer completed payment release an
     expect(fn () => $action->handle($booking, $stranger, 5))
         ->toThrow(AuthorizationException::class);
     expect(fn () => $action->handle($unpaidBooking, $context['customer'], 5))
-        ->toThrow(InvalidArgumentException::class, 'Only confirmed paid bookings can be reviewed.');
+        ->toThrow(InvalidArgumentException::class, 'Only settled paid bookings can be reviewed.');
     expect(fn () => $action->handle($withoutCredit, $context['customer'], 5))
-        ->toThrow(InvalidArgumentException::class, 'Only bookings with released wallet credit can be reviewed.');
+        ->toThrow(InvalidArgumentException::class, 'Only settled paid bookings can be reviewed.');
 
     $review = $action->handle($booking, $context['customer'], 5, 'Excellent repair.');
 
@@ -630,7 +632,7 @@ test('customer and artisan inertia contracts expose review dispute and payout fl
         ->assertOk()
         ->assertInertia(fn (Assert $page): Assert => $page
             ->component('artisan/Wallet')
-            ->where('wallet.availableBalance', 2500000)
+            ->where('wallet.availableBalance', 2202500)
             ->where('payoutAccounts.0.id', $payoutAccount->id)
             ->where('payouts', []));
 
@@ -701,8 +703,8 @@ test('phase seven filament resources policies and table actions are scoped', fun
     expect(array_keys(DisputeResource::getPages()))->toBe(['index', 'view']);
     expect(array_keys(PayoutResource::getPages()))->toBe(['index', 'view']);
     expect(array_keys(ReportSnapshotResource::getPages()))->toBe(['index', 'view']);
-    expect(DisputeResource::infolist(Schema::make())->getComponents())->toHaveCount(10);
-    expect(PayoutResource::infolist(Schema::make())->getComponents())->toHaveCount(10);
+    expect(DisputeResource::infolist(Schema::make())->getComponents())->toHaveCount(14);
+    expect(PayoutResource::infolist(Schema::make())->getComponents())->toHaveCount(18);
     expect(ReportSnapshotResource::infolist(Schema::make())->getComponents())->toHaveCount(6);
     expect(DisputeResource::getEloquentQuery()->whereKey($dispute->id)->exists())->toBeTrue();
     expect(PayoutResource::getEloquentQuery()->whereKey($payout->id)->exists())->toBeTrue();
@@ -774,7 +776,9 @@ test('phase seven filament resources policies and table actions are scoped', fun
         ])
         ->assertHasNoTableActionErrors();
     phaseSevenLivewire($context['superAdmin'], ListPayouts::class)
-        ->callTableAction('process', phaseSevenRecordKey($payout->refresh()))
+        ->callTableAction('process', phaseSevenRecordKey($payout->refresh()), [
+            'reason' => 'Manual confirmation from finance.',
+        ])
         ->assertHasNoTableActionErrors();
     phaseSevenLivewire($context['superAdmin'], ViewPayout::class, ['record' => phaseSevenRecordKey($payout->refresh())])
         ->assertOk();

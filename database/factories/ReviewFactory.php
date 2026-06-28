@@ -32,6 +32,12 @@ class ReviewFactory extends Factory
             'moderated_by' => null,
             'moderated_at' => null,
             'moderation_notes' => null,
+            'artisan_response_by' => null,
+            'artisan_response' => null,
+            'artisan_responded_at' => null,
+            'moderation_signal' => null,
+            'moderation_score' => 0,
+            'moderation_metadata' => null,
         ];
     }
 
@@ -41,6 +47,17 @@ class ReviewFactory extends Factory
             'status' => ReviewStatus::Hidden,
             'moderated_at' => now(),
             'moderation_notes' => 'Hidden by moderation.',
+        ]);
+    }
+
+    public function pendingModeration(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => ReviewStatus::PendingModeration,
+            'moderation_signal' => 'low_rating_keyword',
+            'moderation_score' => 80,
+            'moderation_notes' => 'Automatically routed for moderation.',
+            'moderation_metadata' => ['keywords' => ['unsafe']],
         ]);
     }
 }

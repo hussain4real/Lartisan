@@ -261,7 +261,7 @@ Use PHP backed enums with TitleCase keys for statuses and role names.
 
 ### 8.3 Booking And Payment
 
-Phase 6 and Phase 7 currently implement marketplace discovery, guest and registered booking requests, secure tracker links, customer confirmation, artisan booking lifecycle actions, booking status history, wallet release after confirmed quoted work, verified reviews, booking/review disputes, support case creation from disputes, payout requests, manual payout processing, and scoped report snapshots. OTP-at-booking, booking checkout/escrow, transactional notifications, chat, guest review submission, and dedicated support inboxes remain later phases.
+Phases 6 through 12 currently implement marketplace discovery, guest and registered booking requests, secure tracker links, OTP-at-booking, saved-address booking, booking checkout/escrow, customer confirmation, artisan booking lifecycle actions, booking status history, controlled registered booking chat, guest review/dispute flows, transactional notifications, wallet release after confirmed quoted work, verified reviews, booking/review disputes, support case creation from disputes, dedicated support inboxes, payout requests, manual payout processing, and scoped report snapshots. Payout automation, provider transfer callbacks, deeper review moderation, and observability/recovery workflows remain later phases.
 
 1. Customer selects category, location, schedule, description, and optional images.
 2. Guest customers verify phone by OTP; registered customers may reuse saved addresses.

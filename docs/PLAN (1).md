@@ -1,9 +1,9 @@
 # Phased Lartisan Implementation Plan
 
 ## Summary
-- Current state: Laravel/Inertia starter with Fortify, passkeys, Teams, Wayfinder, and no marketplace tables yet. Baseline verified: `91` tests, `100.0%` coverage.
-- Build order: environment and quality gates, database foundations, backend action workflows, then Inertia customer/artisan UI and Filament operations UI.
-- Locked decisions: PHP 8.5, install approved packages now, Larastan with no baseline, 100% coverage after every phase, Teams represent artisan business workspaces, local OTP first, pilot geography seed, Paystack-first escrow.
+- Current state: the scoped MVP implementation is complete through Phase 12, with marketplace, booking, payment, escrow, notifications, customer-depth, chat, support inbox, and operations workflows in place.
+- Build order: environment and quality gates, database foundations, backend action workflows, Inertia customer/artisan UI, Filament operations UI, then hardening and BRS expansion tracks.
+- Locked decisions: PHP 8.5, Larastan with no baseline, 100% coverage after every phase, Teams represent artisan business workspaces, local OTP first, pilot geography seed, Paystack-first escrow, and Phase 10 notification channels are email and WhatsApp for now.
 
 ## Implementation Phases
 **Phase 0: Platform And Quality Gate**
@@ -70,6 +70,59 @@ Goal: make the full trust loop reliable enough for pilot use.
 - Frontend: mobile field-agent polish, empty/loading/error states, accessibility and browser smoke coverage.
 - Tests: full suite, coverage, static analysis, frontend checks, webhook/retry edge cases.
 
+**Phase 9: Booking Payment And Escrow**
+Goal: add booking checkout, escrow-aware lifecycle states, commission and fee snapshots, refunds, and Paystack-backed booking webhooks.
+- DB: booking payment references, payment settlement snapshots, booking payment lifecycle timestamps, and payment/query indexes.
+- Backend actions: `InitializeBookingPayment`, `CalculateBookingSettlement`, `EscrowBookingPayment`, `RefundBookingPayment`, and payment webhook handling for booking payments.
+- Frontend: registered customer and guest tracker payment initiation from booking screens.
+- Tests: checkout authorization, webhook idempotency, invalid amounts, failed payments, escrow ledger entries, settlement math, refunds, and invalid lifecycle transitions.
+
+**Phase 10: Communication And Notifications**
+Goal: implement transactional email and WhatsApp communication for booking, payment, review, subscription, payout, dispute, and support events.
+- DB: notification delivery logs with provider status, callback metadata, attempts, failures, and dead-letter timestamps.
+- Backend actions/interfaces: `NotificationProvider`, `SendNotificationDelivery`, `SendLifecycleNotification`, email and WhatsApp provider adapters, WhatsApp callback intake, retry and dead-letter commands.
+- Frontend: no broad UI beyond existing event-triggering surfaces; operations visibility comes from delivery records and support workflows.
+- Tests: provider fakes, disabled-provider fallback, failures, callback validation, retries, dead letters, and lifecycle event dispatch.
+- Scope note: SMS, push, and richer in-app notification surfaces remain future BRS expansion unless explicitly approved.
+
+**Phase 11: Customer Account Depth**
+Goal: complete deeper guest and registered customer journeys around booking confidence and repeat use.
+- DB: customer favorites and customer profile preferences.
+- Backend actions: booking OTP enforcement, saved-address validation, guest account upgrade, guest tracker review/dispute submission, favorites, and preference persistence.
+- Frontend: saved-address booking support, tracker account upgrade, guest review/dispute forms, favorite actions, and booking preference page.
+- Tests: OTP branches, saved-address ownership, guest upgrade, token-limited guest review/dispute access, favorites, preferences, and denial paths.
+
+**Phase 12: Chat And Support Inbox**
+Goal: add controlled registered booking chat and dedicated support inbox workflows.
+- DB: booking messages and support case notes.
+- Backend actions/policies: `PostBookingMessage`, `BookingMessagePolicy`, support case assignment, internal notes, audited status transitions, and contact-detail safeguards.
+- Frontend: shared customer/artisan booking chat UI and Filament support inbox list/view actions.
+- Tests: chat visibility, authorization, eligible/closed booking states, contact blocking, support scoping, assignment, notes, status transitions, notifications, and audit logs.
+
+**Phase 13: Trust And Moderation Expansion**
+Goal: expand trust workflows beyond the scoped MVP loop.
+- DB: review proof media, artisan review responses, moderation signal metadata, and expanded dispute targets where needed.
+- Backend actions: review response handling, suspicious review detection/routing, profile/payment dispute creation, and audited dispute adjustment actions for money-changing outcomes.
+- Frontend: review proof upload, artisan response UI, moderation queues, and profile/payment dispute entry points.
+- Tests: moderation routing, media privacy, response permissions, suspicious-pattern handling, profile/payment dispute targets, and ledger-backed adjustment outcomes.
+
+**Phase 14: Payout Automation And Finance Ops**
+Goal: automate payout dispatch and strengthen finance recovery workflows.
+- DB: provider transfer identifiers, reconciliation metadata, scheduled batch records if needed, bank/BVN verification status, and payout exception tracking.
+- Backend actions/interfaces: payout provider contract, transfer dispatch, webhook or polling reconciliation, scheduled payout batch creation, verification checks, retry/reversal handling, and finance approval flows.
+- Frontend: finance exception queues and safer payout status visibility for operations and artisans.
+- Tests: provider failures, retries, duplicate/uncertain callbacks, reconciliation, no-double-pay guarantees, bank verification, and finance approval denial paths.
+
+**Phase 15: Reporting, Observability, And Recovery**
+Goal: make operations and production readiness visible before silent failures become business problems.
+- Monitoring: use Laravel Nightwatch and Laravel logs as the approved monitoring sources for exceptions, queue failures, provider failures, and operational recovery signals.
+- Backup: use `spatie/laravel-backup` for database and critical media backup execution, health checks, and restore-readiness verification.
+- DB/config: provider health snapshots or report metrics where useful, queue/failed-job visibility, backup status metadata, retention settings, and restore-test tracking.
+- Backend: health checks for payments, notifications, storage, payout provider, queues, database touchpoints, scheduler freshness, Laravel logs, Nightwatch handoff expectations, backup execution, and restore verification.
+- Frontend: Super Admin Filament health and recovery dashboard only; State, LGA, Agent, and Artisan surfaces stay out of Phase 15 unless a later reporting phase requires them.
+- Retention: keep audit logs, payment records, KYC records, wallet ledgers, admin actions, and dispute outcomes indefinitely by default; prune notification delivery logs, provider callback logs, health snapshots, and operational noise after configurable retention windows.
+- Tests: Super Admin visibility, health-check status handling, provider-failure surfacing, failed-job visibility, backup status checks, restore-test tracking, and retention-policy guard rails.
+
 ## Interfaces And Patterns
 - Every meaningful write uses an `App\Actions\{Domain}\...` action; controllers and Filament actions stay thin.
 - Inertia forms and links use Wayfinder imports from `@/actions` or `@/routes`; avoid hardcoded URLs.
@@ -89,4 +142,6 @@ Goal: make the full trust loop reliable enough for pilot use.
 - Use Paystack via Laravel HTTP client first; add an SDK only if provider requirements force it.
 - Use stable Composer packages only; do not lower `minimum-stability` without a new decision.
 - Do not create extra documentation files during implementation unless explicitly requested.
+- Phase 13 through Phase 15 are BRS expansion phases, not blockers for the scoped Phase 1-12 MVP completion.
+- Phase 15 may add `spatie/laravel-backup`; do not add other observability or backup packages without a separate decision.
 - References used: [BRS](/Users/amisha/www/lartisan/docs/lartisan_brs.md), [Technical Spec](/Users/amisha/www/lartisan/docs/Technical_Spec_Lartisan_App.md), [Larastan package](https://packagist.org/packages/larastan/larastan), [Inertia Forms + Wayfinder](https://inertiajs.com/docs/v3/the-basics/forms), [Wayfinder README](https://github.com/laravel/wayfinder/blob/main/README.md).

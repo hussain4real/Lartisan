@@ -4,9 +4,11 @@ namespace Database\Factories;
 
 use App\Enums\DisputeSeverity;
 use App\Enums\DisputeStatus;
+use App\Enums\DisputeTargetType;
 use App\Models\ArtisanProfile;
 use App\Models\Booking;
 use App\Models\Dispute;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -25,6 +27,7 @@ class DisputeFactory extends Factory
         return [
             'booking_id' => Booking::factory(),
             'review_id' => null,
+            'payment_id' => null,
             'artisan_profile_id' => ArtisanProfile::factory(),
             'customer_id' => User::factory(),
             'opened_by_id' => User::factory(),
@@ -32,6 +35,7 @@ class DisputeFactory extends Factory
             'resolved_by_id' => null,
             'status' => DisputeStatus::Open,
             'severity' => DisputeSeverity::Medium,
+            'target' => DisputeTargetType::Booking,
             'subject' => fake()->sentence(4),
             'description' => fake()->paragraph(),
             'escalation_reason' => null,
@@ -41,6 +45,10 @@ class DisputeFactory extends Factory
             'resolved_at' => null,
             'closed_at' => null,
             'metadata' => ['source' => 'factory'],
+            'money_adjustment_amount' => null,
+            'money_adjustment_direction' => null,
+            'money_adjustment_ledger_entry_id' => null,
+            'money_adjusted_at' => null,
         ];
     }
 
@@ -61,6 +69,14 @@ class DisputeFactory extends Factory
             'resolved_by_id' => $resolver?->id,
             'resolution' => 'Resolved from factory.',
             'resolved_at' => now(),
+        ]);
+    }
+
+    public function paymentTarget(?Payment $payment = null): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'payment_id' => $payment instanceof Payment ? $payment->id : Payment::factory(),
+            'target' => DisputeTargetType::Payment,
         ]);
     }
 }

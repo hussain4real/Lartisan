@@ -31,9 +31,9 @@ The platform currently includes:
 - Verified customer reviews for confirmed paid bookings.
 - Customer and artisan dispute intake against bookings and linked reviews, private dispute evidence, audit logs, and automatically created support cases.
 - Artisan payout requests from verified payout accounts, operations payout approval, manual processing, failed-attempt retries, and immutable wallet payout debits.
-- Scoped report snapshots, report PDF rendering, and Filament dispute, payout, and report resources.
+- Scoped report snapshots, report PDF rendering, controlled booking chat, dedicated support inboxes, and Filament dispute, payout, support, and report resources.
 
-Booking checkout/escrow, chat, guest review submission, notification templates, dedicated support inboxes, and operations booking exception queues are planned later phases. The customer guides describe current booking behavior and label not-yet-built flows clearly.
+Operations booking exception queues, deeper review moderation, payout automation, provider transfer callbacks, and observability/recovery workflows are planned later phases. The customer guides describe current booking behavior and label not-yet-built flows clearly.
 
 ## Phase 6-7 Booking And Trust Surfaces
 

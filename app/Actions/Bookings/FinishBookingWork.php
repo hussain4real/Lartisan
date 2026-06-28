@@ -2,6 +2,7 @@
 
 namespace App\Actions\Bookings;
 
+use App\Actions\Notifications\SendLifecycleNotification;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\User;
@@ -13,11 +14,12 @@ class FinishBookingWork
     public function __construct(
         private readonly EnsureBookingCanBeManagedByArtisan $ensureBookingCanBeManagedByArtisan,
         private readonly RecordBookingStatus $recordBookingStatus,
+        private readonly SendLifecycleNotification $sendLifecycleNotification,
     ) {}
 
     public function handle(Booking $booking, User $actor): Booking
     {
-        return DB::transaction(function () use ($booking, $actor): Booking {
+        $updatedBooking = DB::transaction(function () use ($booking, $actor): Booking {
             $lockedBooking = Booking::query()->whereKey($booking->id)->lockForUpdate()->firstOrFail();
             $this->ensureBookingCanBeManagedByArtisan->handle($lockedBooking, $actor);
 
@@ -34,5 +36,9 @@ class FinishBookingWork
 
             return $lockedBooking->refresh();
         }, attempts: 3);
+
+        $this->sendLifecycleNotification->bookingStatusChanged($updatedBooking, BookingStatus::Finished);
+
+        return $updatedBooking->refresh();
     }
 }

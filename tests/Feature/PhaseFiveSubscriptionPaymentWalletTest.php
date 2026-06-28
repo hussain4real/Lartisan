@@ -136,14 +136,14 @@ test('phase five seed data permissions models and relationships are wired', func
 
     expect(SubscriptionPlan::query()->count())->toBe(3);
     expect(PaymentProviderName::cases())->toHaveCount(2);
-    expect(PaymentPurpose::cases())->toBe([PaymentPurpose::Subscription]);
-    expect(PaymentStatus::cases())->toHaveCount(4);
+    expect(PaymentPurpose::cases())->toBe([PaymentPurpose::Subscription, PaymentPurpose::Booking]);
+    expect(PaymentStatus::cases())->toHaveCount(5);
     expect(PayoutAccountStatus::cases())->toHaveCount(4);
     expect(ProviderWebhookEventStatus::cases())->toHaveCount(4);
     expect(SubscriptionInterval::cases())->toHaveCount(3);
     expect(SubscriptionStatus::cases())->toHaveCount(5);
     expect(WalletLedgerDirection::cases())->toHaveCount(2);
-    expect(WalletLedgerEntryType::cases())->toHaveCount(7);
+    expect(WalletLedgerEntryType::cases())->toHaveCount(9);
     expect($artisan->can('artisan.subscription.manage'))->toBeTrue();
     expect(Gate::forUser($artisan)->allows('manageSubscription', $profile))->toBeTrue();
     expect(Gate::forUser($artisan)->allows('viewWallet', $profile))->toBeTrue();

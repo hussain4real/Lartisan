@@ -189,6 +189,14 @@ class ArtisanProfile extends Model implements HasMedia
     }
 
     /**
+     * @return HasMany<CustomerFavorite, $this>
+     */
+    public function customerFavorites(): HasMany
+    {
+        return $this->hasMany(CustomerFavorite::class);
+    }
+
+    /**
      * @return HasMany<Subscription, $this>
      */
     public function subscriptions(): HasMany

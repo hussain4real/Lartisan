@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { CalendarCheck, Store } from 'lucide-vue-next';
+import {
+    CalendarCheck,
+    MessageSquare,
+    SlidersHorizontal,
+    Store,
+} from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { show as showBooking } from '@/routes/customer/bookings';
+import { show as showChat } from '@/routes/customer/bookings/chat';
+import { show as showPreferences } from '@/routes/customer/preferences';
 import { index as marketplaceIndex } from '@/routes/marketplace';
 import type { BookingDetail } from '@/types';
 
@@ -19,12 +26,20 @@ defineProps<{
         <div class="mx-auto grid w-full max-w-5xl gap-8 px-4 py-6 sm:px-6">
             <nav class="flex items-center justify-between gap-4">
                 <h1 class="text-2xl font-semibold">My bookings</h1>
-                <Button as-child variant="outline" size="sm">
-                    <Link :href="marketplaceIndex().url">
-                        <Store />
-                        Marketplace
-                    </Link>
-                </Button>
+                <div class="flex items-center gap-2">
+                    <Button as-child variant="outline" size="sm">
+                        <Link :href="showPreferences().url">
+                            <SlidersHorizontal />
+                            Preferences
+                        </Link>
+                    </Button>
+                    <Button as-child variant="outline" size="sm">
+                        <Link :href="marketplaceIndex().url">
+                            <Store />
+                            Marketplace
+                        </Link>
+                    </Button>
+                </div>
             </nav>
 
             <section class="grid gap-4">
@@ -50,12 +65,25 @@ defineProps<{
                             {{ booking.scheduledAt ?? 'Flexible schedule' }}
                         </p>
                     </div>
-                    <Button as-child size="sm">
-                        <Link :href="showBooking(booking.id).url">
-                            <CalendarCheck />
-                            Open
-                        </Link>
-                    </Button>
+                    <div class="flex flex-wrap gap-2">
+                        <Button
+                            v-if="booking.canChat"
+                            as-child
+                            variant="outline"
+                            size="sm"
+                        >
+                            <Link :href="showChat(booking.id).url">
+                                <MessageSquare />
+                                Chat
+                            </Link>
+                        </Button>
+                        <Button as-child size="sm">
+                            <Link :href="showBooking(booking.id).url">
+                                <CalendarCheck />
+                                Open
+                            </Link>
+                        </Button>
+                    </div>
                 </article>
 
                 <p

@@ -215,14 +215,35 @@ defineOptions({
                             <Badge variant="outline">{{ payout.status }}</Badge>
                         </div>
                         <p
+                            v-if="payout.providerStatus"
+                            class="text-sm text-muted-foreground"
+                        >
+                            Provider: {{ payout.providerStatus }}
+                        </p>
+                        <p
+                            v-if="payout.trackingReference"
+                            class="text-xs break-all text-muted-foreground"
+                        >
+                            {{ payout.trackingReference }}
+                        </p>
+                        <p
                             v-if="payout.failureReason"
                             class="text-sm text-muted-foreground"
                         >
                             {{ payout.failureReason }}
                         </p>
                     </div>
-                    <div class="text-sm text-muted-foreground">
-                        {{ payout.requestedAt ?? 'Pending' }}
+                    <div class="space-y-1 text-sm text-muted-foreground">
+                        <div>
+                            Requested {{ payout.requestedAt ?? 'Pending' }}
+                        </div>
+                        <div v-if="payout.processingAt">
+                            Processing {{ payout.processingAt }}
+                        </div>
+                        <div v-if="payout.paidAt">Paid {{ payout.paidAt }}</div>
+                        <div v-if="payout.nextRetryAt">
+                            Retry {{ payout.nextRetryAt }}
+                        </div>
                     </div>
                 </div>
             </div>

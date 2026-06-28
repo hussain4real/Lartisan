@@ -7,6 +7,7 @@ use App\Actions\Artisans\SubmitKyc;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Artisan\SubmitKycRequest;
 use App\Models\KycSubmission;
+use App\Support\PrivateMediaUrl;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -63,7 +64,7 @@ class KycController extends Controller
     }
 
     /**
-     * @return array{id: int, status: string, submittedAt: string|null, notes: string|null, media: array<string, array{id: int, name: string, fileName: string}|null>}|null
+     * @return array{id: int, status: string, submittedAt: string|null, notes: string|null, media: array<string, array{id: int, name: string, fileName: string, url: string}|null>}|null
      */
     private function submissionPayload(?KycSubmission $submission): ?array
     {
@@ -85,7 +86,7 @@ class KycController extends Controller
     }
 
     /**
-     * @return array{id: int, name: string, fileName: string}|null
+     * @return array{id: int, name: string, fileName: string, url: string}|null
      */
     private function mediaPayload(?Media $media): ?array
     {
@@ -97,6 +98,7 @@ class KycController extends Controller
             'id' => $media->id,
             'name' => $media->name,
             'fileName' => $media->file_name,
+            'url' => app(PrivateMediaUrl::class)->for($media),
         ];
     }
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Form, Head, Link } from '@inertiajs/vue3';
 import { AlertTriangle, ArrowLeft } from 'lucide-vue-next';
+import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { dashboard as artisanDashboard } from '@/routes/artisan';
 import { index as artisanBookings } from '@/routes/artisan/bookings';
@@ -17,7 +18,13 @@ type Booking = {
 defineProps<{
     currentTeam: Team;
     booking: Booking;
+    payment: {
+        id: number;
+        reference: string;
+    } | null;
 }>();
+
+const target = ref('booking');
 
 defineOptions({
     layout: (props: { currentTeam: Team }) => ({
@@ -72,6 +79,30 @@ defineOptions({
                 enctype="multipart/form-data"
                 #default="{ errors, processing }"
             >
+                <input
+                    v-if="payment && target === 'payment'"
+                    type="hidden"
+                    name="payment_id"
+                    :value="payment.id"
+                />
+                <label class="grid gap-2 text-sm">
+                    Target
+                    <select
+                        v-model="target"
+                        name="target"
+                        class="h-10 rounded-md border bg-background px-3"
+                        required
+                    >
+                        <option value="booking">Booking</option>
+                        <option value="profile">Artisan profile</option>
+                        <option v-if="payment" value="payment">
+                            Payment {{ payment.reference }}
+                        </option>
+                    </select>
+                    <span v-if="errors.target" class="text-destructive">
+                        {{ errors.target }}
+                    </span>
+                </label>
                 <label class="grid gap-2 text-sm">
                     Subject
                     <input
