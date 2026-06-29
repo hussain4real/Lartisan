@@ -18,6 +18,7 @@ State Coordinators supervise Lartisan operations within one state. They focus on
 - Review and resolve scoped dispute queues for severe or escalated cases.
 - View scoped payout records where finance visibility is allowed.
 - Generate state report snapshots.
+- Monitor scoped support cases and review moderation queues where policy allows.
 
 ## Standard Workflow
 
@@ -45,8 +46,15 @@ State Coordinators supervise Lartisan operations within one state. They focus on
 - Severe local disputes that exceed one LGA's authority.
 - Repeated support cases or review disputes that show statewide policy risk.
 
+## Process Runbooks
+
+- [Artisan verification and activation](../processes/artisan-verification-and-activation.md)
+- [Booking trust lifecycle](../processes/booking-trust-lifecycle.md)
+- [Communications and support operations](../processes/communications-and-support-operations.md)
+- [Platform operations and recovery](../processes/platform-operations-and-recovery.md)
+
 ## Current Limitations
 
-- Operations booking exception queues and dedicated review moderation panels are planned later.
+- Booking exceptions should be handled through booking, dispute, and support records rather than a separate booking-exception panel.
 - Customer support cases are triaged through the scoped support inbox.
 - State finance dashboards are scoped to current payment/payout visibility and report snapshots.

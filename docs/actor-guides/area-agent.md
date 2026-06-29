@@ -44,6 +44,13 @@ Area Agents handle field execution. They support artisan onboarding, collect ver
 - Multi-territory or repeated issue: LGA Admin escalates to State Coordinator.
 - Dispute needing formal decision: escalate to LGA Admin with notes and evidence.
 
+## Process Runbooks
+
+- [Artisan verification and activation](../processes/artisan-verification-and-activation.md)
+- [Marketplace discovery and listing visibility](../processes/marketplace-discovery-and-listing-visibility.md)
+- [Booking trust lifecycle](../processes/booking-trust-lifecycle.md)
+- [Communications and support operations](../processes/communications-and-support-operations.md)
+
 ## Current Limitations
 
 - A dedicated mobile field app is not implemented yet.

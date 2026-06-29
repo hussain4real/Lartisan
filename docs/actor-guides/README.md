@@ -1,8 +1,8 @@
 # Lartisan Actor Guides
 
-Status: current through Phase 7 implementation
+Status: current through Phase 16 implementation
 
-These guides explain how each Lartisan actor should use the platform, what they own, what they can see, and where work should be escalated. They are operational guides, not implementation specs.
+These guides explain how each Lartisan actor should use the platform, what they own, what they can see, and where work should be escalated. They are role entrypoints. Use [process runbooks](../processes/README.md) for detailed operational workflows.
 
 ## Actor Guides
 
@@ -25,21 +25,30 @@ The platform currently includes:
 - Artisan profile, service catalog, KYC intake, portfolio media, and field visits.
 - Operations verification panels for KYC review, territory assignment, reason codes, and suspensions.
 - Subscription plans, Paystack checkout initiation, payment webhooks, subscription activation, wallets, immutable ledger entries, and payout account records.
-- Marketplace discovery for verified, approved, active subscribed artisans.
+- Marketplace discovery for verified, approved, active subscribed artisans, including opt-in proximity search.
 - Guest and registered booking request creation with address snapshots and optional booking attachments.
 - Secure booking tracker links, customer booking screens, artisan booking queues, booking status history, and completion wallet release.
 - Verified customer reviews for confirmed paid bookings.
 - Customer and artisan dispute intake against bookings and linked reviews, private dispute evidence, audit logs, and automatically created support cases.
-- Artisan payout requests from verified payout accounts, operations payout approval, manual processing, failed-attempt retries, and immutable wallet payout debits.
-- Scoped report snapshots, report PDF rendering, controlled booking chat, dedicated support inboxes, and Filament dispute, payout, support, and report resources.
+- Artisan payout requests from verified payout accounts, operations payout approval, Paystack-backed automated payout batches, reconciliation, exception handling, and immutable wallet payout debits.
+- Scoped report snapshots, report PDF rendering, controlled booking chat, dedicated support inboxes, review moderation, observability, backup status, restore tracking, and Filament dispute, payout, support, health, and report resources.
 
-Operations booking exception queues, deeper review moderation, payout automation, provider transfer callbacks, and observability/recovery workflows are planned later phases. The customer guides describe current booking behavior and label not-yet-built flows clearly.
+## Process Runbooks
+
+| Process | Guide |
+| --- | --- |
+| Artisan verification and activation | [Process](../processes/artisan-verification-and-activation.md) |
+| Marketplace discovery and listing visibility | [Process](../processes/marketplace-discovery-and-listing-visibility.md) |
+| Booking trust lifecycle | [Process](../processes/booking-trust-lifecycle.md) |
+| Finance operations | [Process](../processes/finance-operations.md) |
+| Communications and support operations | [Process](../processes/communications-and-support-operations.md) |
+| Platform operations and recovery | [Process](../processes/platform-operations-and-recovery.md) |
 
 ## Phase 6-7 Booking And Trust Surfaces
 
 | Surface | Purpose |
 | --- | --- |
-| `/marketplace` | Search verified subscribed artisans by keyword, service category, and geography. |
+| `/marketplace` | Search verified subscribed artisans by keyword, service category, geography, or opt-in proximity. |
 | `/marketplace/artisans/{artisanProfile}` | View a public artisan profile, services, location, availability, and portfolio. |
 | `/marketplace/artisans/{artisanProfile}/book` | Create a guest or registered booking request. |
 | `/booking-tracker/{trackerCode}?token=...` | Secure tracker for a single booking context. |
