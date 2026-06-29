@@ -1,7 +1,7 @@
 # Phased Lartisan Implementation Plan
 
 ## Summary
-- Current state: all scoped implementation phases, Phase 0 through Phase 15, are complete, including marketplace, booking, payment, escrow, notifications, customer-depth, chat, support inbox, trust and moderation, automated payout operations, reporting, observability, and recovery workflows. Phase 16 is the next planned marketplace expansion for opt-in proximity discovery.
+- Current state: all scoped implementation phases, Phase 0 through Phase 16, are complete, including marketplace, booking, payment, escrow, notifications, customer-depth, chat, support inbox, trust and moderation, automated payout operations, reporting, observability, recovery workflows, and opt-in proximity marketplace discovery.
 - Build order: environment and quality gates, database foundations, backend action workflows, Inertia customer/artisan UI, Filament operations UI, then hardening and BRS expansion tracks.
 - Locked decisions: PHP 8.5, Larastan with no baseline, 100% coverage after every phase, Teams represent artisan business workspaces, local OTP first, pilot geography seed, Paystack-first escrow, and Phase 10 notification channels are email and WhatsApp for now.
 
@@ -125,12 +125,12 @@ Goal: make operations and production readiness visible before silent failures be
 
 **Phase 16: Location-Aware Marketplace Proximity Discovery**
 Goal: make marketplace discovery prioritize nearby verified artisan services using opt-in browser location, similar to Facebook Marketplace location behavior.
-- DB/data: add verified artisan marketplace coordinates or document a reliable coordinate source from verified shop or field-visit data; keep the existing State, LGA, Territory, and service-radius model.
-- Backend: extend marketplace search request handling and `SearchArtisans` for `near_lat`, `near_lng`, and `radius_km`, proximity ranking, approximate distance payloads, and manual geography filters that remain authoritative.
-- Frontend: add a `Use my location` marketplace control, radius selector, clear-location state, permission-denied/unavailable fallback, distance labels on artisan cards, and the existing State/LGA/Territory filters.
+- DB/data: persist verified artisan marketplace coordinates on artisan profiles from completed field visits with coordinates; keep the existing State, LGA, Territory, and service-radius model.
+- Backend: validate marketplace `near_lat`, `near_lng`, and `radius_km` inputs, extend `SearchArtisans` for proximity ranking and radius filtering, emit approximate distance payloads, and keep manual geography filters authoritative.
+- Frontend: provide a `Use my location` marketplace control, radius selector, clear-location state, permission-denied/unavailable fallback, distance labels on artisan cards, and the existing State/LGA/Territory filters.
 - Privacy: round browser coordinates before request, use them only for the active search, and do not persist precise user coordinates to customer, profile, or session records.
-- Types: extend marketplace TypeScript filter and artisan-card types for proximity filters and optional `distanceKm` / distance-label fields.
-- Tests: validate proximity query inputs, nearby ranking, manual-filter interaction, no coordinate persistence, geolocation success/denial/unavailable UI states, clear-location behavior, and radius changes.
+- Types: include marketplace TypeScript filter and artisan-card fields for proximity filters and optional `distanceKm` / distance-label values.
+- Tests: validate proximity query inputs, nearby ranking, manual-filter interaction, no coordinate persistence, field-visit coordinate publishing, geolocation success/denial/unavailable UI states, clear-location behavior, and radius changes.
 
 ## Interfaces And Patterns
 - Every meaningful write uses an `App\Actions\{Domain}\...` action; controllers and Filament actions stay thin.

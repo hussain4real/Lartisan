@@ -41,6 +41,7 @@ class MarketplaceController extends Controller
         $state = $request->state();
         $localGovernment = $request->localGovernment();
         $territory = $request->territory();
+        $proximity = $request->proximity();
 
         return Inertia::render('marketplace/Index', [
             'filters' => [
@@ -49,6 +50,9 @@ class MarketplaceController extends Controller
                 'stateId' => $state?->id,
                 'localGovernmentId' => $localGovernment?->id,
                 'territoryId' => $territory?->id,
+                'nearLat' => $proximity?->roundedLatitude(),
+                'nearLng' => $proximity?->roundedLongitude(),
+                'radiusKm' => $proximity?->radiusKm,
             ],
             'categories' => $this->categoryOptions(),
             'states' => $this->stateOptions(),
@@ -58,6 +62,7 @@ class MarketplaceController extends Controller
                 state: $state,
                 localGovernment: $localGovernment,
                 territory: $territory,
+                proximity: $proximity,
                 perPage: self::MARKETPLACE_ARTISANS_PER_PAGE,
                 page: $request->page(),
                 path: route('marketplace.index'),
@@ -194,7 +199,7 @@ class MarketplaceController extends Controller
     }
 
     /**
-     * @return array{id: int, businessName: string, publicSummary: string|null, availabilityStatus: string, verificationStatus: string, subscriptionStatus: string, yearsExperience: int|null, serviceRadiusKm: int|null, publicPhone: string|null, publicEmail: string|null, location: string, servicesCount: int, isFavorite: bool, services: array<int, array{id: int, title: string, description: string|null, startingPrice: string|null, currencyCode: string, category: array{id: int, name: string}}>, portfolio: array<int, array{id: int, name: string, url: string}>}
+     * @return array{id: int, businessName: string, publicSummary: string|null, availabilityStatus: string, verificationStatus: string, subscriptionStatus: string, yearsExperience: int|null, serviceRadiusKm: int|null, publicPhone: string|null, publicEmail: string|null, location: string, distanceKm: float|null, distanceLabel: string|null, servicesCount: int, isFavorite: bool, services: array<int, array{id: int, title: string, description: string|null, startingPrice: string|null, currencyCode: string, category: array{id: int, name: string}}>, portfolio: array<int, array{id: int, name: string, url: string}>}
      */
     private function artisanDetailPayload(ArtisanProfile $profile, mixed $user = null): array
     {
@@ -223,10 +228,12 @@ class MarketplaceController extends Controller
     }
 
     /**
-     * @return array{id: int, businessName: string, availabilityStatus: string, verificationStatus: string, subscriptionStatus: string, location: string, servicesCount: int}
+     * @return array{id: int, businessName: string, availabilityStatus: string, verificationStatus: string, subscriptionStatus: string, location: string, distanceKm: float|null, distanceLabel: string|null, servicesCount: int}
      */
     private function artisanCardPayload(ArtisanProfile $profile): array
     {
+        $distanceKm = $this->distanceKm($profile);
+
         return [
             'id' => $profile->id,
             'businessName' => $profile->business_name,
@@ -234,6 +241,8 @@ class MarketplaceController extends Controller
             'verificationStatus' => $profile->verification_status->value,
             'subscriptionStatus' => $profile->subscription_status->value,
             'location' => $this->locationLabel($profile),
+            'distanceKm' => $distanceKm,
+            'distanceLabel' => $distanceKm === null ? null : $this->distanceLabel($distanceKm),
             'servicesCount' => $profile->services->count(),
         ];
     }
@@ -277,6 +286,22 @@ class MarketplaceController extends Controller
             $profile->localGovernment?->name,
             $profile->state?->name,
         ])->filter()->implode(', ');
+    }
+
+    private function distanceKm(ArtisanProfile $profile): ?float
+    {
+        $distance = $profile->getAttribute('distance_km');
+
+        return is_numeric($distance) ? (float) $distance : null;
+    }
+
+    private function distanceLabel(float $distanceKm): string
+    {
+        if ($distanceKm < 1) {
+            return __('Less than 1 km away');
+        }
+
+        return __(':distance km away', ['distance' => number_format($distanceKm, 1)]);
     }
 
     /**

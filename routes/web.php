@@ -36,6 +36,7 @@ use App\Http\Controllers\WaitlistHostRedirectController;
 use App\Http\Controllers\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\Webhooks\WhatsappWebhookController;
 use App\Http\Middleware\EnsureTeamMembership;
+use App\Http\Middleware\NormalizeMarketplaceProximityQuery;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -87,7 +88,9 @@ Route::post('webhooks/whatsapp', WhatsappWebhookController::class)
     ->middleware('throttle:whatsapp-webhooks')
     ->name('webhooks.whatsapp');
 
-Route::get('marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('marketplace', [MarketplaceController::class, 'index'])
+    ->middleware(NormalizeMarketplaceProximityQuery::class)
+    ->name('marketplace.index');
 Route::post('marketplace/booking-otp', BookingOtpController::class)
     ->middleware('throttle:identity-otp')
     ->name('marketplace.booking-otp.issue');

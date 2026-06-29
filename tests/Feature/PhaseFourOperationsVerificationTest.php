@@ -256,9 +256,16 @@ test('filament operation pages dispatch verification actions', function () {
             'status' => FieldVisitStatus::Completed->value,
             'territory_id' => $wuseMarket->id,
             'visited_at' => now()->toDateTimeString(),
+            'latitude' => '9.0764780',
+            'longitude' => '7.4686590',
             'notes' => 'Visited from the agent queue.',
         ])
         ->assertHasNoTableActionErrors();
+
+    $fieldVisitProfile = $fieldVisitSubmission->artisanProfile()->firstOrFail()->refresh();
+
+    expect($fieldVisitProfile->marketplace_latitude)->toBe('9.0764780')
+        ->and($fieldVisitProfile->marketplace_longitude)->toBe('7.4686590');
 
     $rawFieldVisitSubmission = KycSubmission::factory()->submitted()->create([
         'artisan_profile_id' => phaseFourProfileFor($amac, $wuseMarket)->id,

@@ -6,9 +6,11 @@ use App\Models\LocalGovernment;
 use App\Models\ServiceCategory;
 use App\Models\State;
 use App\Models\Territory;
+use App\Support\Marketplace\ProximitySearch;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class SearchArtisansRequest extends FormRequest
 {
@@ -49,7 +51,32 @@ class SearchArtisansRequest extends FormRequest
                 'integer',
                 Rule::exists((new Territory)->getTable(), 'id')->where('active', true),
             ],
+            'near_lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'near_lng' => ['nullable', 'numeric', 'between:-180,180'],
+            'radius_km' => ['nullable', 'integer', 'min:1', 'max:100'],
             'page' => ['nullable', 'integer', 'min:1'],
+        ];
+    }
+
+    /**
+     * @return array<int, callable(Validator): void>
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator): void {
+                $hasLatitude = $this->filled('near_lat');
+                $hasLongitude = $this->filled('near_lng');
+                $hasRadius = $this->filled('radius_km');
+
+                if ($hasLatitude !== $hasLongitude) {
+                    $validator->errors()->add('near_lng', __('Latitude and longitude are required together.'));
+                }
+
+                if ($hasRadius && (! $hasLatitude || ! $hasLongitude)) {
+                    $validator->errors()->add('radius_km', __('Radius requires a nearby location.'));
+                }
+            },
         ];
     }
 
@@ -117,5 +144,23 @@ class SearchArtisansRequest extends FormRequest
     public function page(): int
     {
         return max(1, $this->integer('page', 1));
+    }
+
+    public function proximity(): ?ProximitySearch
+    {
+        if (! $this->filled('near_lat') || ! $this->filled('near_lng')) {
+            return null;
+        }
+
+        $latitude = $this->string('near_lat')->toString();
+        $longitude = $this->string('near_lng')->toString();
+
+        return new ProximitySearch(
+            latitude: round((float) $latitude, 3),
+            longitude: round((float) $longitude, 3),
+            radiusKm: $this->filled('radius_km')
+                ? $this->integer('radius_km')
+                : ProximitySearch::DEFAULT_RADIUS_KM,
+        );
     }
 }
