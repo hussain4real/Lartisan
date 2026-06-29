@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { Head, InfiniteScroll, Link, router } from '@inertiajs/vue3';
-import { Search, ShieldCheck, SlidersHorizontal } from 'lucide-vue-next';
+import {
+    MapPin,
+    Navigation,
+    Search,
+    ShieldCheck,
+    SlidersHorizontal,
+    X,
+} from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import { Badge } from '@/components/ui/badge';
@@ -31,16 +38,29 @@ type FilterForm = {
     state_id: string;
     local_government_id: string;
     territory_id: string;
+    near_lat: string;
+    near_lng: string;
+    radius_km: string;
 };
 
 const props = defineProps<Props>();
 const isFiltering = ref(false);
+const locationStatus = ref<'idle' | 'locating' | 'active' | 'error'>(
+    props.filters.nearLat !== null && props.filters.nearLng !== null
+        ? 'active'
+        : 'idle',
+);
+const locationMessage = ref<string | null>(null);
+const radiusOptions = [5, 10, 25, 50, 100];
 const filterForm = reactive<FilterForm>({
     query: props.filters.query ?? '',
     service_category_id: props.filters.serviceCategoryId?.toString() ?? '',
     state_id: props.filters.stateId?.toString() ?? '',
     local_government_id: props.filters.localGovernmentId?.toString() ?? '',
     territory_id: props.filters.territoryId?.toString() ?? '',
+    near_lat: props.filters.nearLat?.toString() ?? '',
+    near_lng: props.filters.nearLng?.toString() ?? '',
+    radius_km: props.filters.radiusKm?.toString() ?? '25',
 });
 
 const localGovernments = computed(() => {
@@ -60,6 +80,16 @@ const territories = computed(() => {
 });
 
 const loadedResultCount = computed(() => props.artisans.data.length);
+const proximityActive = computed(
+    () => filterForm.near_lat !== '' && filterForm.near_lng !== '',
+);
+const displayedLocationMessage = computed(() => {
+    if (locationMessage.value !== null) {
+        return locationMessage.value;
+    }
+
+    return proximityActive.value ? 'Showing nearby artisans.' : null;
+});
 const resultCountLabel = computed(() => {
     const total = props.artisans.total;
     const noun = total === 1 ? 'result' : 'results';
@@ -81,6 +111,19 @@ watch(
         filterForm.local_government_id =
             filters.localGovernmentId?.toString() ?? '';
         filterForm.territory_id = filters.territoryId?.toString() ?? '';
+        filterForm.near_lat = filters.nearLat?.toString() ?? '';
+        filterForm.near_lng = filters.nearLng?.toString() ?? '';
+        filterForm.radius_km = filters.radiusKm?.toString() ?? '25';
+
+        if (filters.nearLat !== null && filters.nearLng !== null) {
+            locationStatus.value = 'active';
+
+            return;
+        }
+
+        if (locationStatus.value !== 'error') {
+            locationStatus.value = 'idle';
+        }
     },
     { deep: true },
 );
@@ -97,6 +140,15 @@ const filterQuery = (): QueryParams => ({
     state_id: filledValue(filterForm.state_id),
     local_government_id: filledValue(filterForm.local_government_id),
     territory_id: filledValue(filterForm.territory_id),
+    near_lat: proximityActive.value
+        ? filledValue(filterForm.near_lat)
+        : undefined,
+    near_lng: proximityActive.value
+        ? filledValue(filterForm.near_lng)
+        : undefined,
+    radius_km: proximityActive.value
+        ? filledValue(filterForm.radius_km || '25')
+        : undefined,
 });
 
 const visitMarketplace = (replace: boolean): void => {
@@ -132,6 +184,57 @@ const applyLocalGovernmentFilter = (): void => {
 
 const submitSearch = (): void => {
     visitMarketplace(false);
+};
+
+const roundedCoordinate = (value: number): string => value.toFixed(3);
+
+const useCurrentLocation = (): void => {
+    if (!navigator.geolocation) {
+        locationStatus.value = 'error';
+        locationMessage.value = 'Location unavailable. Use filters instead.';
+
+        return;
+    }
+
+    locationStatus.value = 'locating';
+    locationMessage.value = null;
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            filterForm.near_lat = roundedCoordinate(position.coords.latitude);
+            filterForm.near_lng = roundedCoordinate(position.coords.longitude);
+            filterForm.radius_km = filterForm.radius_km || '25';
+            locationStatus.value = 'active';
+            locationMessage.value = 'Showing nearby artisans.';
+            visitMarketplace(true);
+        },
+        (error) => {
+            locationStatus.value = 'error';
+            locationMessage.value =
+                error.code === error.PERMISSION_DENIED
+                    ? 'Location permission denied. Use filters instead.'
+                    : 'Location unavailable. Use filters instead.';
+        },
+        {
+            enableHighAccuracy: false,
+            maximumAge: 300000,
+            timeout: 10000,
+        },
+    );
+};
+
+const clearLocation = (): void => {
+    filterForm.near_lat = '';
+    filterForm.near_lng = '';
+    locationStatus.value = 'idle';
+    locationMessage.value = null;
+    visitMarketplace(true);
+};
+
+const applyRadiusFilter = (): void => {
+    if (proximityActive.value) {
+        applyDynamicFilters();
+    }
 };
 </script>
 
@@ -273,6 +376,88 @@ const submitSearch = (): void => {
                     </div>
 
                     <div
+                        class="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-end sm:justify-between"
+                    >
+                        <div class="flex flex-wrap items-end gap-3">
+                            <Button
+                                type="button"
+                                :variant="
+                                    proximityActive ? 'default' : 'outline'
+                                "
+                                :aria-pressed="proximityActive"
+                                :class="
+                                    proximityActive
+                                        ? 'border border-primary shadow-sm ring-2 shadow-primary/20 ring-primary/20'
+                                        : ''
+                                "
+                                :disabled="locationStatus === 'locating'"
+                                data-test="use-location-button"
+                                @click="useCurrentLocation"
+                            >
+                                <MapPin v-if="proximityActive" />
+                                <Navigation v-else />
+                                {{
+                                    locationStatus === 'locating'
+                                        ? 'Locating...'
+                                        : proximityActive
+                                          ? 'Location active'
+                                          : 'Use my location'
+                                }}
+                            </Button>
+
+                            <Badge
+                                v-if="proximityActive"
+                                class="border-primary/30 bg-primary/10 text-primary"
+                                data-test="active-location-indicator"
+                                variant="outline"
+                            >
+                                <MapPin />
+                                Nearby search active
+                            </Badge>
+
+                            <div class="grid gap-2">
+                                <Label for="radius_km">Radius</Label>
+                                <select
+                                    id="radius_km"
+                                    v-model="filterForm.radius_km"
+                                    name="radius_km"
+                                    class="h-9 rounded-md border bg-transparent px-3 text-sm disabled:opacity-60"
+                                    :disabled="!proximityActive"
+                                    data-test="radius-select"
+                                    @change="applyRadiusFilter"
+                                >
+                                    <option
+                                        v-for="radius in radiusOptions"
+                                        :key="radius"
+                                        :value="String(radius)"
+                                    >
+                                        {{ radius }} km
+                                    </option>
+                                </select>
+                            </div>
+
+                            <Button
+                                v-if="proximityActive"
+                                type="button"
+                                variant="ghost"
+                                data-test="clear-location-button"
+                                @click="clearLocation"
+                            >
+                                <X />
+                                Clear
+                            </Button>
+                        </div>
+
+                        <p
+                            v-if="displayedLocationMessage"
+                            class="text-sm text-muted-foreground"
+                            data-test="location-status"
+                        >
+                            {{ displayedLocationMessage }}
+                        </p>
+                    </div>
+
+                    <div
                         class="flex items-center text-sm text-muted-foreground"
                     >
                         <SlidersHorizontal class="mr-2 size-4" />
@@ -316,6 +501,13 @@ const submitSearch = (): void => {
                                 </div>
                                 <p class="text-sm text-muted-foreground">
                                     {{ artisan.location || 'Location pending' }}
+                                </p>
+                                <p
+                                    v-if="artisan.distanceLabel"
+                                    class="flex items-center gap-1 text-sm text-muted-foreground"
+                                >
+                                    <MapPin class="size-3.5" />
+                                    {{ artisan.distanceLabel }}
                                 </p>
                                 <p class="text-sm">
                                     {{ artisan.servicesCount }} active service{{

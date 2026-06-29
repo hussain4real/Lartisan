@@ -25,6 +25,7 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -113,6 +114,16 @@ class KycSubmissionsTable
                         ->pluck('name', 'id')
                         ->all()),
                 DateTimePicker::make('visited_at'),
+                TextInput::make('latitude')
+                    ->label('Latitude')
+                    ->numeric()
+                    ->minValue(-90)
+                    ->maxValue(90),
+                TextInput::make('longitude')
+                    ->label('Longitude')
+                    ->numeric()
+                    ->minValue(-180)
+                    ->maxValue(180),
                 Textarea::make('notes')
                     ->maxLength(2000)
                     ->columnSpanFull(),
@@ -134,6 +145,12 @@ class KycSubmissionsTable
                 $notes = isset($data['notes']) && is_string($data['notes'])
                     ? $data['notes']
                     : null;
+                $latitude = filled($data['latitude'] ?? null) && is_scalar($data['latitude'])
+                    ? (string) $data['latitude']
+                    : null;
+                $longitude = filled($data['longitude'] ?? null) && is_scalar($data['longitude'])
+                    ? (string) $data['longitude']
+                    : null;
 
                 app(RecordFieldVisit::class)->handle(
                     profile: $record->artisanProfile()->firstOrFail(),
@@ -142,6 +159,8 @@ class KycSubmissionsTable
                     territory: $territory,
                     status: $status,
                     visitedAt: $visitedAt,
+                    latitude: $latitude,
+                    longitude: $longitude,
                     notes: $notes,
                 );
             });

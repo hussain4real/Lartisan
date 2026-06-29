@@ -58,6 +58,7 @@ class RecordFieldVisit
             );
 
             $this->transitionVerificationStatus($profile, $areaAgent, $submission, $status);
+            $this->publishMarketplaceCoordinates($profile, $visit, $status, $visitedAt);
 
             return $visit->refresh();
         });
@@ -120,6 +121,23 @@ class RecordFieldVisit
             toStatus: $targetStatus->value,
             reason: 'kyc.field_visit_updated',
         );
+    }
+
+    private function publishMarketplaceCoordinates(
+        ArtisanProfile $profile,
+        FieldVisit $visit,
+        FieldVisitStatus $status,
+        ?DateTimeInterface $visitedAt,
+    ): void {
+        if ($status !== FieldVisitStatus::Completed || $visit->latitude === null || $visit->longitude === null) {
+            return;
+        }
+
+        $profile->update([
+            'marketplace_latitude' => $visit->latitude,
+            'marketplace_longitude' => $visit->longitude,
+            'marketplace_coordinates_verified_at' => $visitedAt ?? now(),
+        ]);
     }
 
     private function blankToNull(?string $value): ?string

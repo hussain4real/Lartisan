@@ -41,6 +41,9 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property int|null $state_id
  * @property int|null $local_government_id
  * @property int|null $territory_id
+ * @property string|null $marketplace_latitude
+ * @property string|null $marketplace_longitude
+ * @property Carbon|null $marketplace_coordinates_verified_at
  * @property int|null $onboarded_by_agent_id
  * @property int|null $approved_by
  * @property Carbon|null $approved_at
@@ -65,6 +68,9 @@ use Spatie\MediaLibrary\MediaCollections\File;
     'state_id',
     'local_government_id',
     'territory_id',
+    'marketplace_latitude',
+    'marketplace_longitude',
+    'marketplace_coordinates_verified_at',
     'onboarded_by_agent_id',
     'approved_by',
     'approved_at',
@@ -422,6 +428,9 @@ class ArtisanProfile extends Model implements HasMedia
             'approved_at' => 'datetime',
             'availability_status' => ArtisanAvailabilityStatus::class,
             'is_public' => 'boolean',
+            'marketplace_coordinates_verified_at' => 'datetime',
+            'marketplace_latitude' => 'decimal:7',
+            'marketplace_longitude' => 'decimal:7',
             'service_radius_km' => 'integer',
             'subscription_status' => ArtisanSubscriptionStatus::class,
             'suspended_at' => 'datetime',
