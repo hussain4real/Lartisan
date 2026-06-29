@@ -182,8 +182,8 @@ test('marketplace proximity ranks nearby verified artisans and exposes distance 
 
     $this->get(route('marketplace.index', [
         'service_category_id' => $category->id,
-        'near_lat' => '9.0764789',
-        'near_lng' => '7.4686599',
+        'near_lat' => '9.076',
+        'near_lng' => '7.469',
         'radius_km' => 50,
     ]))
         ->assertOk()
@@ -275,6 +275,19 @@ test('proximity search applies circular radius filtering after bounding box pref
             ->where('artisans.data.0.businessName', 'Phase 16 Circular Radius Match'));
 });
 
+test('precise proximity coordinates redirect to rounded query parameters', function (): void {
+    $this->get(route('marketplace.index', [
+        'near_lat' => '9.0764789',
+        'near_lng' => '7.4686599',
+        'radius_km' => 25,
+    ]))
+        ->assertRedirect(route('marketplace.index', [
+            'near_lat' => '9.076',
+            'near_lng' => '7.469',
+            'radius_km' => 25,
+        ]));
+});
+
 test('proximity ranking uses distance and business name tie breakers', function (): void {
     $geography = phaseSixteenGeography('Tie Breakers');
     $category = ServiceCategory::factory()->create([
@@ -315,12 +328,25 @@ test('customer proximity queries do not persist precise user coordinates', funct
         'preferences' => ['preferred_channel' => 'whatsapp'],
     ]);
 
-    $this->actingAs($customer)
-        ->get(route('marketplace.index', [
-            'near_lat' => '9.0764789',
-            'near_lng' => '7.4686599',
-            'radius_km' => 25,
-        ]))
+    $this->actingAs($customer);
+
+    $redirectResponse = $this->get(route('marketplace.index', [
+        'near_lat' => '9.0764789',
+        'near_lng' => '7.4686599',
+        'radius_km' => 25,
+    ]));
+
+    $redirectResponse->assertRedirect(route('marketplace.index', [
+        'near_lat' => '9.076',
+        'near_lng' => '7.469',
+        'radius_km' => 25,
+    ]));
+
+    $this->get(route('marketplace.index', [
+        'near_lat' => '9.076',
+        'near_lng' => '7.469',
+        'radius_km' => 25,
+    ]))
         ->assertOk()
         ->assertInertia(fn (Assert $page): Assert => $page
             ->component('marketplace/Index')
