@@ -80,7 +80,7 @@ Current KYC upload collections:
 - Confirmed bookings post booking-credit ledger entries once; repeated release attempts return the existing ledger entry.
 - Payout requests require a verified payout account and sufficient available balance.
 - Approved payout requests post immutable payout-debit ledger entries.
-- Failed payout processing attempts remain visible in payout history and may be retried by operations.
+- Automated payout attempts, failed transfers, uncertain transfers, reversals, and finance exceptions remain visible in payout history with safe tracking details.
 
 ## Dispute Rules
 
@@ -89,7 +89,14 @@ Current KYC upload collections:
 - Dispute evidence is private to involved parties and authorized operations users.
 - Formal operational decisions are handled through scoped Filament queues.
 
+## Process Runbooks
+
+- [Artisan verification and activation](../processes/artisan-verification-and-activation.md)
+- [Marketplace discovery and listing visibility](../processes/marketplace-discovery-and-listing-visibility.md)
+- [Booking trust lifecycle](../processes/booking-trust-lifecycle.md)
+- [Finance operations](../processes/finance-operations.md)
+
 ## Current Limitations
 
 - Booking chat is available only for registered customer bookings while they are requested, accepted, paid, escrowed, or in progress; closed booking chats remain readable but not writable.
-- Payout account self-service, payout automation, and artisan review responses are planned later.
+- Offline-first field support and a dedicated mobile field app are not implemented yet.

@@ -18,6 +18,7 @@ Super Admins govern the whole Lartisan platform. They own global access, risk po
 - Review and resolve dispute queues across all states, LGAs, and territories.
 - Approve and process payout requests, including failed-attempt recovery.
 - Generate global report snapshots and render report documents.
+- Monitor provider health, queues, failed jobs, backups, restore tests, scheduler freshness, and recovery signals.
 
 ## Standard Workflow
 
@@ -28,8 +29,8 @@ Super Admins govern the whole Lartisan platform. They own global access, risk po
 5. Audit escalated or unusual verification decisions.
 6. Review territory coverage gaps or repeated reassignment patterns.
 7. Coordinate finance follow-up for payment, wallet, payout, or subscription anomalies.
-8. Review dispute, payout, and report resources in the operations panel.
-9. Approve, record failed payout attempts, or mark manual payouts as paid where policy allows.
+8. Review dispute, payout, support, health, and report resources in the operations panel.
+9. Approve payout requests, monitor automated payout batches, reconcile exceptions, or use audited manual fallback where policy allows.
 
 ## Decision Rules
 
@@ -48,8 +49,14 @@ Super Admins govern the whole Lartisan platform. They own global access, risk po
 - Role or permission changes.
 - Final decisions on severe operational incidents.
 
+## Process Runbooks
+
+- [Artisan verification and activation](../processes/artisan-verification-and-activation.md)
+- [Finance operations](../processes/finance-operations.md)
+- [Communications and support operations](../processes/communications-and-support-operations.md)
+- [Platform operations and recovery](../processes/platform-operations-and-recovery.md)
+
 ## Current Limitations
 
 - Subscription plan management is seeded in code; a Super Admin plan-management UI is not implemented yet.
-- Automated provider transfer dispatch, payout webhooks for transfers, and scheduled payout batches are planned later.
-- Operations booking exception queues and dedicated review moderation panels are planned later.
+- Booking exceptions should be handled through booking, dispute, and support records rather than a separate booking-exception panel.

@@ -9,6 +9,7 @@ Guest Customers can make limited one-off booking requests without creating a ful
 ## Current Capabilities
 
 - Browse verified approved artisans with active subscriptions on `/marketplace`.
+- Use opt-in proximity discovery or manual State, LGA, and Territory filters.
 - View public artisan profiles and active service catalog entries.
 - Submit a booking request with name, phone, optional email, job notes, service address, and optional attachments.
 - Receive a secure booking tracker link limited to that booking.
@@ -41,8 +42,13 @@ Guest Customers can make limited one-off booking requests without creating a ful
 - Payment issue: keep the payment reference and phone number used for booking.
 - Safety concern: contact platform support through the available support channel.
 
+## Process Runbooks
+
+- [Marketplace discovery and listing visibility](../processes/marketplace-discovery-and-listing-visibility.md)
+- [Booking trust lifecycle](../processes/booking-trust-lifecycle.md)
+- [Communications and support operations](../processes/communications-and-support-operations.md)
+
 ## Current Limitations
 
 - Guests use tracker links, OTP, notifications, payment, review, and dispute flows instead of persistent in-app chat.
 - Guest account claiming is separate from agent-created artisan account claiming.
-- Payout automation, provider transfer callbacks, deeper review moderation, and observability/recovery workflows are planned later.

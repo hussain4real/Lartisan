@@ -18,6 +18,7 @@ Local Government Admins own day-to-day Lartisan operations inside one LGA. They 
 - Review, escalate, or resolve local booking and review disputes.
 - Monitor local support cases created from disputes.
 - Generate LGA-scoped report snapshots.
+- Review local review moderation and support queues where policy allows.
 
 ## Standard Workflow
 
@@ -54,8 +55,15 @@ Local Government Admins own day-to-day Lartisan operations inside one LGA. They 
 - Local suspensions, unless a state-level policy or risk issue is involved.
 - Standard local dispute resolution and support-case follow-up.
 
+## Process Runbooks
+
+- [Artisan verification and activation](../processes/artisan-verification-and-activation.md)
+- [Booking trust lifecycle](../processes/booking-trust-lifecycle.md)
+- [Communications and support operations](../processes/communications-and-support-operations.md)
+- [Platform operations and recovery](../processes/platform-operations-and-recovery.md)
+
 ## Current Limitations
 
-- Operations booking exception queues and dedicated review moderation panels are planned later.
+- Booking exceptions should be handled through booking, dispute, and support records rather than a separate booking-exception panel.
 - Payout approval remains a Super Admin finance responsibility.
 - LGA finance reporting is limited to scoped report snapshots and current operational metrics.

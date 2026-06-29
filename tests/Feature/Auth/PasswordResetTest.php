@@ -22,7 +22,19 @@ test('reset password link can be requested', function () {
 
     $this->post(route('password.email'), ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class);
+    Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $notification) use ($user): bool {
+        $mail = $notification->toMail($user);
+        $html = (string) $mail->render();
+
+        expect($mail->subject)->toBe('Reset your password')
+            ->and($mail->actionText)->toBe('Reset Password')
+            ->and($mail->actionUrl)->toContain($notification->token)
+            ->and($html)->toContain('Lartisan')
+            ->and($html)->toContain('Verified local services, booking updates, secure payments, and support with clear accountability.')
+            ->and($html)->toContain('background-color: #002172');
+
+        return true;
+    });
 });
 
 test('reset password screen can be rendered', function () {

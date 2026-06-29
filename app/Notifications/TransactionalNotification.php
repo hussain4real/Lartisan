@@ -28,10 +28,14 @@ class TransactionalNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $recipientName = trim((string) $this->delivery->recipient_name);
+
         return (new MailMessage)
             ->subject($this->delivery->subject)
-            ->greeting('Hello '.($this->delivery->recipient_name ?? 'there'))
-            ->line($this->delivery->body);
+            ->greeting($recipientName !== '' ? __('Hello :name,', ['name' => $recipientName]) : __('Hello,'))
+            ->line($this->delivery->body)
+            ->line(__('Open Lartisan to review the latest status and any next steps.'))
+            ->action(__('Open Lartisan'), url('/'));
     }
 
     /**

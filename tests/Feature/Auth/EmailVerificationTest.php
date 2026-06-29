@@ -2,8 +2,13 @@
 
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
+
+test('user accounts require email verification', function () {
+    expect(User::factory()->make())->toBeInstanceOf(MustVerifyEmail::class);
+});
 
 test('email verification screen can be rendered', function () {
     $user = User::factory()->unverified()->create();
@@ -98,4 +103,36 @@ test('already verified user visiting verification link is redirected without fir
 
     Event::assertNotDispatched(Verified::class);
     expect($freshUser->hasVerifiedEmail())->toBeTrue();
+});
+
+test('unverified users are redirected from protected application routes', function () {
+    $user = User::factory()->unverified()->create();
+    $team = $user->teams()->where('is_personal', true)->firstOrFail();
+
+    $routes = [
+        route('dashboard', ['current_team' => $team]),
+        route('artisan.onboarding.create', ['current_team' => $team]),
+        route('customer.bookings.index'),
+        route('identity.phone.edit'),
+        route('security.edit'),
+        route('teams.index'),
+    ];
+
+    foreach ($routes as $protectedRoute) {
+        $this
+            ->actingAs($user)
+            ->get($protectedRoute)
+            ->assertRedirect(route('verification.notice'));
+    }
+});
+
+test('unverified users can still browse public marketplace and correct profile email', function () {
+    $user = User::factory()->unverified()->create();
+
+    $this->get(route('marketplace.index'))->assertOk();
+
+    $this
+        ->actingAs($user)
+        ->get(route('profile.edit'))
+        ->assertOk();
 });
