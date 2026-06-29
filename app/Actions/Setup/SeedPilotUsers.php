@@ -120,6 +120,8 @@ class SeedPilotUsers
                 $localGovernment,
                 $wuseMarket,
             );
+            $this->publishPilotMarketplaceCoordinates($artisanProfile);
+
             $categories = $this->upsertServiceCategories();
             $artisanService = $this->upsertPilotService($artisanProfile, $categories['electrical']);
             $kycSubmission = $this->upsertPilotKyc($artisanProfile, $artisan);
@@ -297,6 +299,15 @@ class SeedPilotUsers
             onboardedByAgent: $areaAgent,
             internalNotes: 'Pilot artisan seeded for onboarding and operations demos.',
         );
+    }
+
+    private function publishPilotMarketplaceCoordinates(ArtisanProfile $artisanProfile): void
+    {
+        $artisanProfile->forceFill([
+            'marketplace_latitude' => '9.0764780',
+            'marketplace_longitude' => '7.4686590',
+            'marketplace_coordinates_verified_at' => now()->subDay(),
+        ])->save();
     }
 
     /**

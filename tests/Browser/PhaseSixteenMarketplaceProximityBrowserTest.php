@@ -18,6 +18,9 @@ test('phase sixteen browser proximity controls handle location success clearing 
         ->assertSee('Use my location')
         ->click('@use-location-button')
         ->assertSee('Showing nearby artisans.')
+        ->assertSee('Nearby search active')
+        ->assertAriaAttribute('@use-location-button', 'pressed', 'true')
+        ->assertVisible('@active-location-indicator')
         ->assertQueryStringHas('near_lat', '9.076')
         ->assertQueryStringHas('near_lng', '7.469')
         ->assertQueryStringHas('radius_km', '25')
@@ -25,6 +28,8 @@ test('phase sixteen browser proximity controls handle location success clearing 
         ->select('@radius-select', '50')
         ->assertQueryStringHas('radius_km', '50')
         ->click('@clear-location-button')
+        ->assertAriaAttribute('@use-location-button', 'pressed', 'false')
+        ->assertNotPresent('@active-location-indicator')
         ->assertQueryStringMissing('near_lat')
         ->assertQueryStringMissing('near_lng')
         ->assertNoSmoke();

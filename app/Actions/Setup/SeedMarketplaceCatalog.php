@@ -69,7 +69,7 @@ class SeedMarketplaceCatalog
                 territory: $territory,
             );
 
-            $this->publishProfile($profile, $business);
+            $this->publishProfile($profile, $business, $territory);
             $this->upsertSubscription($profile, $plan);
 
             for ($offeringIndex = 0; $offeringIndex < self::OFFERINGS_PER_ARTISAN; $offeringIndex++) {
@@ -171,9 +171,10 @@ class SeedMarketplaceCatalog
     /**
      * @param  array{owner: string, business_name: string, summary: string, years_experience: int, radius: int}  $business
      */
-    private function publishProfile(ArtisanProfile $profile, array $business): void
+    private function publishProfile(ArtisanProfile $profile, array $business, Territory $territory): void
     {
         $phoneNumber = str_pad((string) (8070000000 + $profile->id), 10, '0', STR_PAD_LEFT);
+        $coordinates = $this->marketplaceCoordinates($territory);
 
         $profile->forceFill([
             'public_summary' => $business['summary'],
@@ -181,6 +182,9 @@ class SeedMarketplaceCatalog
             'service_radius_km' => $business['radius'],
             'public_phone' => '+234'.$phoneNumber,
             'public_email' => Str::slug($business['business_name']).'@lartisan.test',
+            'marketplace_latitude' => $coordinates['latitude'],
+            'marketplace_longitude' => $coordinates['longitude'],
+            'marketplace_coordinates_verified_at' => now()->subDay(),
             'verification_status' => ArtisanVerificationStatus::Approved,
             'subscription_status' => ArtisanSubscriptionStatus::Active,
             'availability_status' => $profile->id % 3 === 0
@@ -189,6 +193,37 @@ class SeedMarketplaceCatalog
             'approved_at' => now(),
             'is_public' => true,
         ])->save();
+    }
+
+    /**
+     * @return array{latitude: string, longitude: string}
+     */
+    private function marketplaceCoordinates(Territory $territory): array
+    {
+        $coordinates = [
+            'wuse-market' => ['latitude' => '9.0764780', 'longitude' => '7.4686590'],
+            'garki-market' => ['latitude' => '9.0272000', 'longitude' => '7.4969000'],
+            'gwarinpa-estate' => ['latitude' => '9.1056000', 'longitude' => '7.4084000'],
+            'jabi-community' => ['latitude' => '9.0735000', 'longitude' => '7.4253000'],
+            'bwari-central-ward' => ['latitude' => '9.2799000', 'longitude' => '7.3806000'],
+            'kubwa-trade-cluster' => ['latitude' => '9.1538000', 'longitude' => '7.3419000'],
+            'gwagwalada-market' => ['latitude' => '8.9423000', 'longitude' => '7.0818000'],
+            'zuba-community' => ['latitude' => '9.1238000', 'longitude' => '7.2331000'],
+            'kuje-market' => ['latitude' => '8.8799000', 'longitude' => '7.2276000'],
+            'kwali-market' => ['latitude' => '8.8869000', 'longitude' => '7.0186000'],
+            'computer-village-cluster' => ['latitude' => '6.5971000', 'longitude' => '3.3420000'],
+            'alausa-secretariat' => ['latitude' => '6.6169000', 'longitude' => '3.3575000'],
+            'yaba-market' => ['latitude' => '6.5158000', 'longitude' => '3.3772000'],
+            'sabon-gari-market' => ['latitude' => '12.0022000', 'longitude' => '8.5209000'],
+            'kofar-wambai-cluster' => ['latitude' => '12.0006000', 'longitude' => '8.5171000'],
+            'farm-centre-market' => ['latitude' => '12.0335000', 'longitude' => '8.5166000'],
+            'mile-one-market' => ['latitude' => '4.7892000', 'longitude' => '6.9978000'],
+            'trans-amadi-cluster' => ['latitude' => '4.8156000', 'longitude' => '7.0449000'],
+            'kawo-market' => ['latitude' => '10.5721000', 'longitude' => '7.4385000'],
+            'narayi-community' => ['latitude' => '10.4657000', 'longitude' => '7.4389000'],
+        ];
+
+        return $coordinates[$territory->slug] ?? $coordinates['wuse-market'];
     }
 
     private function upsertSubscription(ArtisanProfile $profile, SubscriptionPlan $plan): Subscription

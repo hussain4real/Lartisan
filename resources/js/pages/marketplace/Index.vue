@@ -381,18 +381,39 @@ const applyRadiusFilter = (): void => {
                         <div class="flex flex-wrap items-end gap-3">
                             <Button
                                 type="button"
-                                variant="outline"
+                                :variant="
+                                    proximityActive ? 'default' : 'outline'
+                                "
+                                :aria-pressed="proximityActive"
+                                :class="
+                                    proximityActive
+                                        ? 'border border-primary shadow-sm ring-2 shadow-primary/20 ring-primary/20'
+                                        : ''
+                                "
                                 :disabled="locationStatus === 'locating'"
                                 data-test="use-location-button"
                                 @click="useCurrentLocation"
                             >
-                                <Navigation />
+                                <MapPin v-if="proximityActive" />
+                                <Navigation v-else />
                                 {{
                                     locationStatus === 'locating'
                                         ? 'Locating...'
-                                        : 'Use my location'
+                                        : proximityActive
+                                          ? 'Location active'
+                                          : 'Use my location'
                                 }}
                             </Button>
+
+                            <Badge
+                                v-if="proximityActive"
+                                class="border-primary/30 bg-primary/10 text-primary"
+                                data-test="active-location-indicator"
+                                variant="outline"
+                            >
+                                <MapPin />
+                                Nearby search active
+                            </Badge>
 
                             <div class="grid gap-2">
                                 <Label for="radius_km">Radius</Label>

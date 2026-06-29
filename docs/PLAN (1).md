@@ -125,12 +125,12 @@ Goal: make operations and production readiness visible before silent failures be
 
 **Phase 16: Location-Aware Marketplace Proximity Discovery**
 Goal: make marketplace discovery prioritize nearby verified artisan services using opt-in browser location, similar to Facebook Marketplace location behavior.
-- DB/data: persist verified artisan marketplace coordinates on artisan profiles from completed field visits with coordinates; keep the existing State, LGA, Territory, and service-radius model.
+- DB/data: persist verified artisan marketplace coordinates on artisan profiles from completed field visits with coordinates; keep the existing State, LGA, Territory, and service-radius model; ensure pilot/catalog seed data includes verified demo coordinates for local and staging marketplace testing.
 - Backend: validate marketplace `near_lat`, `near_lng`, and `radius_km` inputs, extend `SearchArtisans` for proximity ranking and radius filtering, emit approximate distance payloads, and keep manual geography filters authoritative.
 - Frontend: provide a `Use my location` marketplace control, radius selector, clear-location state, permission-denied/unavailable fallback, distance labels on artisan cards, and the existing State/LGA/Territory filters.
 - Privacy: round browser coordinates before request, use them only for the active search, and do not persist precise user coordinates to customer, profile, or session records.
 - Types: include marketplace TypeScript filter and artisan-card fields for proximity filters and optional `distanceKm` / distance-label values.
-- Tests: validate proximity query inputs, nearby ranking, manual-filter interaction, no coordinate persistence, field-visit coordinate publishing, geolocation success/denial/unavailable UI states, clear-location behavior, and radius changes.
+- Tests: validate proximity query inputs, nearby ranking, manual-filter interaction, no coordinate persistence, field-visit coordinate publishing, seeded marketplace coordinate coverage, geolocation success/denial/unavailable UI states, clear-location behavior, and radius changes.
 
 ## Interfaces And Patterns
 - Every meaningful write uses an `App\Actions\{Domain}\...` action; controllers and Filament actions stay thin.

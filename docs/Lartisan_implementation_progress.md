@@ -720,6 +720,7 @@ Add opt-in location-aware marketplace discovery so users can see nearby verified
 - Marketplace query inputs are `near_lat`, `near_lng`, and `radius_km`.
 - Manual category, State, LGA, and Territory filters remain visible and authoritative.
 - Verified artisan marketplace coordinates are persisted on artisan profiles from completed field visits that include coordinates.
+- Pilot and catalog seeders publish verified demo marketplace coordinates to `artisan_profiles` for local and staging proximity testing.
 - Precise user coordinates are rounded before request, used only for the active marketplace search, and not persisted to customer, profile, or session records.
 - No new third-party dependencies were added; the implementation uses the browser Geolocation API and app-side distance calculation compatible with existing tests.
 
@@ -733,6 +734,7 @@ Add opt-in location-aware marketplace discovery so users can see nearby verified
 ### Checklist
 
 - [x] Add verified artisan marketplace coordinates from completed field-visit data.
+- [x] Add verified demo marketplace coordinates to pilot and catalog seed data.
 - [x] Extend marketplace request validation for `near_lat`, `near_lng`, and `radius_km`.
 - [x] Extend `SearchArtisans` for proximity ranking, radius filtering where appropriate, and manual-filter interaction.
 - [x] Add approximate distance payloads for artisan cards when proximity search is active.
@@ -744,6 +746,7 @@ Add opt-in location-aware marketplace discovery so users can see nearby verified
 
 - Marketplace proximity query contract using `near_lat`, `near_lng`, and `radius_km`.
 - Artisan marketplace coordinate persistence backed by completed field visits with coordinates.
+- Pilot and catalog seeders with verified demo marketplace coordinates for seeded discovery smoke coverage.
 - Privacy-safe browser-location workflow that rounds browser coordinates and does not persist precise user coordinates.
 - Nearby artisan ranking, service-radius filtering, and distance display for verified active marketplace results.
 - Existing manual location filters preserved as explicit user controls.
@@ -757,7 +760,9 @@ Add opt-in location-aware marketplace discovery so users can see nearby verified
 - Marketplace cards can show approximate distance when proximity is active.
 - Declined or unavailable geolocation falls back cleanly to manual location filters.
 - No precise user coordinates are persisted.
+- Seeded pilot/catalog artisans include verified marketplace coordinates and can be discovered through proximity search.
 - Focused Phase 16 feature coverage passed with `php artisan test --compact tests/Feature/PhaseSixteenMarketplaceProximityTest.php`.
+- Seeder coverage passed with `php artisan test --compact tests/Feature/PilotUserSeederTest.php`.
 - Phase 16 browser coverage passed with `php artisan test --compact tests/Browser/PhaseSixteenMarketplaceProximityBrowserTest.php`.
 - Filament field-visit coordinate capture is covered by the Phase 4 verification action test.
 - The full coverage gate passed with `php artisan test --coverage --min=100 --compact` at 100.0% coverage.
