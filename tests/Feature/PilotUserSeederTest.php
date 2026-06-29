@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Bookings\SearchArtisans;
 use App\Actions\Setup\SeedMarketplaceCatalog;
 use App\Enums\AdminProfileStatus;
 use App\Enums\ArtisanServiceStatus;
@@ -20,6 +21,7 @@ use App\Models\Subscription;
 use App\Models\Team;
 use App\Models\Territory;
 use App\Models\User;
+use App\Support\Marketplace\ProximitySearch;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\GeographySeeder;
 use Database\Seeders\PilotUserSeeder;
@@ -90,6 +92,9 @@ test('pilot user seeder creates idempotent role scoped demo accounts', function 
     expect($artisanProfile->state()->firstOrFail()->is($fct))->toBeTrue();
     expect($artisanProfile->localGovernment()->firstOrFail()->is($amac))->toBeTrue();
     expect($artisanProfile->territory()->firstOrFail()->slug)->toBe('wuse-market');
+    expect($artisanProfile->marketplace_latitude)->toBe('9.0764780');
+    expect($artisanProfile->marketplace_longitude)->toBe('7.4686590');
+    expect($artisanProfile->marketplace_coordinates_verified_at)->not->toBeNull();
     expect($artisanProfile->services()->firstOrFail()->status)->toBe(ArtisanServiceStatus::Active);
     expect($artisanProfile->kycSubmissions()->firstOrFail()->status)->toBe(ArtisanVerificationStatus::Submitted);
     expect($customer->artisanProfiles()->exists())->toBeFalse();
@@ -118,12 +123,26 @@ test('pilot user seeder creates a broad marketplace catalog', function () {
     expect($catalogProfiles->pluck('state_id')->unique()->count())->toBeGreaterThanOrEqual(5);
     expect($catalogProfiles->pluck('local_government_id')->unique()->count())->toBeGreaterThanOrEqual(10);
     expect($catalogProfiles->pluck('territory_id')->unique()->count())->toBeGreaterThanOrEqual(20);
+    expect($catalogProfiles->pluck('marketplace_latitude')->filter()->count())->toBe(20);
+    expect($catalogProfiles->pluck('marketplace_longitude')->filter()->count())->toBe(20);
+    expect($catalogProfiles->pluck('marketplace_coordinates_verified_at')->filter()->count())->toBe(20);
+    expect($catalogProfiles
+        ->map(fn (ArtisanProfile $profile): string => $profile->marketplace_latitude.','.$profile->marketplace_longitude)
+        ->unique()
+        ->count())->toBe(20);
 
     $catalogProfiles->each(function (ArtisanProfile $profile): void {
         expect($profile->services()->count())->toBe(10);
         expect($profile->subscriptions()->where('status', SubscriptionStatus::Active)->exists())->toBeTrue();
         expect($profile->is_public)->toBeTrue();
     });
+
+    $nearWuseResults = app(SearchArtisans::class)->handle(
+        proximity: new ProximitySearch(latitude: 9.076, longitude: 7.469, radiusKm: 30),
+        limit: 20,
+    );
+
+    expect($nearWuseResults->pluck('business_name')->all())->toContain('Amina Home Works');
 });
 
 test('database seeder loads pilot users instead of the generic test account', function () {

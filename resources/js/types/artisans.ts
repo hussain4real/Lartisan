@@ -219,6 +219,9 @@ export type MarketplaceFilters = {
     stateId: number | null;
     localGovernmentId: number | null;
     territoryId: number | null;
+    nearLat: number | null;
+    nearLng: number | null;
+    radiusKm: number | null;
 };
 
 export type MarketplaceArtisanCard = {
@@ -228,6 +231,8 @@ export type MarketplaceArtisanCard = {
     verificationStatus: string;
     subscriptionStatus: string;
     location: string;
+    distanceKm: number | null;
+    distanceLabel: string | null;
     servicesCount: number;
 };
 

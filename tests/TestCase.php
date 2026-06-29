@@ -8,6 +8,13 @@ use Laravel\Fortify\Features;
 
 abstract class TestCase extends BaseTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config()->set('inertia.ssr.enabled', false);
+    }
+
     /**
      * @param  iterable<Model>|Model|class-string<Model>|string  $table
      * @param  array<string, mixed>  $data
