@@ -4,7 +4,7 @@ Primary surface: `/marketplace`, `/customer/bookings`
 
 ## Purpose
 
-Registered Customers use Lartisan to find verified subscribed artisans, submit booking requests, track work, confirm completion, leave verified reviews, and open booking disputes when support is needed. Profile, address, payment, receipt, and support features continue to expand across later phases.
+Registered Customers use Lartisan to find verified subscribed artisans, submit booking requests, track work, pay through supported checkout flows, confirm completion, leave verified reviews, chat during eligible booking states, and open booking disputes when support is needed.
 
 ## Current Capabilities
 
@@ -27,7 +27,7 @@ Registered Customers use Lartisan to find verified subscribed artisans, submit b
 5. Submit a booking request with schedule, location, and job notes.
 6. Track artisan response and job status.
 7. Confirm job completion after the artisan finishes work.
-8. Pay through the platform when booking payment is enabled.
+8. Pay through the platform when checkout is presented.
 9. Leave a verified review after completed paid work.
 10. Open a dispute from the booking detail page if service delivery, review, safety, or payment context needs operations review.
 
@@ -47,8 +47,13 @@ Registered Customers use Lartisan to find verified subscribed artisans, submit b
 - Payment issue: escalate with payment reference and booking context.
 - Artisan misconduct or safety issue: escalate to LGA operations or platform support.
 
+## Process Runbooks
+
+- [Marketplace discovery and listing visibility](../processes/marketplace-discovery-and-listing-visibility.md)
+- [Booking trust lifecycle](../processes/booking-trust-lifecycle.md)
+- [Communications and support operations](../processes/communications-and-support-operations.md)
+
 ## Current Limitations
 
 - Booking chat is available only for registered bookings while they are requested, accepted, paid, escrowed, or in progress; closed booking chats remain readable but not writable.
 - Support help continues through booking disputes and the operations support inbox rather than a separate customer-facing support center.
-- Payout automation, provider transfer callbacks, deeper review moderation, and observability/recovery workflows are planned later.

@@ -36,11 +36,12 @@ class WaitlistJoined extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject(__('You are on the Lartisan waitlist'))
+            ->subject(__('Welcome to the Lartisan waitlist'))
             ->greeting(__('Hi :name,', ['name' => $this->entry->name]))
-            ->line(__('Thanks for joining the Lartisan waitlist. We have saved your interest and will share launch updates as we open access.'))
+            ->line(__('Thanks for joining the Lartisan waitlist. We are building a trusted local marketplace for verified artisans and service customers.'))
             ->line(__('You joined as: :audience.', ['audience' => $this->entry->audience_type->label()]))
-            ->line(__('We will contact you at :email when your invitation is ready.', ['email' => $this->entry->email]));
+            ->line(__('We will contact you at :email when your invitation is ready.', ['email' => $this->entry->email]))
+            ->action(__('Visit Lartisan'), url('/'));
     }
 
     /**

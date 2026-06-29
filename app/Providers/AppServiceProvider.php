@@ -5,12 +5,15 @@ namespace App\Providers;
 use App\Contracts\Documents\DocumentRenderer;
 use App\Contracts\Payments\PaymentProvider;
 use App\Contracts\Payouts\PayoutProvider;
+use App\Models\User;
 use App\Services\Documents\LaravelPdfDocumentRenderer;
 use App\Services\Payments\PaystackPaymentProvider;
 use App\Services\Payouts\PaystackPayoutProvider;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
@@ -35,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureMailNotifications();
         $this->configureRateLimiting();
     }
 
@@ -91,6 +95,23 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('whatsapp-webhooks', fn (Request $request): Limit => Limit::perMinute($this->rateLimit('whatsapp_webhooks_per_minute'))
             ->by((string) $request->ip()));
+    }
+
+    /**
+     * Configure branded framework notification copy while preserving signed URLs.
+     */
+    protected function configureMailNotifications(): void
+    {
+        VerifyEmail::toMailUsing(function (mixed $notifiable, string $url): MailMessage {
+            $name = $notifiable instanceof User ? trim($notifiable->name) : '';
+
+            return (new MailMessage)
+                ->subject(__('Verify your Lartisan email address'))
+                ->greeting($name !== '' ? __('Welcome to Lartisan, :name', ['name' => $name]) : __('Welcome to Lartisan'))
+                ->line(__('Confirm this email address so we can protect your account and keep booking, subscription, and payout updates tied to the right inbox.'))
+                ->action(__('Verify email address'), $url)
+                ->line(__('If you did not create a Lartisan account, you can safely ignore this email.'));
+        });
     }
 
     private function rateLimit(string $key): int

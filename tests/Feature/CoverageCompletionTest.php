@@ -191,12 +191,17 @@ test('team invitation notification renders mail and array payloads', function ()
     $notification = new TeamInvitationNotification($invitation);
 
     $mail = $notification->toMail((object) ['email' => $invitation->email]);
+    $html = (string) $mail->render();
 
     expect($notification->via((object) []))->toBe(['mail']);
-    expect($mail->subject)->toBe("You've been invited to join Growth Guild");
-    expect($mail->introLines[0])->toBe('Ada Manager has invited you to join the Growth Guild team.');
+    expect($mail->subject)->toBe('Join Growth Guild on Lartisan');
+    expect($mail->greeting)->toBe('You have been invited to Lartisan');
+    expect($mail->introLines[0])->toBe('Ada Manager invited you to join Growth Guild on Lartisan.');
+    expect($mail->introLines[1])->toBe('Accept the invitation to collaborate inside this artisan business workspace.');
     expect($mail->actionText)->toBe('Accept invitation');
-    expect($mail->actionUrl)->toBe(url("/invitations/{$invitation->code}/accept"));
+    expect($mail->actionUrl)->toBe(route('invitations.accept', $invitation));
+    expect($html)->toContain('Verified local services, booking updates, secure payments, and support with clear accountability.');
+    expect($html)->toContain('background-color: #002172');
     expect($notification->toArray((object) []))->toBe([
         'invitation_id' => $invitation->id,
         'team_id' => $team->id,

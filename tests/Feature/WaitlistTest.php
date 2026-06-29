@@ -321,11 +321,17 @@ test('waitlist joined notification exposes mail and array payloads', function ()
     ]);
     $notification = new WaitlistJoined($entry);
     $mail = $notification->toMail((object) []);
+    $html = (string) $mail->render();
 
     expect($notification->via((object) []))->toBe(['mail'])
-        ->and($mail->subject)->toBe('You are on the Lartisan waitlist')
+        ->and($mail->subject)->toBe('Welcome to the Lartisan waitlist')
         ->and($mail->greeting)->toBe('Hi Amina Bello,')
         ->and($mail->introLines)->toContain('You joined as: Operations.')
+        ->and($mail->actionText)->toBe('Visit Lartisan')
+        ->and($mail->actionUrl)->toBe(url('/'))
+        ->and($html)->toContain('trusted local marketplace for verified artisans')
+        ->and($html)->toContain('Verified local services, booking updates, secure payments, and support with clear accountability.')
+        ->and($html)->toContain('background-color: #002172')
         ->and($notification->toArray((object) []))->toBe([
             'waitlist_entry_id' => $entry->id,
             'email' => 'amina@example.com',

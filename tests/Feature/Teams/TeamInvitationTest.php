@@ -3,6 +3,8 @@
 use App\Enums\TeamRole;
 use App\Models\TeamInvitation;
 use App\Models\User;
+use App\Notifications\Teams\TeamInvitation as TeamInvitationNotification;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Notification;
 
 test('team invitations can be created', function () {
@@ -26,6 +28,29 @@ test('team invitations can be created', function () {
         'email' => 'invited@example.com',
         'role' => TeamRole::Member->value,
     ]);
+
+    $invitation = TeamInvitation::query()->where('email', 'invited@example.com')->firstOrFail();
+
+    Notification::assertSentOnDemand(
+        TeamInvitationNotification::class,
+        function (TeamInvitationNotification $notification, array $channels, AnonymousNotifiable $notifiable) use ($invitation): bool {
+            $mail = $notification->toMail((object) ['email' => $invitation->email]);
+            $html = (string) $mail->render();
+
+            expect($channels)->toBe(['mail'])
+                ->and($notifiable->routes['mail'])->toBe('invited@example.com')
+                ->and($notification->invitation->is($invitation))->toBeTrue()
+                ->and($mail->subject)->toBe("Join {$invitation->team()->firstOrFail()->name} on Lartisan")
+                ->and($mail->greeting)->toBe('You have been invited to Lartisan')
+                ->and($mail->introLines)->toContain('Accept the invitation to collaborate inside this artisan business workspace.')
+                ->and($mail->actionText)->toBe('Accept invitation')
+                ->and($mail->actionUrl)->toBe(route('invitations.accept', $invitation))
+                ->and($html)->toContain('Verified local services, booking updates, secure payments, and support with clear accountability.')
+                ->and($html)->toContain('background-color: #002172');
+
+            return true;
+        },
+    );
 });
 
 test('team invitations can be created by admins', function () {

@@ -101,9 +101,19 @@ test('notification deliveries use provider abstractions and dedupe outbound atte
     expect(NotificationDelivery::query()->where('dedupe_key', 'phase-ten-booking-accepted')->count())->toBe(1);
 
     $notification = new TransactionalNotification($delivery);
+    $mail = $notification->toMail(new stdClass);
+    $html = (string) $mail->render();
 
     expect($notification->via(new stdClass))->toBe(['mail']);
-    expect($notification->toMail(new stdClass))->toBeInstanceOf(MailMessage::class);
+    expect($mail)->toBeInstanceOf(MailMessage::class);
+    expect($mail->subject)->toBe('Booking Accepted');
+    expect($mail->greeting)->toBe('Hello Phase Ten Customer,');
+    expect($mail->introLines)->toContain('Your booking was accepted.');
+    expect($mail->introLines)->toContain('Open Lartisan to review the latest status and any next steps.');
+    expect($mail->actionText)->toBe('Open Lartisan');
+    expect($mail->actionUrl)->toBe(url('/'));
+    expect($html)->toContain('Verified local services, booking updates, secure payments, and support with clear accountability.');
+    expect($html)->toContain('background-color: #002172');
     expect($notification->toArray(new stdClass))->toMatchArray([
         'delivery_id' => $delivery->id,
         'event_type' => NotificationEventType::BookingStatusChanged->value,
