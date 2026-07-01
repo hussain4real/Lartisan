@@ -5,6 +5,18 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Mail\Markdown;
 use Illuminate\Support\Facades\Notification;
 
+test('mail sender defaults use the verified Lartisan domain', function () {
+    expect(file_get_contents(config_path('mail.php')))
+        ->toContain("env('MAIL_FROM_ADDRESS', 'info@lartisan.app')")
+        ->not->toContain("env('MAIL_FROM_ADDRESS', 'hello@example.com')")
+        ->and(file_get_contents(config_path('backup.php')))
+        ->toContain("env('MAIL_FROM_ADDRESS', 'info@lartisan.app')")
+        ->not->toContain("env('MAIL_FROM_ADDRESS', 'hello@example.com')")
+        ->and(file_get_contents(base_path('.env.example')))
+        ->toContain('MAIL_FROM_ADDRESS="info@lartisan.app"')
+        ->not->toContain('MAIL_FROM_ADDRESS="hello@example.com"');
+});
+
 test('sends verification notification', function () {
     Notification::fake();
 
