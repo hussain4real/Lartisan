@@ -239,11 +239,11 @@ return [
         'notifiable' => Notifiable::class,
 
         'mail' => [
-            'to' => env('LARTISAN_OPERATIONS_EMAIL', env('MAIL_FROM_ADDRESS', 'hello@example.com')),
+            'to' => env('LARTISAN_OPERATIONS_EMAIL', env('MAIL_FROM_ADDRESS', 'info@lartisan.app')),
 
             'from' => [
-                'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-                'name' => env('MAIL_FROM_NAME', 'Example'),
+                'address' => env('MAIL_FROM_ADDRESS', 'info@lartisan.app'),
+                'name' => env('MAIL_FROM_NAME', 'Lartisan'),
             ],
         ],
 
