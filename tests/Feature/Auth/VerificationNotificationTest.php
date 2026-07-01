@@ -5,6 +5,23 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Mail\Markdown;
 use Illuminate\Support\Facades\Notification;
 
+test('mail sender defaults use the verified Lartisan domain', function () {
+    $mailConfig = file_get_contents(config_path('mail.php'));
+    $backupConfig = file_get_contents(config_path('backup.php'));
+    $environmentExample = file_get_contents(base_path('.env.example'));
+
+    if (! is_string($mailConfig) || ! is_string($backupConfig) || ! is_string($environmentExample)) {
+        throw new RuntimeException('Expected mail configuration files to be readable.');
+    }
+
+    expect(str_contains($mailConfig, "env('MAIL_FROM_ADDRESS', 'info@lartisan.app')"))->toBeTrue()
+        ->and(str_contains($mailConfig, "env('MAIL_FROM_ADDRESS', 'hello@example.com')"))->toBeFalse()
+        ->and(str_contains($backupConfig, "env('MAIL_FROM_ADDRESS', 'info@lartisan.app')"))->toBeTrue()
+        ->and(str_contains($backupConfig, "env('MAIL_FROM_ADDRESS', 'hello@example.com')"))->toBeFalse()
+        ->and(str_contains($environmentExample, 'MAIL_FROM_ADDRESS="info@lartisan.app"'))->toBeTrue()
+        ->and(str_contains($environmentExample, 'MAIL_FROM_ADDRESS="hello@example.com"'))->toBeFalse();
+});
+
 test('sends verification notification', function () {
     Notification::fake();
 
