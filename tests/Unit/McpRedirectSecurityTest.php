@@ -14,7 +14,7 @@ test('MCP rejects userinfo and loopback prefix redirect bypasses', function (str
     ]));
 
     expect($response->getStatusCode())->toBe(400)
-        ->and($response->getData(true)['error'])->toBe('invalid_redirect_uri');
+        ->and(data_get($response->getData(true), 'error'))->toBe('invalid_redirect_uri');
 })->with([
     'http://localhost@attacker.example/callback',
     'http://127.0.0.1@attacker.example/callback',
@@ -34,7 +34,7 @@ test('MCP preserves valid loopback and custom scheme redirects', function (strin
     ]));
 
     expect($response->getStatusCode())->toBe(500)
-        ->and($response->getData(true)['error_description'])->toBe('OAuth support (Passport) is not installed.');
+        ->and(data_get($response->getData(true), 'error_description'))->toBe('OAuth support (Passport) is not installed.');
 })->with([
     'http://localhost:54321/callback',
     'http://127.0.0.1:54321/callback',
