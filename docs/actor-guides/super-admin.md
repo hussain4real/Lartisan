@@ -9,6 +9,7 @@ Super Admins govern the whole Lartisan platform. They own global access, risk po
 ## Current Responsibilities
 
 - Maintain platform roles and permissions through seeded access templates.
+- Create, edit, reorder, activate/deactivate, and audit artisan subscription plans in `/admin`.
 - Manage global reason codes used for KYC decisions, territory reassignment, and suspensions.
 - View and moderate artisan profiles across all states, LGAs, and territories.
 - View all KYC queues and high-risk or escalated verification records.
@@ -25,7 +26,7 @@ Super Admins govern the whole Lartisan platform. They own global access, risk po
 1. Sign in with a Super Admin account.
 2. Open `/admin`.
 3. Review KYC queue health across the platform.
-4. Check reason codes before operations teams begin a new campaign or policy change.
+4. Check subscription plans and reason codes before operations teams begin a new campaign or policy change.
 5. Audit escalated or unusual verification decisions.
 6. Review territory coverage gaps or repeated reassignment patterns.
 7. Coordinate finance follow-up for payment, wallet, payout, or subscription anomalies.
@@ -58,5 +59,4 @@ Super Admins govern the whole Lartisan platform. They own global access, risk po
 
 ## Current Limitations
 
-- Subscription plan management is seeded in code; a Super Admin plan-management UI is not implemented yet.
 - Booking exceptions should be handled through booking, dispute, and support records rather than a separate booking-exception panel.

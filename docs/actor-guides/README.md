@@ -1,6 +1,6 @@
 # Lartisan Actor Guides
 
-Status: current through Phase 16 implementation
+Status: current through Phase 18 implementation
 
 These guides explain how each Lartisan actor should use the platform, what they own, what they can see, and where work should be escalated. They are role entrypoints. Use [process runbooks](../processes/README.md) for detailed operational workflows.
 

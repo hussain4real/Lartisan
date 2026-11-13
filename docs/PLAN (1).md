@@ -1,7 +1,7 @@
 # Phased Lartisan Implementation Plan
 
 ## Summary
-- Current state: all scoped implementation phases, Phase 0 through Phase 17, are complete, including marketplace, booking, payment, escrow, notifications, customer-depth, chat, support inbox, trust and moderation, automated payout operations, reporting, observability, recovery workflows, opt-in proximity marketplace discovery, progressive web app installability, offline fallback routing, and field/artisan offline draft persistence.
+- Current state: all scoped implementation phases, Phase 0 through Phase 18, are complete, including marketplace, booking, payment, escrow, notifications, customer-depth, chat, support inbox, trust and moderation, automated payout operations, reporting, observability, recovery workflows, opt-in proximity marketplace discovery, progressive web app installability, offline fallback routing, field/artisan offline draft persistence, and Super Admin subscription plan management.
 - Build order: environment and quality gates, database foundations, backend action workflows, Inertia customer/artisan UI, Filament operations UI, then hardening and BRS expansion tracks.
 - Locked decisions: PHP 8.5, Larastan with no baseline, 100% coverage after every phase, Teams represent artisan business workspaces, local OTP first, pilot geography seed, Paystack-first escrow, and Phase 10 notification channels are email and WhatsApp for now.
 
@@ -139,6 +139,12 @@ Goal: make Lartisan installable on mobile and desktop devices with offline fallb
 - Frontend: `resources/js/pages/Offline.vue`, `resources/js/composables/usePwa.ts` (Web Install API `navigator.install()` with `beforeinstallprompt` fallback and `aria-disabled` focus preservation), `resources/js/composables/useOfflineDraft.ts`, `resources/js/components/PwaStatusBanner.vue`, `resources/js/components/OfflineDraftBanner.vue`, and offline draft + GPS field-visit capture on `artisan/Kyc.vue`, `artisan/Onboarding.vue`, `artisan/Profile.vue`, and `artisan/Services.vue`.
 - Tests: `tests/Feature/PhaseSeventeenPwaFieldOfflineTest.php`, `tests/Browser/PhaseSeventeenPwaFieldOfflineBrowserTest.php`, and updated `tests/Feature/BrandAssetsTest.php`.
 
+**Phase 18: Super Admin Subscription Plan Management**
+Goal: give Super Admins an audited Filament management UI in `/admin` to create, edit, activate/deactivate, and safely delete unused artisan subscription plans without editing seeders.
+- Backend/Policy: `SubscriptionPlanPolicy` gated by `PlatformPermission::ManagePlatformSettings`, blocking deletion whenever linked subscriptions or payments exist.
+- Filament UI (`/admin`): `SubscriptionPlanResource`, `SubscriptionPlanForm`, `SubscriptionPlansTable` (with `toggleActive` action), `ListSubscriptionPlans`, `CreateSubscriptionPlan`, and `EditSubscriptionPlan` recording `RecordAuditLog` entries on create, update, activation toggle, and delete.
+- Tests: `tests/Feature/PhaseEighteenSubscriptionPlanManagementTest.php` and `tests/Feature/PricingPageTest.php`.
+
 ## Interfaces And Patterns
 - Every meaningful write uses an `App\Actions\{Domain}\...` action; controllers and Filament actions stay thin.
 - Inertia forms and links use Wayfinder imports from `@/actions` or `@/routes`; avoid hardcoded URLs.
@@ -158,8 +164,9 @@ Goal: make Lartisan installable on mobile and desktop devices with offline fallb
 - Use Paystack via Laravel HTTP client first; add an SDK only if provider requirements force it.
 - Use stable Composer packages only; do not lower `minimum-stability` without a new decision.
 - Do not create extra documentation files during implementation unless explicitly requested.
-- Phase 13 through Phase 17 are BRS expansion phases, not blockers for the scoped Phase 1-12 MVP completion.
+- Phase 13 through Phase 18 are BRS expansion phases, not blockers for the scoped Phase 1-12 MVP completion.
 - Phase 15 may add `spatie/laravel-backup`; do not add other observability or backup packages without a separate decision.
 - Phase 16 must not add new third-party dependencies, and precise user coordinates must stay query-only unless a later privacy and retention decision explicitly approves persistence.
 - Phase 17 uses native Service Worker, Web App Manifest, Web Install API / `beforeinstallprompt`, and `localStorage` without adding new third-party dependencies.
+- Phase 18 reuses `SubscriptionPlan`, `SubscriptionPlanPolicy`, Filament v5 `/admin` panel resources, and `RecordAuditLog` without adding new dependencies.
 - References used: [BRS](/Users/amisha/www/lartisan/docs/lartisan_brs.md), [Technical Spec](/Users/amisha/www/lartisan/docs/Technical_Spec_Lartisan_App.md), [Larastan package](https://packagist.org/packages/larastan/larastan), [Inertia Forms + Wayfinder](https://inertiajs.com/docs/v3/the-basics/forms), [Wayfinder README](https://github.com/laravel/wayfinder/blob/main/README.md).
