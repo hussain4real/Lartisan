@@ -8,7 +8,7 @@ This plan tracks the implemented Lartisan MVP phases, completed BRS expansion ph
 
 The application already includes the scoped marketplace and operations foundation:
 
-- Phase 0 through Phase 17 from `docs/PLAN (1).md` are implemented for the scoped MVP and completed BRS expansion plan.
+- Phase 0 through Phase 18 from `docs/PLAN (1).md` are implemented for the scoped MVP and completed BRS expansion plan.
 - Laravel, Inertia, Vue, Filament, Pest, Larastan, Pint, ESLint, Prettier, Vite, and CI-aligned quality gates are present.
 - Geography, territories, admin profiles, customer profiles, artisan profiles, audit logs, roles, permissions, policies, and role-scoping tests are present.
 - Customer and artisan onboarding, phone-aware identity records, OTP record foundations, OTP-at-booking, account claims, customer addresses, saved-address booking, artisan workspace creation, guest account upgrade, guest tracker review/dispute flows, and Inertia route contracts are present.
@@ -20,8 +20,9 @@ The application already includes the scoped marketplace and operations foundatio
 - Transactional email and WhatsApp notification abstractions, delivery logs, provider callback intake, retry/dead-letter workflows, booking/subscription/payout/review/dispute/support notifications, customer favorites, and customer booking preferences are present.
 - Review proof media, artisan responses, moderation routing, profile/payment dispute targets, Paystack-backed payout automation, finance exception queues, provider reconciliation, system-health snapshots, backup/recovery checks, retention guard rails, and opt-in proximity marketplace discovery are present.
 - Installable Progressive Web App (PWA) manifest, icons, service worker, `/offline` fallback route, Filament and Inertia install/connectivity banners, and browser-local offline draft capture and reconnect sync for Area Agent field visits and Artisan forms are present.
+- Super Admin `/admin` Filament subscription plan management (`SubscriptionPlanResource`, `SubscriptionPlanPolicy`, activation/deactivation toggles, safe delete guards, and append-only audit logging) is present.
 
-The scoped implementation now covers the planned Phase 0 through Phase 17 requirements. Remaining BRS follow-up is limited to product, provider, or policy decisions intentionally kept outside the current shipped scope, such as SMS/push/richer in-app notification expansion, role dashboards beyond the scoped Super Admin recovery dashboard, Agent compensation policy, Flutterwave expansion beyond Paystack, and launch-specific operating rules.
+The scoped implementation now covers the planned Phase 0 through Phase 18 requirements. Remaining BRS follow-up is limited to product, provider, or policy decisions intentionally kept outside the current shipped scope, such as SMS/push/richer in-app notification expansion, role dashboards beyond the scoped Super Admin recovery dashboard, Agent compensation policy, Flutterwave expansion beyond Paystack, and launch-specific operating rules.
 
 ## Implementation Principles
 
@@ -816,9 +817,54 @@ Make Lartisan installable on mobile and desktop devices with offline fallback na
 - Focused feature coverage passes with `php artisan test --compact tests/Feature/BrandAssetsTest.php tests/Feature/PhaseSeventeenPwaFieldOfflineTest.php`.
 - The full suite passes `php artisan test --coverage --min=100 --compact` with 100.0% coverage, along with static analysis and frontend checks.
 
+## Phase 18: Super Admin Subscription Plan Management
+
+### Status
+
+Completed and verified.
+
+### Goal
+
+Provide Super Admins an audited Filament management UI in `/admin` to create, update, reorder, activate/deactivate, and safely delete unused artisan subscription plans without code or seeder changes.
+
+### Implementation Clarifications
+
+- Authorized exclusively via `PlatformPermission::ManagePlatformSettings` (`SubscriptionPlanPolicy` and `SubscriptionPlanResource::canAccess()`), keeping State, LGA, Area Agent, Artisan, and Customer roles denied.
+- `SubscriptionPlanPolicy::delete()` denies deletion when a plan has existing subscriptions or payments; Super Admins deactivate retired plans instead via the `toggleActive` table action.
+- Every create, update, activation toggle, and delete action writes an append-only `AuditLog` record via `RecordAuditLog`.
+
+### BRS Coverage
+
+- Super Admin subscription tier administration and pricing configuration.
+- Safe plan lifecycle controls preventing deletion of historical subscription/payment references.
+- Complete audit trail for subscription plan pricing, feature summary, and active status mutations.
+
+### Checklist
+
+- [x] Add `SubscriptionPlanPolicy` gated by `PlatformPermission::ManagePlatformSettings` with subscription/payment deletion protection.
+- [x] Add `SubscriptionPlanResource`, `SubscriptionPlanForm`, `SubscriptionPlansTable`, `ListSubscriptionPlans`, `CreateSubscriptionPlan`, and `EditSubscriptionPlan` in `/admin`.
+- [x] Add `toggleActive` table action with append-only `RecordAuditLog` recording for create, update, activate, deactivate, and delete actions.
+- [x] Update Super Admin actor guide and phase docs removing the seeded-only plan limitation.
+- [x] Add `tests/Feature/PhaseEighteenSubscriptionPlanManagementTest.php` covering permissions, policies, Livewire CRUD, audit logs, and `/pricing` rendering.
+
+### Deliverables
+
+- `app/Policies/SubscriptionPlanPolicy.php`
+- `app/Filament/Resources/SubscriptionPlans/SubscriptionPlanResource.php`, `Schemas/SubscriptionPlanForm.php`, `Tables/SubscriptionPlansTable.php`, and `Pages/{ListSubscriptionPlans,CreateSubscriptionPlan,EditSubscriptionPlan}.php`
+- `tests/Feature/PhaseEighteenSubscriptionPlanManagementTest.php`
+
+### Acceptance Criteria
+
+- Super Admins can list, filter, create, edit, activate/deactivate, and delete unused subscription plans in `/admin`.
+- Non-SuperAdmin roles and guests cannot access the resource or mutate plans.
+- Plans referenced by subscriptions or payments cannot be deleted; unused plans can be deleted with an audit log entry.
+- Active newly created or updated plans appear cleanly on `/pricing` and artisan subscription pages.
+- Focused feature coverage passes with `php artisan test --compact tests/Feature/PhaseEighteenSubscriptionPlanManagementTest.php tests/Feature/PricingPageTest.php`.
+- The full suite passes `php artisan test --coverage --min=100 --compact` with 100.0% coverage, along with PHPStan and Pint checks.
+
 ## Suggested Phase Order
 
-Phase 0 through Phase 17 now have implementation coverage. No additional implementation phase is currently queued; future BRS expansion should be added as Phase 18 or later after product, provider, and policy sign-off.
+Phase 0 through Phase 18 now have implementation coverage. No additional implementation phase is currently queued; future BRS expansion should be added as Phase 19 or later after product, provider, and policy sign-off.
 
 ## Global Verification Gate
 
