@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
 import { ImagePlus, Save } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import OfflineDraftBanner from '@/components/OfflineDraftBanner.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useOfflineDraft } from '@/composables/useOfflineDraft';
 import { dashboard as artisanDashboard } from '@/routes/artisan';
 import { update } from '@/routes/artisan/profile';
 import { store as storePortfolio } from '@/routes/artisan/profile/portfolio';
@@ -27,7 +29,39 @@ type Props = {
 };
 
 const props = defineProps<Props>();
-const availabilityStatus = ref(props.profile.availabilityStatus);
+
+const profileDraft = useOfflineDraft<{
+    business_name: string;
+    public_summary: string;
+    years_experience: string;
+    service_radius_km: string;
+    public_phone: string;
+    public_email: string;
+    availability_status: string;
+    is_public: boolean;
+}>(`artisan-profile:${props.profile.id}`, {
+    business_name: props.profile.businessName,
+    public_summary: props.profile.publicSummary ?? '',
+    years_experience:
+        props.profile.yearsExperience !== null
+            ? String(props.profile.yearsExperience)
+            : '',
+    service_radius_km:
+        props.profile.serviceRadiusKm !== null
+            ? String(props.profile.serviceRadiusKm)
+            : '',
+    public_phone: props.profile.publicPhone ?? '',
+    public_email: props.profile.publicEmail ?? '',
+    availability_status: props.profile.availabilityStatus,
+    is_public: props.profile.isPublic,
+});
+
+const availabilityStatus = computed({
+    get: () => profileDraft.draft.value.availability_status,
+    set: (value: string) => {
+        profileDraft.draft.value.availability_status = value;
+    },
+});
 
 defineOptions({
     layout: (props: { currentTeam: Team }) => ({
@@ -74,10 +108,27 @@ defineOptions({
         >
             <Heading variant="small" title="Listing details" />
 
+            <OfflineDraftBanner
+                :has-draft="profileDraft.hasDraft.value"
+                :is-online="profileDraft.isOnline.value"
+                :queued-for-sync="profileDraft.queuedForSync.value"
+                :saved-at="profileDraft.savedAt.value"
+                :status-message="profileDraft.statusMessage.value"
+                label="Profile listing draft"
+                @save="profileDraft.saveDraft()"
+                @clear="profileDraft.clearDraft('Local profile draft cleared.')"
+            />
+
             <Form
                 v-bind="update.form(props.currentTeam.slug)"
                 class="grid gap-5"
                 v-slot="{ errors, processing }"
+                @submit.capture="profileDraft.handleOfflineSubmit"
+                @success="
+                    profileDraft.clearDraft(
+                        'Profile changes saved and local draft cleared.',
+                    )
+                "
             >
                 <input
                     type="hidden"
@@ -90,8 +141,8 @@ defineOptions({
                     <Label for="business_name">Business name</Label>
                     <Input
                         id="business_name"
+                        v-model="profileDraft.draft.value.business_name"
                         name="business_name"
-                        :default-value="profile.businessName"
                         required
                         maxlength="255"
                     />
@@ -102,11 +153,11 @@ defineOptions({
                     <Label for="public_summary">Summary</Label>
                     <textarea
                         id="public_summary"
+                        v-model="profileDraft.draft.value.public_summary"
                         name="public_summary"
                         rows="4"
                         maxlength="1000"
                         class="min-h-24 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                        :value="profile.publicSummary ?? ''"
                     />
                     <InputError :message="errors.public_summary" />
                 </div>
@@ -116,11 +167,11 @@ defineOptions({
                         <Label for="years_experience">Years</Label>
                         <Input
                             id="years_experience"
+                            v-model="profileDraft.draft.value.years_experience"
                             name="years_experience"
                             type="number"
                             min="0"
                             max="80"
-                            :default-value="profile.yearsExperience ?? ''"
                         />
                         <InputError :message="errors.years_experience" />
                     </div>
@@ -129,11 +180,11 @@ defineOptions({
                         <Label for="service_radius_km">Radius km</Label>
                         <Input
                             id="service_radius_km"
+                            v-model="profileDraft.draft.value.service_radius_km"
                             name="service_radius_km"
                             type="number"
                             min="1"
                             max="500"
-                            :default-value="profile.serviceRadiusKm ?? ''"
                         />
                         <InputError :message="errors.service_radius_km" />
                     </div>
@@ -142,8 +193,8 @@ defineOptions({
                         <Label for="public_phone">Public phone</Label>
                         <Input
                             id="public_phone"
+                            v-model="profileDraft.draft.value.public_phone"
                             name="public_phone"
-                            :default-value="profile.publicPhone ?? ''"
                             maxlength="32"
                         />
                         <InputError :message="errors.public_phone" />
@@ -153,9 +204,9 @@ defineOptions({
                         <Label for="public_email">Public email</Label>
                         <Input
                             id="public_email"
+                            v-model="profileDraft.draft.value.public_email"
                             name="public_email"
                             type="email"
-                            :default-value="profile.publicEmail ?? ''"
                         />
                         <InputError :message="errors.public_email" />
                     </div>
@@ -184,11 +235,11 @@ defineOptions({
 
                     <label class="flex items-center gap-2 self-end text-sm">
                         <input
+                            v-model="profileDraft.draft.value.is_public"
                             type="checkbox"
                             name="is_public"
                             value="1"
                             class="size-4 rounded border"
-                            :checked="profile.isPublic"
                         />
                         Public listing
                     </label>

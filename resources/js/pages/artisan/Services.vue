@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
 import { PlusCircle, Wrench } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import OfflineDraftBanner from '@/components/OfflineDraftBanner.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useOfflineDraft } from '@/composables/useOfflineDraft';
 import { dashboard as artisanDashboard } from '@/routes/artisan';
 import { store } from '@/routes/artisan/services';
 import type { ArtisanServiceItem, ServiceCategoryOption, Team } from '@/types';
@@ -27,10 +29,36 @@ type Props = {
 };
 
 const props = defineProps<Props>();
-const selectedCategoryId = ref(
-    props.categories.length > 0 ? String(props.categories[0].id) : '',
-);
-const selectedStatus = ref('active');
+
+const serviceDraft = useOfflineDraft<{
+    service_category_id: string;
+    status: string;
+    title: string;
+    description: string;
+    starting_price: string;
+    currency_code: string;
+}>(`artisan-service:${props.currentTeam.slug}`, {
+    service_category_id:
+        props.categories.length > 0 ? String(props.categories[0].id) : '',
+    status: 'active',
+    title: '',
+    description: '',
+    starting_price: '',
+    currency_code: 'NGN',
+});
+
+const selectedCategoryId = computed({
+    get: () => serviceDraft.draft.value.service_category_id,
+    set: (value: string) => {
+        serviceDraft.draft.value.service_category_id = value;
+    },
+});
+const selectedStatus = computed({
+    get: () => serviceDraft.draft.value.status,
+    set: (value: string) => {
+        serviceDraft.draft.value.status = value;
+    },
+});
 const canCreate = computed(() => selectedCategoryId.value !== '');
 
 defineOptions({
@@ -74,10 +102,27 @@ defineOptions({
         >
             <Heading variant="small" title="Add service" />
 
+            <OfflineDraftBanner
+                :has-draft="serviceDraft.hasDraft.value"
+                :is-online="serviceDraft.isOnline.value"
+                :queued-for-sync="serviceDraft.queuedForSync.value"
+                :saved-at="serviceDraft.savedAt.value"
+                :status-message="serviceDraft.statusMessage.value"
+                label="Service catalog draft"
+                @save="serviceDraft.saveDraft()"
+                @clear="serviceDraft.clearDraft('Local service draft cleared.')"
+            />
+
             <Form
                 v-bind="store.form(props.currentTeam.slug)"
                 class="grid gap-5"
                 v-slot="{ errors, processing }"
+                @submit.capture="serviceDraft.handleOfflineSubmit"
+                @success="
+                    serviceDraft.clearDraft(
+                        'Service created and local draft cleared.',
+                    )
+                "
             >
                 <input
                     type="hidden"
@@ -128,7 +173,13 @@ defineOptions({
 
                 <div class="grid gap-2">
                     <Label for="title">Title</Label>
-                    <Input id="title" name="title" required maxlength="255" />
+                    <Input
+                        id="title"
+                        v-model="serviceDraft.draft.value.title"
+                        name="title"
+                        required
+                        maxlength="255"
+                    />
                     <InputError :message="errors.title" />
                 </div>
 
@@ -136,6 +187,7 @@ defineOptions({
                     <Label for="description">Description</Label>
                     <textarea
                         id="description"
+                        v-model="serviceDraft.draft.value.description"
                         name="description"
                         rows="3"
                         maxlength="1000"
@@ -149,6 +201,7 @@ defineOptions({
                         <Label for="starting_price">Starting price</Label>
                         <Input
                             id="starting_price"
+                            v-model="serviceDraft.draft.value.starting_price"
                             name="starting_price"
                             type="number"
                             min="0"
@@ -160,8 +213,8 @@ defineOptions({
                         <Label for="currency_code">Currency</Label>
                         <Input
                             id="currency_code"
+                            v-model="serviceDraft.draft.value.currency_code"
                             name="currency_code"
-                            default-value="NGN"
                             maxlength="3"
                             required
                         />

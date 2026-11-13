@@ -53,7 +53,7 @@ Area Agents handle field execution. They support artisan onboarding, collect ver
 
 ## Current Limitations
 
-- A dedicated mobile field app is not implemented yet.
-- Offline capture and later sync are planned later.
+- A dedicated native mobile field app is not implemented yet; installable PWA support and browser-local offline draft saving/restoration are available for field visits.
+- Multi-device background database sync outside browser-local drafts is planned later.
 - Customer booking management is not part of the Area Agent panel yet.
 - Area Agents support dispute evidence and follow-up; formal policy decisions should remain with LGA Admin, State Coordinator, or Super Admin.

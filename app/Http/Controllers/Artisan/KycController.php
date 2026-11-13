@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Artisan;
 
 use App\Actions\Artisans\AttachKycMedia;
 use App\Actions\Artisans\SubmitKyc;
+use App\Enums\FieldVisitStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Artisan\SubmitKycRequest;
+use App\Models\FieldVisit;
 use App\Models\KycSubmission;
+use App\Models\Territory;
 use App\Support\PrivateMediaUrl;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,6 +25,7 @@ class KycController extends Controller
     public function show(Request $request): Response
     {
         $profile = $this->artisanProfileFrom($request);
+        $user = $this->userFrom($request);
 
         Gate::authorize('view', $profile);
 
@@ -30,11 +34,27 @@ class KycController extends Controller
                 'id' => $profile->id,
                 'businessName' => $profile->business_name,
                 'verificationStatus' => $profile->verification_status->value,
+                'territoryId' => $profile->territory_id,
             ],
             'collections' => KycSubmission::mediaCollectionNames(),
             'latestSubmission' => $this->submissionPayload(
                 $profile->kycSubmissions()->with('media')->latest('id')->first(),
             ),
+            'canRecordFieldVisit' => Gate::forUser($user)->allows('create', [FieldVisit::class, $profile]),
+            'fieldVisitStatuses' => array_map(
+                static fn (FieldVisitStatus $status): string => $status->value,
+                FieldVisitStatus::cases(),
+            ),
+            'territories' => Territory::query()
+                ->where('active', true)
+                ->where('local_government_id', $profile->local_government_id)
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn (Territory $territory): array => [
+                    'id' => $territory->id,
+                    'name' => $territory->name,
+                ])
+                ->all(),
         ]);
     }
 

@@ -1,5 +1,6 @@
 import { createInertiaApp } from '@inertiajs/vue3';
 import { initializeTheme } from '@/composables/useAppearance';
+import { registerServiceWorker } from '@/composables/usePwa';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
@@ -14,6 +15,7 @@ createInertiaApp({
             case name === 'Welcome':
             case name === 'Pricing':
             case name === 'Waitlist':
+            case name === 'Offline':
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
@@ -34,3 +36,6 @@ initializeTheme();
 
 // This will listen for flash toast data from the server...
 initializeFlashToast();
+
+// Register PWA service worker for offline shell and installability...
+registerServiceWorker();

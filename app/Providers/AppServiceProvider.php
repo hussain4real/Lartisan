@@ -10,13 +10,17 @@ use App\Services\Documents\LaravelPdfDocumentRenderer;
 use App\Services\Payments\PaystackPaymentProvider;
 use App\Services\Payouts\PaystackPayoutProvider;
 use Carbon\CarbonImmutable;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -40,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureMailNotifications();
         $this->configureRateLimiting();
+        $this->configureFilamentPwa();
     }
 
     /**
@@ -112,6 +117,22 @@ class AppServiceProvider extends ServiceProvider
                 ->action(__('Verify email address'), $url)
                 ->line(__('If you did not create a Lartisan account, you can safely ignore this email.'));
         });
+    }
+
+    /**
+     * Register PWA metadata and field-agent offline support hooks for Filament panels.
+     */
+    protected function configureFilamentPwa(): void
+    {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_END,
+            fn (): HtmlString => new HtmlString('<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#001C72">'),
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::BODY_END,
+            fn (): View => view('filament.hooks.pwa-field-support'),
+        );
     }
 
     private function rateLimit(string $key): int

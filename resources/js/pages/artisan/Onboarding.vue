@@ -9,6 +9,7 @@ import {
 import { computed, ref, watch } from 'vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import OfflineDraftBanner from '@/components/OfflineDraftBanner.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useOfflineDraft } from '@/composables/useOfflineDraft';
 import { create, store } from '@/routes/artisan/onboarding';
 import type {
     ArtisanProfileSummary,
@@ -67,12 +69,47 @@ const firstLocalGovernment = (state?: StateOption | null) =>
     state?.localGovernments[0] ??
     null;
 
-const selectedCountryId = ref(optionValue(firstCountry()));
-const selectedStateId = ref(optionValue(firstState(firstCountry())));
-const selectedLocalGovernmentId = ref(
-    optionValue(firstLocalGovernment(firstState(firstCountry()))),
-);
-const selectedTerritoryId = ref('none');
+const onboardingDraft = useOfflineDraft<{
+    business_name: string;
+    country_id: string;
+    state_id: string;
+    local_government_id: string;
+    territory_id: string;
+}>(`artisan-onboarding:${props.currentTeam.slug}`, {
+    business_name: '',
+    country_id: optionValue(firstCountry()),
+    state_id: optionValue(firstState(firstCountry())),
+    local_government_id: optionValue(
+        firstLocalGovernment(firstState(firstCountry())),
+    ),
+    territory_id: 'none',
+});
+
+const selectedCountryId = computed({
+    get: () => onboardingDraft.draft.value.country_id,
+    set: (value: string) => {
+        onboardingDraft.draft.value.country_id = value;
+    },
+});
+const selectedStateId = computed({
+    get: () => onboardingDraft.draft.value.state_id,
+    set: (value: string) => {
+        onboardingDraft.draft.value.state_id = value;
+    },
+});
+const selectedLocalGovernmentId = computed({
+    get: () => onboardingDraft.draft.value.local_government_id,
+    set: (value: string) => {
+        onboardingDraft.draft.value.local_government_id = value;
+    },
+});
+const selectedTerritoryId = computed({
+    get: () => onboardingDraft.draft.value.territory_id,
+    set: (value: string) => {
+        onboardingDraft.draft.value.territory_id = value;
+    },
+});
+const isResettingDraft = ref(false);
 
 const selectedCountry = computed(
     () =>
@@ -111,18 +148,38 @@ const territoryFormValue = computed(() =>
 );
 
 watch(selectedCountryId, () => {
+    if (isResettingDraft.value) {
+        return;
+    }
+
     selectedStateId.value = optionValue(firstState(selectedCountry.value));
 });
 
 watch(selectedStateId, () => {
+    if (isResettingDraft.value) {
+        return;
+    }
+
     selectedLocalGovernmentId.value = optionValue(
         firstLocalGovernment(selectedState.value),
     );
 });
 
 watch(selectedLocalGovernmentId, () => {
+    if (isResettingDraft.value) {
+        return;
+    }
+
     selectedTerritoryId.value = 'none';
 });
+
+const clearOnboardingDraft = (
+    message: string | null = 'Local onboarding draft cleared.',
+): void => {
+    isResettingDraft.value = true;
+    onboardingDraft.clearDraft(message);
+    isResettingDraft.value = false;
+};
 </script>
 
 <template>
@@ -162,10 +219,27 @@ watch(selectedLocalGovernmentId, () => {
                 />
             </div>
 
+            <OfflineDraftBanner
+                :has-draft="onboardingDraft.hasDraft.value"
+                :is-online="onboardingDraft.isOnline.value"
+                :queued-for-sync="onboardingDraft.queuedForSync.value"
+                :saved-at="onboardingDraft.savedAt.value"
+                :status-message="onboardingDraft.statusMessage.value"
+                label="Onboarding draft"
+                @save="onboardingDraft.saveDraft()"
+                @clear="clearOnboardingDraft()"
+            />
+
             <Form
                 v-bind="store.form(props.currentTeam.slug)"
                 class="grid gap-5"
                 v-slot="{ errors, processing }"
+                @submit.capture="onboardingDraft.handleOfflineSubmit"
+                @success="
+                    clearOnboardingDraft(
+                        'Business profile saved and local draft cleared.',
+                    )
+                "
             >
                 <input
                     type="hidden"
@@ -188,6 +262,7 @@ watch(selectedLocalGovernmentId, () => {
                     <Label for="business_name">Business name</Label>
                     <Input
                         id="business_name"
+                        v-model="onboardingDraft.draft.value.business_name"
                         name="business_name"
                         data-test="artisan-business-name"
                         required
