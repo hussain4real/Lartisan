@@ -99,4 +99,4 @@ Current KYC upload collections:
 ## Current Limitations
 
 - Booking chat is available only for registered customer bookings while they are requested, accepted, paid, escrowed, or in progress; closed booking chats remain readable but not writable.
-- Offline-first field support and a dedicated mobile field app are not implemented yet.
+- A dedicated native mobile app and multi-device background database sync are not implemented yet; installable PWA support and browser-local offline draft saving/restoration are available for onboarding, profile, services, and KYC forms.

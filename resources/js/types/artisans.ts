@@ -110,6 +110,11 @@ export type KycSubmissionDetail = ArtisanKycSummary & {
     media: Record<string, KycMediaItem | null>;
 };
 
+export type FieldVisitTerritoryOption = {
+    id: number;
+    name: string;
+};
+
 export type SubscriptionPlanOption = {
     id: number;
     name: string;

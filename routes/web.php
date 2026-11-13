@@ -50,7 +50,7 @@ if (is_string($adminHost) && $adminHost !== '') {
     Route::domain($adminHost)->group(function (): void {
         Route::any('/', AdminHostRedirectController::class);
         Route::any('{path}', AdminHostRedirectController::class)
-            ->where('path', '^(?!(admin|state|lga|agent|livewire(?:-[^/]+)?|filament|build|js|css|fonts|images|storage|cdn-cgi|favicon\\.ico|favicon\\.svg|apple-touch-icon\\.png|robots\\.txt)(/|$)).*$');
+            ->where('path', '^(?!(admin|state|lga|agent|livewire(?:-[^/]+)?|filament|build|js|css|fonts|images|storage|cdn-cgi|favicon\\.ico|favicon\\.svg|apple-touch-icon\\.png|manifest\\.webmanifest|sw\\.js|pwa-192x192\\.png|pwa-512x512\\.png|pwa-maskable-512x512\\.png|robots\\.txt)(/|$)).*$');
     });
 }
 
@@ -80,6 +80,7 @@ Route::post('waitlist', [WaitlistController::class, 'store'])
 Route::get('pricing', [PricingController::class, 'index'])->name('pricing');
 Route::get('privacy-policy', fn () => Inertia::render('Legal/PrivacyPolicy'))->name('privacy-policy');
 Route::get('terms-of-service', fn () => Inertia::render('Legal/TermsOfService'))->name('terms-of-service');
+Route::get('offline', fn () => Inertia::render('Offline'))->name('offline');
 
 Route::post('webhooks/paystack', PaystackWebhookController::class)
     ->middleware('throttle:paystack-webhooks')

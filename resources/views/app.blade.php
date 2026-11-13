@@ -49,6 +49,12 @@
         <link rel="icon" href="/favicon.ico?v=lartisan" sizes="any">
         <link rel="icon" href="/favicon.svg?v=lartisan" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=lartisan">
+        <link rel="manifest" href="/manifest.webmanifest">
+        <meta name="theme-color" content="#001C72" media="(prefers-color-scheme: light)">
+        <meta name="theme-color" content="#091026" media="(prefers-color-scheme: dark)">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-title" content="{{ config('app.name', 'Lartisan') }}">
 
         @fonts
 

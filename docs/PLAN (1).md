@@ -1,7 +1,7 @@
 # Phased Lartisan Implementation Plan
 
 ## Summary
-- Current state: all scoped implementation phases, Phase 0 through Phase 16, are complete, including marketplace, booking, payment, escrow, notifications, customer-depth, chat, support inbox, trust and moderation, automated payout operations, reporting, observability, recovery workflows, and opt-in proximity marketplace discovery.
+- Current state: all scoped implementation phases, Phase 0 through Phase 17, are complete, including marketplace, booking, payment, escrow, notifications, customer-depth, chat, support inbox, trust and moderation, automated payout operations, reporting, observability, recovery workflows, opt-in proximity marketplace discovery, progressive web app installability, offline fallback routing, and field/artisan offline draft persistence.
 - Build order: environment and quality gates, database foundations, backend action workflows, Inertia customer/artisan UI, Filament operations UI, then hardening and BRS expansion tracks.
 - Locked decisions: PHP 8.5, Larastan with no baseline, 100% coverage after every phase, Teams represent artisan business workspaces, local OTP first, pilot geography seed, Paystack-first escrow, and Phase 10 notification channels are email and WhatsApp for now.
 
@@ -132,6 +132,13 @@ Goal: make marketplace discovery prioritize nearby verified artisan services usi
 - Types: include marketplace TypeScript filter and artisan-card fields for proximity filters and optional `distanceKm` / distance-label values.
 - Tests: validate proximity query inputs, nearby ranking, manual-filter interaction, no coordinate persistence, field-visit coordinate publishing, seeded marketplace coordinate coverage, geolocation success/denial/unavailable UI states, clear-location behavior, and radius changes.
 
+**Phase 17: Progressive Web App And Field Offline Readiness**
+Goal: make Lartisan installable on mobile and desktop devices with offline fallback navigation and resilient local draft capture/restore for Area Agent field visits and Artisan forms.
+- Assets/PWA: `public/manifest.webmanifest` (with explicit `"id": "/"`), `public/pwa-192x192.png`, `public/pwa-512x512.png`, `public/pwa-maskable-512x512.png`, and `public/sw.js` service worker with static asset caching and `/offline` navigation fallback.
+- Backend: `/offline` Inertia route (`offline`), PWA manifest/theme-color head links in `resources/views/app.blade.php` and Filament panels (`PanelsRenderHook::HEAD_END` and `PanelsRenderHook::BODY_END` in `AppServiceProvider`), admin-host redirect exclusion for PWA assets in `routes/web.php`, and Area Agent field-visit form context (`canRecordFieldVisit`, `fieldVisitStatuses`, `territories`) in `KycController::show`.
+- Frontend: `resources/js/pages/Offline.vue`, `resources/js/composables/usePwa.ts` (Web Install API `navigator.install()` with `beforeinstallprompt` fallback and `aria-disabled` focus preservation), `resources/js/composables/useOfflineDraft.ts`, `resources/js/components/PwaStatusBanner.vue`, `resources/js/components/OfflineDraftBanner.vue`, and offline draft + GPS field-visit capture on `artisan/Kyc.vue`, `artisan/Onboarding.vue`, `artisan/Profile.vue`, and `artisan/Services.vue`.
+- Tests: `tests/Feature/PhaseSeventeenPwaFieldOfflineTest.php`, `tests/Browser/PhaseSeventeenPwaFieldOfflineBrowserTest.php`, and updated `tests/Feature/BrandAssetsTest.php`.
+
 ## Interfaces And Patterns
 - Every meaningful write uses an `App\Actions\{Domain}\...` action; controllers and Filament actions stay thin.
 - Inertia forms and links use Wayfinder imports from `@/actions` or `@/routes`; avoid hardcoded URLs.
@@ -151,7 +158,8 @@ Goal: make marketplace discovery prioritize nearby verified artisan services usi
 - Use Paystack via Laravel HTTP client first; add an SDK only if provider requirements force it.
 - Use stable Composer packages only; do not lower `minimum-stability` without a new decision.
 - Do not create extra documentation files during implementation unless explicitly requested.
-- Phase 13 through Phase 16 are BRS expansion phases, not blockers for the scoped Phase 1-12 MVP completion.
+- Phase 13 through Phase 17 are BRS expansion phases, not blockers for the scoped Phase 1-12 MVP completion.
 - Phase 15 may add `spatie/laravel-backup`; do not add other observability or backup packages without a separate decision.
 - Phase 16 must not add new third-party dependencies, and precise user coordinates must stay query-only unless a later privacy and retention decision explicitly approves persistence.
+- Phase 17 uses native Service Worker, Web App Manifest, Web Install API / `beforeinstallprompt`, and `localStorage` without adding new third-party dependencies.
 - References used: [BRS](/Users/amisha/www/lartisan/docs/lartisan_brs.md), [Technical Spec](/Users/amisha/www/lartisan/docs/Technical_Spec_Lartisan_App.md), [Larastan package](https://packagist.org/packages/larastan/larastan), [Inertia Forms + Wayfinder](https://inertiajs.com/docs/v3/the-basics/forms), [Wayfinder README](https://github.com/laravel/wayfinder/blob/main/README.md).

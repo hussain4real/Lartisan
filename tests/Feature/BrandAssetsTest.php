@@ -8,7 +8,9 @@ test('app shell declares Lartisan icon assets', function (): void {
     expect($appShell)
         ->toContain('href="/favicon.ico?v=lartisan"')
         ->toContain('href="/favicon.svg?v=lartisan"')
-        ->toContain('href="/apple-touch-icon.png?v=lartisan"');
+        ->toContain('href="/apple-touch-icon.png?v=lartisan"')
+        ->toContain('href="/manifest.webmanifest"')
+        ->toContain('name="theme-color"');
 });
 
 test('favicon svg uses the Lartisan brand mark', function (): void {

@@ -8,7 +8,7 @@ This plan tracks the implemented Lartisan MVP phases, completed BRS expansion ph
 
 The application already includes the scoped marketplace and operations foundation:
 
-- Phase 0 through Phase 16 from `docs/PLAN (1).md` are implemented for the scoped MVP and completed BRS expansion plan.
+- Phase 0 through Phase 17 from `docs/PLAN (1).md` are implemented for the scoped MVP and completed BRS expansion plan.
 - Laravel, Inertia, Vue, Filament, Pest, Larastan, Pint, ESLint, Prettier, Vite, and CI-aligned quality gates are present.
 - Geography, territories, admin profiles, customer profiles, artisan profiles, audit logs, roles, permissions, policies, and role-scoping tests are present.
 - Customer and artisan onboarding, phone-aware identity records, OTP record foundations, OTP-at-booking, account claims, customer addresses, saved-address booking, artisan workspace creation, guest account upgrade, guest tracker review/dispute flows, and Inertia route contracts are present.
@@ -19,8 +19,9 @@ The application already includes the scoped marketplace and operations foundatio
 - Verified reviews, disputes, support case foundations, support inbox assignment/internal-note workflows, manual payout requests, payout approval and processing, payout attempts, report snapshots, PDFs, and scoped report tests are present.
 - Transactional email and WhatsApp notification abstractions, delivery logs, provider callback intake, retry/dead-letter workflows, booking/subscription/payout/review/dispute/support notifications, customer favorites, and customer booking preferences are present.
 - Review proof media, artisan responses, moderation routing, profile/payment dispute targets, Paystack-backed payout automation, finance exception queues, provider reconciliation, system-health snapshots, backup/recovery checks, retention guard rails, and opt-in proximity marketplace discovery are present.
+- Installable Progressive Web App (PWA) manifest, icons, service worker, `/offline` fallback route, Filament and Inertia install/connectivity banners, and browser-local offline draft capture and reconnect sync for Area Agent field visits and Artisan forms are present.
 
-The scoped implementation now covers the planned Phase 0 through Phase 16 requirements. Remaining BRS follow-up is limited to product, provider, or policy decisions intentionally kept outside the current shipped scope, such as SMS/push/richer in-app notification expansion, role dashboards beyond the scoped Super Admin recovery dashboard, Agent compensation policy, Flutterwave expansion beyond Paystack, and launch-specific operating rules.
+The scoped implementation now covers the planned Phase 0 through Phase 17 requirements. Remaining BRS follow-up is limited to product, provider, or policy decisions intentionally kept outside the current shipped scope, such as SMS/push/richer in-app notification expansion, role dashboards beyond the scoped Super Admin recovery dashboard, Agent compensation policy, Flutterwave expansion beyond Paystack, and launch-specific operating rules.
 
 ## Implementation Principles
 
@@ -768,9 +769,56 @@ Add opt-in location-aware marketplace discovery so users can see nearby verified
 - The full coverage gate passed with `php artisan test --coverage --min=100 --compact` at 100.0% coverage.
 - Static analysis and frontend type, lint, format, and production build gates passed for the Phase 16 implementation.
 
+## Phase 17: Progressive Web App And Field Offline Readiness
+
+### Status
+
+Completed and verified.
+
+### Goal
+
+Make Lartisan installable on mobile and desktop devices with offline fallback navigation and resilient browser-local draft capture, restoration, and reconnect sync for Area Agent field visits and Artisan forms.
+
+### Implementation Clarifications
+
+- Uses native Web App Manifest (`public/manifest.webmanifest` with explicit `"id": "/"`), Service Worker (`public/sw.js`), Web Install API (`navigator.install()`) with `beforeinstallprompt` fallback, and `localStorage` draft persistence without adding new third-party dependencies.
+- Dynamic Inertia requests, Livewire requests, and provider webhooks remain network-only in the service worker; navigation failures fall back to `/offline` (`Offline.vue`).
+- Area Agent field-visit capture is supported both in the Filament `/agent` modal (with `localStorage` draft auto-save/restore) and in the Inertia `artisan/Kyc.vue` field-visit form (with GPS coordinate capture and offline draft queuing).
+
+### BRS Coverage
+
+- Mobile-first usability and resilient field-agent and artisan form workflows under intermittent connectivity.
+- Installable app shell with standalone display, app shortcuts, and offline status feedback.
+- Local draft persistence across reloads and offline periods for field visits, onboarding, artisan profile, services, and KYC notes.
+
+### Checklist
+
+- [x] Generate `192x192`, `512x512`, and `512x512` maskable PWA icons from the Lartisan brand icon.
+- [x] Add `public/manifest.webmanifest` with explicit `"id": "/"`, icons, theme/background colors, and shortcuts.
+- [x] Add `public/sw.js` service worker with precaching, stale-while-revalidate static asset caching, and `/offline` navigation fallback.
+- [x] Add `/offline` route (`offline`), admin-host PWA static asset exclusions, and manifest/theme-color meta tags in `app.blade.php` and Filament panel render hooks.
+- [x] Add `usePwa` and `useOfflineDraft` composables plus `PwaStatusBanner.vue`, `OfflineDraftBanner.vue`, and `Offline.vue`.
+- [x] Wire offline draft persistence and reconnect sync into `artisan/Kyc.vue` (including Area Agent field visit + GPS capture), `artisan/Onboarding.vue`, `artisan/Profile.vue`, and `artisan/Services.vue`.
+- [x] Add feature and browser smoke tests for manifest, icons, service worker, `/offline`, Filament hooks, install fallback, and field-visit offline draft persistence.
+
+### Deliverables
+
+- `public/manifest.webmanifest`, `public/sw.js`, `public/pwa-192x192.png`, `public/pwa-512x512.png`, and `public/pwa-maskable-512x512.png`.
+- `/offline` route, `Offline.vue`, `usePwa.ts`, `useOfflineDraft.ts`, `PwaStatusBanner.vue`, `OfflineDraftBanner.vue`, and Filament `pwa-field-support.blade.php` hook.
+- Area Agent field-visit context in `KycController::show` and offline-resilient forms across `artisan/Kyc.vue`, `artisan/Onboarding.vue`, `artisan/Profile.vue`, and `artisan/Services.vue`.
+- Focused Phase 17 feature coverage (`tests/Feature/PhaseSeventeenPwaFieldOfflineTest.php`), updated `tests/Feature/BrandAssetsTest.php`, and browser coverage (`tests/Browser/PhaseSeventeenPwaFieldOfflineBrowserTest.php`).
+
+### Acceptance Criteria
+
+- Lartisan serves a valid web app manifest, required icon sizes, and service worker without breaking admin-host static asset routing.
+- Navigation failures fall back to `/offline`, and both Inertia and Filament shells surface connectivity and install controls.
+- Area Agents and Artisans can save, restore across reload, and submit drafts once online without losing work.
+- Focused feature coverage passes with `php artisan test --compact tests/Feature/BrandAssetsTest.php tests/Feature/PhaseSeventeenPwaFieldOfflineTest.php`.
+- The full suite passes `php artisan test --coverage --min=100 --compact` with 100.0% coverage, along with static analysis and frontend checks.
+
 ## Suggested Phase Order
 
-Phase 0 through Phase 16 now have implementation coverage. No additional implementation phase is currently queued; future BRS expansion should be added as Phase 17 or later after product, provider, and policy sign-off.
+Phase 0 through Phase 17 now have implementation coverage. No additional implementation phase is currently queued; future BRS expansion should be added as Phase 18 or later after product, provider, and policy sign-off.
 
 ## Global Verification Gate
 
